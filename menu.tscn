@@ -1,8 +1,26 @@
 [gd_scene format=3 uid="uid://c8l60tak5vrn8"]
 
-[ext_resource type="Script" uid="uid://c51xerhkvmuxu" path="res://menu.gd" id="1_lti8b"]
-
 [sub_resource type="Theme" id="Theme_0gbd5"]
+
+[sub_resource type="GDScript" id="GDScript_vsb4k"]
+script/source = "extends Control
+
+@onready var start_button: Button = $StartButton
+@onready var options_button: Button = $OptionsButton
+@onready var quit_button: Button = $QuitButton
+ 
+
+func _on_start_button_pressed() -> void:
+	get_tree().change_scene_to_file(\"res://new_load.tscn\")
+
+
+func _on_options_button_pressed() -> void:
+	get_tree().change_scene_to_file(\"res://options_menu.tscn\")
+
+
+func _on_quit_button_pressed() -> void:
+	get_tree().quit()
+"
 
 [node name="Menu" type="Control" unique_id=113734186]
 layout_mode = 3
@@ -12,37 +30,46 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = SubResource("Theme_0gbd5")
-script = ExtResource("1_lti8b")
+script = SubResource("GDScript_vsb4k")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1703368117]
 
 [node name="Label" type="Label" parent="." unique_id=939327407]
 layout_mode = 0
-offset_top = 74.0
-offset_right = 1150.0
-offset_bottom = 330.0
+offset_left = 24.0
+offset_top = 31.0
+offset_right = 622.0
+offset_bottom = 239.0
 text = "TItle
 "
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1917164067]
+[node name="StartButton" type="Button" parent="." unique_id=413149182]
 layout_mode = 0
-offset_left = 363.0
-offset_top = 432.0
-offset_right = 769.0
-offset_bottom = 584.0
-pivot_offset = Vector2(202, -46)
-
-[node name="StartButton" type="Button" parent="VBoxContainer" unique_id=413149182]
-layout_mode = 2
+offset_left = 72.0
+offset_top = 354.0
+offset_right = 322.0
+offset_bottom = 438.0
 text = "Play"
 
-[node name="OptionsButton" type="Button" parent="VBoxContainer" unique_id=1950728367]
-layout_mode = 2
+[node name="OptionsButton" type="Button" parent="." unique_id=1950728367]
+layout_mode = 0
+offset_left = 74.0
+offset_top = 449.0
+offset_right = 348.0
+offset_bottom = 533.0
 text = "Settings"
 
-[node name="QuitButton" type="Button" parent="VBoxContainer" unique_id=1824642754]
-layout_mode = 2
+[node name="QuitButton" type="Button" parent="." unique_id=1824642754]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 545.0
+offset_right = 374.0
+offset_bottom = 626.0
 text = "Quit
 "
+
+[connection signal="pressed" from="StartButton" to="." method="_on_start_button_pressed"]
+[connection signal="pressed" from="OptionsButton" to="." method="_on_options_button_pressed"]
+[connection signal="pressed" from="QuitButton" to="." method="_on_quit_button_pressed"]

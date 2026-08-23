@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://yjhg3eufgupo" path="res://options_menu.gd" id="1_lbr8e"]
 [ext_resource type="Script" uid="uid://cktu2he8wfpp3" path="res://Music-Control.gd" id="2_t1lix"]
+[ext_resource type="Script" uid="uid://dc2xl1t0t32sh" path="res://resolution.gd" id="4_6bffs"]
+[ext_resource type="Script" uid="uid://bwrq1r20lrt4y" path="res://returnbutton.gd" id="4_ogda5"]
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_l8fa8"]
 color = Color(0.8089556, 0, 0.23904586, 1)
@@ -39,19 +41,18 @@ text = "Options"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Return" type="Button" parent="." unique_id=348420769]
-layout_mode = 1
-anchors_preset = 7
+[node name="Label2" type="Label" parent="CanvasLayer" unique_id=723135145]
+anchors_preset = 5
 anchor_left = 0.5
-anchor_top = 1.0
 anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -212.75
-offset_top = -148.0
-offset_right = 212.75
+offset_left = -197.0
+offset_top = 209.0
+offset_right = 4.0
+offset_bottom = 273.0
 grow_horizontal = 2
-grow_vertical = 0
-text = "Return"
+text = "Volume"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="HSlider" type="HSlider" parent="." unique_id=1826981797]
 layout_mode = 1
@@ -60,10 +61,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -124.5
-offset_top = -96.0
-offset_right = 124.5
-offset_bottom = -80.0
+offset_left = -25.0
+offset_top = -90.0
+offset_right = 224.0
+offset_bottom = -74.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/slider = SubResource("StyleBoxLine_l8fa8")
@@ -73,11 +74,25 @@ max_value = 1.0
 step = 0.02
 value = 1.0
 script = ExtResource("2_t1lix")
-audio_bus_name = "Music"
 
-[node name="Music" type="AudioStreamPlayer2D" parent="." unique_id=723204733]
-autoplay = true
-bus = &"Music"
+[node name="Button" type="Button" parent="." unique_id=1987841845]
+layout_mode = 0
+offset_left = 391.0
+offset_top = 437.0
+offset_right = 781.0
+offset_bottom = 572.0
+text = "Return"
+script = ExtResource("4_ogda5")
 
-[connection signal="pressed" from="Return" to="." method="_on_return_pressed"]
+[node name="Resolution" type="CheckButton" parent="." unique_id=1921789388]
+layout_mode = 0
+offset_left = 391.0
+offset_top = 322.0
+offset_right = 735.0
+offset_bottom = 402.0
+text = "Border Toggling"
+script = ExtResource("4_6bffs")
+
 [connection signal="value_changed" from="HSlider" to="HSlider" method="_on_value_changed"]
+[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
+[connection signal="toggled" from="Resolution" to="Resolution" method="_on_toggled"]
