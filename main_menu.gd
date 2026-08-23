@@ -1,11 +1,20 @@
 extends Control
 
+@onready var play_button = $VBoxContainer/PlayButton
+@onready var options_button = $VBoxContainer/OptionsButton
+@onready var quit_button = $VBoxContainer/QuitButton
 
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
+	play_button.pressed.connect(_on_play_pressed)
+	options_button.pressed.connect(_on_options_pressed)
+	quit_button.pressed.connect(_on_quit_pressed)
 
+func _on_play_pressed() -> void:
+	print("Play clicked")
+	# Get_tree().change_scene_to_file("res://game_scene.tscn")
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+func _on_options_pressed() -> void:
+	print("Options clicked")
+
+func _on_quit_pressed() -> void:
+	get_tree().quit()
