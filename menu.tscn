@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://c8l60tak5vrn8"]
+
+[ext_resource type="Script" uid="uid://c51xerhkvmuxu" path="res://menu.gd" id="1_lti8b"]
+
+[sub_resource type="Theme" id="Theme_0gbd5"]
+
+[node name="Menu" type="Control" unique_id=113734186]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_0gbd5")
+script = ExtResource("1_lti8b")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1703368117]
+
+[node name="Label" type="Label" parent="." unique_id=939327407]
+layout_mode = 0
+offset_top = 74.0
+offset_right = 1150.0
+offset_bottom = 330.0
+text = "TItle
+"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1917164067]
+layout_mode = 0
+offset_left = 363.0
+offset_top = 432.0
+offset_right = 769.0
+offset_bottom = 584.0
+pivot_offset = Vector2(202, -46)
+
+[node name="StartButton" type="Button" parent="VBoxContainer" unique_id=413149182]
+layout_mode = 2
+text = "Play"
+
+[node name="OptionsButton" type="Button" parent="VBoxContainer" unique_id=1950728367]
+layout_mode = 2
+text = "Settings"
+
+[node name="QuitButton" type="Button" parent="VBoxContainer" unique_id=1824642754]
+layout_mode = 2
+text = "Quit
+"

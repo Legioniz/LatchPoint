@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://hj8fd5rycivt"]
+
+[node name="Node2D" type="Node2D" unique_id=1453949635]
+
+[node name="Control" type="Control" parent="." unique_id=328110576]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1150.0
+offset_bottom = 648.0
+pivot_offset = Vector2(603, 317)
+
+[node name="Label" type="Label" parent="Control" unique_id=1959122815]
+layout_mode = 0
+offset_right = 631.0
+offset_bottom = 254.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1945601859]
+offset_right = 1153.0
+offset_bottom = 649.0
+
+[node name="Button" type="Button" parent="." unique_id=1334128396]
+offset_left = 6.0
+offset_top = 267.0
+offset_right = 377.0
+offset_bottom = 366.0
+
+[node name="Button" type="Button" parent="Button" unique_id=2097409528]
+layout_mode = 0
+offset_left = 19.0
+offset_top = 131.0
+offset_right = 419.0
+offset_bottom = 241.0
+
+[node name="Button" type="Button" parent="Button/Button" unique_id=1510145947]
+layout_mode = 0
+offset_left = 46.0
+offset_top = 137.0
+offset_right = 446.0
+offset_bottom = 247.0
