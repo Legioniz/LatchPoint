@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://ctah3x4atinh6"]
+
+[ext_resource type="Texture2D" uid="uid://brmwp0g0e0pe8" path="res://Asset/images/Player/cali_character_Sprite1.png" id="1_p6qlh"]
+[ext_resource type="Script" uid="uid://dke3x215j50km" path="res://Scene/player.gd" id="1_y8w33"]
+[ext_resource type="Texture2D" uid="uid://cd7rmg2vvmlh3" path="res://Asset/images/Player/cali_character_Sprite1_Blink.png" id="2_2sw5t"]
+[ext_resource type="Texture2D" uid="uid://b5r3x0hrlxr7f" path="res://Asset/images/Player/cali_character_Sprite2.png" id="3_ij4jb"]
+[ext_resource type="Texture2D" uid="uid://t7o8bmlo3hue" path="res://Asset/images/Player/cali_character_Sprite2_Blink.png" id="4_c68nv"]
+[ext_resource type="Texture2D" uid="uid://btf08i3dvc2ss" path="res://Asset/images/Player/cali_character_Sprite3.png" id="5_c31lq"]
+[ext_resource type="Texture2D" uid="uid://7fektf80adpc" path="res://Asset/images/Player/cali_character_Sprite3_Blink.png" id="6_2dof7"]
+[ext_resource type="Texture2D" uid="uid://d0y7m3gl62lcu" path="res://Asset/images/Player/cali_character_Sprite4.png" id="7_4ao7i"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_p6qlh"]
+radius = 18.0
+height = 88.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_of7fa"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_p6qlh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_ij4jb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_c31lq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_4ao7i")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_c31lq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_ij4jb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_p6qlh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_ij4jb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_c31lq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_4ao7i")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_c31lq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_ij4jb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_2sw5t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_c68nv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_2dof7")
+}],
+"loop": 2,
+"name": &"idle",
+"speed": 5.5
+}]
+
+[node name="Player" type="CharacterBody2D" unique_id=903051167]
+script = ExtResource("1_y8w33")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=593662931]
+shape = SubResource("CapsuleShape2D_p6qlh")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1639753508]
+scale = Vector2(0.1, 0.1)
+sprite_frames = SubResource("SpriteFrames_of7fa")
+animation = &"idle"
+autoplay = "idle"
+frame_progress = 0.0073188357
