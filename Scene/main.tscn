@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://ctah3x4atinh6" path="res://Scene/player.tscn" id="1_f6udf"]
 [ext_resource type="Texture2D" uid="uid://bel1sq6406ods" path="res://icon.svg" id="2_sblpm"]
+[ext_resource type="Texture2D" uid="uid://7ximnvxxomi" path="res://bg/game_background_4/game_background_4.png" id="3_r34rm"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_of7fa"]
 size = Vector2(122, 123)
@@ -12,6 +13,11 @@ position = Vector2(507, 179)
 [node name="Player" parent="." unique_id=903051167 instance=ExtResource("1_f6udf")]
 texture_filter = 1
 position = Vector2(-213, -18)
+
+[node name="Camera2D" type="Camera2D" parent="Player" unique_id=82153148]
+zoom = Vector2(1.7, 1.7)
+position_smoothing_enabled = true
+rotation_smoothing_enabled = true
 
 [node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=871620300]
 position = Vector2(-187, 105)
@@ -50,7 +56,8 @@ position = Vector2(-21, 23)
 shape = SubResource("RectangleShape2D_of7fa")
 
 [node name="StaticBody2D4" type="StaticBody2D" parent="." unique_id=1529948064]
-position = Vector2(-34, 407)
+position = Vector2(1407, 498)
+scale = Vector2(10, 1)
 metadata/_edit_group_ = true
 
 [node name="Sprite2D" type="Sprite2D" parent="StaticBody2D4" unique_id=1963002418]
@@ -60,3 +67,40 @@ texture = ExtResource("2_sblpm")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D4" unique_id=32637896]
 position = Vector2(-21, 23)
 shape = SubResource("RectangleShape2D_of7fa")
+
+[node name="StaticBody2D5" type="StaticBody2D" parent="." unique_id=2082112655]
+position = Vector2(2635, 498)
+scale = Vector2(10, 1)
+metadata/_edit_group_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="StaticBody2D5" unique_id=444242682]
+position = Vector2(-19, 23)
+texture = ExtResource("2_sblpm")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D5" unique_id=793691376]
+position = Vector2(-21, 23)
+shape = SubResource("RectangleShape2D_of7fa")
+
+[node name="StaticBody2D6" type="StaticBody2D" parent="." unique_id=1330717174]
+position = Vector2(3859, 498)
+scale = Vector2(10, 1)
+metadata/_edit_group_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="StaticBody2D6" unique_id=1429240851]
+position = Vector2(-19, 23)
+texture = ExtResource("2_sblpm")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D6" unique_id=796888443]
+position = Vector2(-21, 23)
+shape = SubResource("RectangleShape2D_of7fa")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=457851112]
+layer = -1
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer" unique_id=1618621365]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_r34rm")
