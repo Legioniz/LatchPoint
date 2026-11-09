@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   validate:
-    name: Import, smoke test and boot
+    name: Import, parse, smoke test and boot
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -32,8 +32,18 @@ jobs:
       - name: Verify engine version
         run: godot --version
 
-      - name: Import project resources and parse scenes
+      - name: Import project resources
         run: godot --headless --editor --path . --import
+
+      - name: Parse every GDScript file
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r script; do
+            echo "::group::Parsing $script"
+            godot --headless --path . --check-only --script "res://$script"
+            echo "::endgroup::"
+          done < <(git ls-files '*.gd' | sort)
 
       - name: Run scene and physics smoke tests
         run: godot --headless --path . --script res://tests/physics_smoke_test.gd
