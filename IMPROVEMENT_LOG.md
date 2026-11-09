@@ -9,13 +9,15 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - Root cause: `project.godot` enabled `window/size/borderless`, while `resolution.gd` changed only `Window.mode`. Godot documents that entering fullscreen forces the borderless flag on; the flag must be reset when decorations are wanted.
 - Set the default project window to decorated/windowed mode.
 - Synchronize the fullscreen checkbox with both the window mode and borderless flag on initialization and toggle.
-- Added a regression assertion to `tests/boot_smoke_test.gd` for initial windowed setup and returning from fullscreen to windowed mode.
-- Updated README display behavior.
-- Godot CI result: pending for this branch. Local Godot runtime was not available during this edit; no local import, parser, or runtime result is claimed.
+- Added a regression assertion to `tests/boot_smoke_test.gd` for the borderless flag during windowed initialization and when returning to windowed mode.
+- The first headless regression attempt exposed a test-environment limitation: Godot's headless DisplayServer reported the root window mode as minimized (value 1), so asserting MODE_WINDOWED was invalid in that environment. The test now checks the borderless flag only; the actual mode transition remains a manual desktop verification requirement.
+- Added `TESTING_GUIDE.md` and linked it from the README. Extended the CI push trigger to include `fix/**` branches.
+- Latest Godot CI result: pending. An earlier run passed import, script parsing, and physics smoke tests but failed the boot test because of the headless mode assertion. The corrected boot test has not yet been verified.
+- Local Godot runtime was not available; no local import, parser, or runtime result is claimed.
 
 **Research:** Godot DisplayServer documentation — https://docs.godotengine.org/en/latest/classes/class_displayserver.html
 
-**Branch:** `fix/windowed-borderless-toggle` (PR pending).
+**Branch:** `fix/windowed-borderless-toggle` (PR #2 draft).
 
 ## 2026-11-09 — Foundation and integration repair (PR #1)
 
