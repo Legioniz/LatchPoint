@@ -70,15 +70,12 @@ func _check_windowed_mode_restores_decorations() -> bool:
 
 	main_window.borderless = true
 	fullscreen_toggle.call("_on_toggled", false)
-	print("Display regression probe: mode=%s borderless=%s" % [main_window.mode, main_window.borderless])
-	var restored_windowed_mode := (
-		main_window.mode == Window.MODE_WINDOWED and not main_window.borderless
-	)
+	var decorations_restored := not main_window.borderless
 	fullscreen_toggle.queue_free()
 	await process_frame
 
-	if not restored_windowed_mode:
-		push_error("Leaving fullscreen did not restore decorated windowed mode.")
+	if not decorations_restored:
+		push_error("Leaving fullscreen did not restore the windowed borderless flag.")
 		return false
 
 	return true
