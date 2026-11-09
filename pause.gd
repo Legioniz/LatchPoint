@@ -27,6 +27,19 @@ func toggle_menu() -> void:
 		focused_control.release_focus()
 
 
+func _on_resume_pressed() -> void:
+	get_tree().paused = false
+	hide()
+	get_viewport().set_input_as_handled()
+
+
+func _on_return_to_menu_pressed() -> void:
+	get_tree().paused = false
+	var error := get_tree().change_scene_to_file("res://menu.tscn")
+	if error != OK:
+		push_error("Unable to return to the main menu. Scene load error: %s" % error)
+
+
 func _on_exit_pressed() -> void:
 	get_tree().paused = false
 	get_tree().quit()
