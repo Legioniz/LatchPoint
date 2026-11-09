@@ -13,6 +13,16 @@
 
 ## Active work and priorities
 
+### LP-DOC-001 — Review shared bot guidance and daily QA documentation
+- **Priority:** P2
+- **Status:** In review.
+- **Suggested role:** Project manager / technical writer / integration lead.
+- **Evidence:** Draft [PR #5](https://github.com/Legioniz/LatchPoint/pull/5) adds AGENTS.md, PROJECT_CHARTER.md, ARCHITECTURE.md, FILE_STRUCTURE.md, BOT_TASK_BOARD.md, ISSUE_REGISTER.md and DAILY_QA_LOG.md, and links them from README.
+- **Goal:** Give every contributor one authoritative place to find project purpose, architecture, file placement, issue state, priorities and contribution rules.
+- **Acceptance:** Review all documents against the latest default and foundation branch trees; validate links; make sure no task is presented as assigned without a real owner; merge into the foundation branch only after review.
+- **Branch:** `docs/daily-quality-management`
+- **PR:** [#5](https://github.com/Legioniz/LatchPoint/pull/5)
+
 ### LP-QA-001 — Investigate MP3 playback references at shutdown
 
 - **Priority:** P1
@@ -57,6 +67,7 @@
   1. [PR #1 — gameplay foundation](https://github.com/Legioniz/LatchPoint/pull/1), base `main`, head `feature/gameplay-foundation`.
   2. [PR #2 — fullscreen/window decoration fix](https://github.com/Legioniz/LatchPoint/pull/2), base `feature/gameplay-foundation`, head `fix/windowed-borderless-toggle`.
   3. [PR #4 — audio shutdown investigation docs](https://github.com/Legioniz/LatchPoint/pull/4), base `fix/windowed-borderless-toggle`, head `docs/audio-shutdown-leak-investigation`.
+  4. [PR #5 — daily quality and multi-bot guidance](https://github.com/Legioniz/LatchPoint/pull/5), base `feature/gameplay-foundation`, head `docs/daily-quality-management`.
 - **Goal:** Preserve intended dependency order and ensure each PR's base/head SHA and checks are current.
 - **Acceptance:** Review each complete diff, review comments, CI logs and manual-test limitations; merge only with explicit project-owner approval and required evidence.
 - **Do not:** Retarget or merge downstream PRs before their dependencies are settled.
