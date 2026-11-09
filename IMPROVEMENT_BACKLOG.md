@@ -19,7 +19,7 @@ Items are not promises to implement immediately. Re-score them after inspecting 
 ## P2 — Game systems (dependent on core-loop decision)
 
 - [ ] **Items, tools and pickups.** Goal: introduce only items that create meaningful player decisions. Acceptance: pickup/trigger collision, duplicate protection, feedback, inventory/state changes and tests.
-- [ ] **Power-ups and upgrades.** Goal: build balanced progression with explicit stack/expiry/unlock rules. Acceptance: UI, audio, save representation and edge-case tests are integrated.
+- [ ] **Power-ups and upgrades.** Goal: build balanced progression with explicit stack/expiry/unlock rules. Acceptance: UI, audio, save representation and edge-case tests.
 - [ ] **World, enemies and hazards.** Goal: introduce reusable scenes and readable encounters. Acceptance: AI/state transitions, hitboxes, damage/cooldowns, difficulty pacing and collision regression tests.
 - [ ] **Checkpoints and level progression.** Goal: make retry and progression understandable. Acceptance: correct respawn transforms, unlock rules and no soft-locks.
 
@@ -40,4 +40,4 @@ Items are not promises to implement immediately. Re-score them after inspecting 
 - [x] Repaired pause-menu integration and missing callback targets.
 - [x] Replaced a missing gameplay background reference with a temporary built-in color fallback.
 - [x] Removed confirmed copied Git metadata and unreferenced empty prototype scripts/scenes after reference checks.
-
+- [x] Fixed fullscreen/windowed switching so windowed mode restores native window decorations (separate follow-up branch).
