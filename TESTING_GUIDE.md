@@ -39,6 +39,13 @@ The physics smoke test currently checks scene loading, player landing, and solid
 
 The boot test checks the menu controls and verifies that the fullscreen toggle clears the borderless flag during windowed initialization and when switching back to windowed mode. The headless display server does not reliably report the actual window mode, so mode transitions must also be checked manually on a desktop platform.
 
+## Audio shutdown diagnostics
+
+- Run both smoke-test commands with `--verbose` and inspect the complete process output, not just the exit code.
+- The observed CI run `42573252526` passes its physics assertions but the physics-test process then reports retained `AudioStreamPlaybackMP3` / `AudioStreamMP3` references to `res://Project_bullshit.mp3`. The boot-test process in that same job did not show the same warning in the inspected log.
+- The test currently calls `Audio.shutdown_audio()` and waits two process frames. This has not yet been demonstrated to release the AudioServer's playback-list reference before process shutdown.
+- Track investigation in [issue #3](https://github.com/Legioniz/LatchPoint/issues/3). Do not hide the warning or remove the music check to make CI appear clean. A fix is accepted only after the verbose CI logs show the expected shutdown behavior or the engine limitation is reproduced and documented.
+
 ## Manual display-settings check
 
 Headless checks cannot confirm how each operating system changes display modes or draws native window decorations. On each supported desktop platform:

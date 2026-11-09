@@ -2,6 +2,22 @@
 
 Each completed cycle records its purpose, affected files, sources, verification evidence, remaining risks and PR/commit link. Unrun tests are explicitly marked as unverified.
 
+## 2026-11-09 — Audio playback shutdown warning investigation
+
+**Goal:** trace the MP3 resource warnings emitted after the physics smoke test and prevent them from being mistaken for a clean shutdown.
+
+- Inspected the latest successful Godot 4.7.2 workflow run on commit `ae7c8de03b6502d3b38fa1c481fb6fdf89df6f62`: https://github.com/Legioniz/LatchPoint/actions/runs/42573252526
+- The physics smoke test prints its pass message, but the process then reports two leaked ObjectDB instances, one resource still in use, and retained `AudioStreamPlaybackMP3` / `AudioStreamMP3` references to `res://Project_bullshit.mp3`.
+- The current test calls the Audio autoload's `shutdown_audio()` (stop playback and clear the stream), then waits two process frames. The subsequent boot smoke-test process in the same CI job did not show the same warning in the inspected log.
+- Inspected the Godot 4.7 AudioStreamPlayer API and 4.7-stable engine source. `stop_playback_stream()` marks a playback for fade-out/deletion; the audio mixing path performs playback-list cleanup. This makes asynchronous AudioServer cleanup a plausible lead, not a proven project root cause.
+- Created [issue #3](https://github.com/Legioniz/LatchPoint/issues/3) with reproduction evidence and acceptance criteria. Do not suppress the warning or weaken existing physics assertions.
+- No runtime code was changed: this environment has no local Godot executable, so an unverified timing workaround would be speculative.
+- No ML agent or performance profiling was justified or performed for this lifecycle investigation.
+
+**Status:** investigation tracked; root cause and fix remain open.
+
+**Research:** Godot 4.7 AudioStreamPlayer API and Godot 4.7-stable AudioStreamPlayerInternal / AudioServer source; see `RESEARCH_REGISTER.md`.
+
 ## 2026-11-09 — Window decoration toggle regression
 
 **Goal:** ensure the existing Fullscreen option reliably returns the game to a normal decorated window.
