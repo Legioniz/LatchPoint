@@ -8,7 +8,7 @@ script/source = "extends Control
 @onready var start_button: Button = $StartButton
 @onready var options_button: Button = $OptionsButton
 @onready var quit_button: Button = $QuitButton
- 
+
 
 func _on_start_button_pressed() -> void:
 	get_tree().change_scene_to_file(\"res://new_load.tscn\")
@@ -40,8 +40,7 @@ offset_left = 24.0
 offset_top = 31.0
 offset_right = 622.0
 offset_bottom = 239.0
-text = "TItle
-"
+text = "LATCHPOINT"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -67,8 +66,7 @@ offset_left = 72.0
 offset_top = 545.0
 offset_right = 374.0
 offset_bottom = 626.0
-text = "Quit
-"
+text = "Quit"
 
 [connection signal="pressed" from="StartButton" to="." method="_on_start_button_pressed"]
 [connection signal="pressed" from="OptionsButton" to="." method="_on_options_button_pressed"]
