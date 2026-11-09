@@ -32,6 +32,10 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
+	shutdown_audio()
+
+
+func shutdown_audio() -> void:
 	if is_instance_valid(music_player):
 		music_player.stop()
 		music_player.stream = null
