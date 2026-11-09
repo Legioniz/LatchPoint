@@ -70,6 +70,7 @@ func _check_windowed_mode_restores_decorations() -> bool:
 
 	main_window.borderless = true
 	fullscreen_toggle.call("_on_toggled", false)
+	print("Display regression probe: mode=%s borderless=%s" % [main_window.mode, main_window.borderless])
 	var restored_windowed_mode := (
 		main_window.mode == Window.MODE_WINDOWED and not main_window.borderless
 	)
