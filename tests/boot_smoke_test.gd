@@ -33,7 +33,8 @@ func _run() -> void:
 			quit(1)
 			return
 
-	if not await _check_windowed_mode_restores_decorations():
+	var display_test_passed: bool = await _check_windowed_mode_restores_decorations()
+	if not display_test_passed:
 		main_menu.queue_free()
 		await process_frame
 		await _shutdown_audio()
