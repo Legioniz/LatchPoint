@@ -29,6 +29,7 @@ Review **Project Settings → Input Map** for the active key bindings.
 - The game scene contains static collision platforms and a player collision shape.
 - The pause menu is attached to the gameplay scene.
 - Music and display settings are connected to the options screen.
+- The fullscreen toggle restores native window decorations when returning to windowed mode.
 - Load Game is intentionally disabled until a real save/load system exists.
 - The current dark gameplay background is a safe fallback; final environment art awaits a confirmed visual direction.
 
@@ -36,7 +37,7 @@ Review **Project Settings → Input Map** for the active key bindings.
 
 Read [DEVELOPMENT_PLAYBOOK.md](DEVELOPMENT_PLAYBOOK.md) before making substantial changes. Use [IMPROVEMENT_BACKLOG.md](IMPROVEMENT_BACKLOG.md) for priorities, [IMPROVEMENT_LOG.md](IMPROVEMENT_LOG.md) for completed work, and [RESEARCH_REGISTER.md](RESEARCH_REGISTER.md) for external game/design/engine references.
 
-The repository includes a headless smoke/physics test at `tests/physics_smoke_test.gd` and a GitHub Actions workflow at `.github/workflows/godot-validation.yml`.
+The repository includes a headless smoke/physics test at `tests/physics_smoke_test.gd` and a GitHub Actions workflow at `.github/workflows/godot-validation.yml`. The boot smoke test also checks that switching back to windowed mode restores window decorations.
 
 Run locally from the project root:
 
