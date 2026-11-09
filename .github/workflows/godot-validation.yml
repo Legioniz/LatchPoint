@@ -1,0 +1,42 @@
+name: Godot validation
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Import, smoke test and boot
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Godot 4.7.2
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+
+      - name: Verify engine version
+        run: godot --version
+
+      - name: Import project resources and parse scenes
+        run: godot --headless --editor --path . --import
+
+      - name: Run scene and physics smoke tests
+        run: godot --headless --path . --script res://tests/physics_smoke_test.gd
+
+      - name: Boot the configured main scene
+        run: godot --headless --path . --quit-after 120
