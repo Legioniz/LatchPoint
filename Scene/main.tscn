@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://ctah3x4atinh6" path="res://Scene/player.tscn" id="1_f6udf"]
 [ext_resource type="Texture2D" uid="uid://bel1sq6406ods" path="res://icon.svg" id="2_sblpm"]
-[ext_resource type="Texture2D" uid="uid://7ximnvxxomi" path="res://bg/game_background_4/game_background_4.png" id="3_r34rm"]
+[ext_resource type="PackedScene" uid="uid://bpo0n7rkd6qjd" path="res://pause_menu.tscn" id="3_pause"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_of7fa"]
 size = Vector2(122, 123)
@@ -97,10 +97,13 @@ shape = SubResource("RectangleShape2D_of7fa")
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=457851112]
 layer = -1
 
-[node name="TextureRect" type="TextureRect" parent="CanvasLayer" unique_id=1618621365]
+[node name="Background" type="ColorRect" parent="CanvasLayer" unique_id=1618621365]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("3_r34rm")
+mouse_filter = 2
+color = Color(0.035, 0.045, 0.075, 1)
+
+[node name="PauseMenu" parent="." instance=ExtResource("3_pause")]
