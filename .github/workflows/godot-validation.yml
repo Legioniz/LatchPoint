@@ -49,4 +49,4 @@ jobs:
         run: godot --headless --path . --verbose --script res://tests/physics_smoke_test.gd
 
       - name: Boot the configured main scene
-        run: godot --headless --path . --quit-after 120
+        run: godot --headless --path . --verbose --script res://tests/boot_smoke_test.gd
