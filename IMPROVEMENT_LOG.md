@@ -2,6 +2,21 @@
 
 Each completed cycle records its purpose, affected files, sources, verification evidence, remaining risks and PR/commit link. Unrun tests are explicitly marked as unverified.
 
+## 2026-11-09 — Window decoration toggle regression
+
+**Goal:** ensure the existing Fullscreen option reliably returns the game to a normal decorated window.
+
+- Root cause: `project.godot` enabled `window/size/borderless`, while `resolution.gd` changed only `Window.mode`. Godot documents that entering fullscreen forces the borderless flag on; the flag must be reset when decorations are wanted.
+- Set the default project window to decorated/windowed mode.
+- Synchronize the fullscreen checkbox with both the window mode and borderless flag on initialization and toggle.
+- Added a regression assertion to `tests/boot_smoke_test.gd` for initial windowed setup and returning from fullscreen to windowed mode.
+- Updated README display behavior.
+- Godot CI result: pending for this branch. Local Godot runtime was not available during this edit; no local import, parser, or runtime result is claimed.
+
+**Research:** Godot DisplayServer documentation — https://docs.godotengine.org/en/latest/classes/class_displayserver.html
+
+**Branch:** `fix/windowed-borderless-toggle` (PR pending).
+
 ## 2026-11-09 — Foundation and integration repair (PR #1)
 
 **Goal:** make the existing 2D prototype more internally consistent, remove broken references and establish an accountable development process.
