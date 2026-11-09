@@ -2,6 +2,27 @@
 
 Checked 2026-11-09. These references establish the first research baseline. Re-check them when a design decision depends on an API or current implementation detail.
 
+## Audio playback shutdown and resource lifetime
+
+### Godot 4.7 — AudioStreamPlayer
+- Source: https://docs.godotengine.org/en/4.7/classes/class_audiostreamplayer.html
+- Relevant behavior: assigning an empty `stream` stops currently playing sounds; `stop()` stops all sounds from the player. The API does not promise that AudioServer-side playback references are released synchronously with the call.
+- Project observation: CI's physics smoke-test process still reports retained `AudioStreamPlaybackMP3` and `AudioStreamMP3` references after `shutdown_audio()` stops the player and clears its stream. The next boot-test process does not show the same warning in the inspected run.
+
+### Godot 4.7-stable — AudioStreamPlayerInternal and AudioServer implementation
+- Sources: https://github.com/godotengine/godot/blob/4.7-stable/scene/audio/audio_stream_player_internal.cpp and https://github.com/godotengine/godot/blob/4.7-stable/servers/audio/audio_server.cpp
+- Relevant implementation: `AudioStreamPlayerInternal::stop_basic()` asks the AudioServer to stop each playback and clears the player's local playback references. `AudioServer::stop_playback_stream()` marks the server playback node for fade-out/deletion; the audio mix path removes it.
+- Investigation implication: test shutdown may be racing asynchronous server cleanup, but source inspection alone does not prove that this is the cause of LatchPoint's warning. A repeatable CI experiment is required before changing production code.
+
+### Related upstream report — Godot issue #76745
+- Source: https://github.com/godotengine/godot/issues/76745
+- Context: an older Godot 4.0.2 report describes audio playback resources retained at process exit. It is a related symptom only; it is not evidence that LatchPoint has the same root cause or that the issue persists unchanged in Godot 4.7.
+
+### Project decision
+- Track the warning in https://github.com/Legioniz/LatchPoint/issues/3.
+- Do not silence the warning, remove audio from tests, or weaken physics assertions. Establish a reproducible fix or a verified engine limitation first.
+- No external code, music, or assets reused.
+
 ## Window and display behavior
 
 ### Godot DisplayServer — window mode and borderless flag

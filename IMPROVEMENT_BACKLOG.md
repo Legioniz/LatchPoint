@@ -10,6 +10,7 @@ Items are not promises to implement immediately. Re-score them after inspecting 
 
 ## P1 — Playable core and physics
 
+- [ ] **Resolve MP3 playback references retained at test shutdown ([issue #3](https://github.com/Legioniz/LatchPoint/issues/3)).** Goal: determine why the physics smoke-test process reports retained `AudioStreamPlaybackMP3` / `AudioStreamMP3` resources after the audio autoload is stopped. Acceptance: reproduce on CI, identify project-owned references versus asynchronous AudioServer cleanup, add a deterministic regression check where possible, and remove the warning or document a verified engine limitation without suppressing it.
 - [ ] **Expand deterministic physics coverage.** Goal: test walls, ceilings, corners, slopes, one-way platforms, moving platforms, high-speed motion, collision masks and respawn overlap. Acceptance: each test is reproducible and has a regression assertion.
 - [ ] **Tune player feel against the confirmed game loop.** Candidate controls: jump buffering, coyote time, variable jump height, air control and knockback. Acceptance: measured feel improvement, no unintended exploits, frame-step independence.
 - [ ] **Audit all interactive collision geometry.** Goal: verify sprite/collision alignment and document layers/masks for players, platforms, hazards and interactables. Acceptance: visible collision-shape playtest and automated checks.
