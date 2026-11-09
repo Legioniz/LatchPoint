@@ -37,11 +37,11 @@ godot --headless --path . --verbose --script res://tests/boot_smoke_test.gd
 
 The physics smoke test currently checks scene loading, player landing, and solid floor, wall, and ceiling collision probes. It does not yet cover slopes, one-way platforms, moving platforms, hazards, or high-speed gameplay movement.
 
-The boot test checks the menu controls and verifies that the fullscreen toggle initializes windowed mode with decorations and restores decorations when switched back to windowed mode.
+The boot test checks the menu controls and verifies that the fullscreen toggle clears the borderless flag during windowed initialization and when switching back to windowed mode. The headless display server does not reliably report the actual window mode, so mode transitions must also be checked manually on a desktop platform.
 
 ## Manual display-settings check
 
-Headless checks cannot confirm how each operating system draws native window decorations. On each supported desktop platform:
+Headless checks cannot confirm how each operating system changes display modes or draws native window decorations. On each supported desktop platform:
 
 1. Launch LatchPoint and confirm it starts in a normal window with a title bar and native decorations.
 2. Open Options and enable **Fullscreen**. Confirm the game covers the display.
