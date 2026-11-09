@@ -2,6 +2,14 @@
 
 Checked 2026-11-09. These references establish the first research baseline. Re-check them when a design decision depends on an API or current implementation detail.
 
+## Window and display behavior
+
+### Godot DisplayServer — window mode and borderless flag
+- Source: https://docs.godotengine.org/en/latest/classes/class_displayserver.html
+- Relevant behavior: entering fullscreen forces the borderless flag to true; applications that want normal window decorations must explicitly set the flag back to false when returning to windowed mode. Borderless removes native title-bar/window decorations and is ignored while fullscreen.
+- Project decision: default LatchPoint to a decorated window and synchronize the fullscreen toggle with both `Window.mode` and `Window.borderless`. The toggle must not leave the app borderless after returning to windowed mode.
+- No external code or assets reused.
+
 ## Game-feel and player-control references
 
 ### Celeste — Maddy Thorson, developer-authored notes
