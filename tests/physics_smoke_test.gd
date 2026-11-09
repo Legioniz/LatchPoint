@@ -25,6 +25,7 @@ func _run() -> void:
 	_check_music_asset()
 	await _check_gameplay_physics()
 	await _check_solid_collision_directions()
+	await _shutdown_audio_before_exit()
 
 	if failures.is_empty():
 		print("LatchPoint tests passed: scenes loaded; player landed; floor, wall and ceiling collisions held.")
@@ -36,6 +37,15 @@ func _run() -> void:
 
 	push_error("LatchPoint tests failed with %d issue(s)." % failures.size())
 	quit(1)
+
+
+func _shutdown_audio_before_exit() -> void:
+	var audio_manager := root.get_node_or_null("Audio")
+	if audio_manager != null and audio_manager.has_method("shutdown_audio"):
+		audio_manager.call("shutdown_audio")
+
+	await process_frame
+	await process_frame
 
 
 func _check_required_scenes() -> void:
