@@ -31,6 +31,12 @@ func _ready() -> void:
 		push_warning("LatchPoint music file is missing: %s" % MUSIC_TRACK_PATH)
 
 
+func _exit_tree() -> void:
+	if is_instance_valid(music_player):
+		music_player.stop()
+		music_player.stream = null
+
+
 func _on_scene_changed(_new_scene: Node) -> void:
 	_apply_all_volumes()
 
