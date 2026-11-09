@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://cult05ergndu1" path="res://pause.gd" id="1_hdmo1"]
 [ext_resource type="Script" uid="uid://dsyy7qhldqqwg" path="res://resume.gd" id="2_p81d2"]
 [ext_resource type="Script" uid="uid://dk81clywwx48q" path="res://return_to_menu.gd" id="3_2nc7s"]
-[ext_resource type="Script" uid="uid://cv6hola3nujea" path="res://exit.gd" id="4_d3xb4"]
 
 [node name="PauseMenu" type="Control" unique_id=1844185713]
 process_mode = 3
@@ -26,7 +25,7 @@ layout_mode = 0
 offset_right = 1151.0
 offset_bottom = 644.0
 mouse_filter = 2
-color = Color(0.41215247, 0.41215247, 0.41215247, 0.27450982)
+color = Color(0.12, 0.14, 0.19, 0.78)
 
 [node name="Exit" type="Button" parent="." unique_id=1255533630]
 layout_mode = 0
@@ -36,7 +35,6 @@ offset_right = 807.0
 offset_bottom = 627.0
 focus_mode = 0
 text = "Quit"
-script = ExtResource("4_d3xb4")
 
 [node name="return to menu" type="Button" parent="." unique_id=2145379216]
 layout_mode = 0
@@ -45,8 +43,7 @@ offset_top = 363.0
 offset_right = 805.0
 offset_bottom = 482.0
 focus_mode = 0
-text = "Return To Menu
-"
+text = "Return To Menu"
 script = ExtResource("3_2nc7s")
 
 [node name="resume" type="Button" parent="." unique_id=1368014911]
@@ -56,8 +53,7 @@ offset_top = 221.0
 offset_right = 805.0
 offset_bottom = 336.0
 focus_mode = 0
-text = "Resume
-"
+text = "Resume"
 script = ExtResource("2_p81d2")
 
 [connection signal="pressed" from="Exit" to="." method="_on_exit_pressed"]
