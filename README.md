@@ -5,21 +5,21 @@ LatchPoint is an early Godot 4.7 2D game prototype. The repository currently con
 ## Run the project
 
 1. Install Godot 4.7.x (standard build; the project currently uses GDScript).
-2. Open project.godot in Godot.
+2. Open `project.godot` in Godot.
 3. Let Godot import the project's resources.
 4. Run the project with **F6/F5** or the Run Project button.
 
 Current scene flow:
 
-menu.tscn → new_load.tscn → Scene/main.tscn
+`menu.tscn` → `new_load.tscn` → `Scene/main.tscn`
 
 ## Current controls
 
 The player uses Godot's built-in input actions:
 
-- ui_left / ui_right: horizontal movement
-- ui_accept: jump
-- ui_cancel: pause / resume while in gameplay
+- `ui_left` / `ui_right`: horizontal movement
+- `ui_accept`: jump
+- `ui_cancel`: pause / resume while in gameplay
 
 Review **Project Settings → Input Map** for the active key bindings.
 
@@ -35,9 +35,9 @@ Review **Project Settings → Input Map** for the active key bindings.
 
 ## Development and validation
 
-Read DEVELOPMENT_PLAYBOOK.md before making substantial changes. Use IMPROVEMENT_BACKLOG.md for priorities, IMPROVEMENT_LOG.md for completed work, RESEARCH_REGISTER.md for external game/design/engine references, and TESTING_GUIDE.md for repeatable checks.
+Read [DEVELOPMENT_PLAYBOOK.md](DEVELOPMENT_PLAYBOOK.md) before making substantial changes. Use [IMPROVEMENT_BACKLOG.md](IMPROVEMENT_BACKLOG.md) for priorities, [IMPROVEMENT_LOG.md](IMPROVEMENT_LOG.md) for completed work, [RESEARCH_REGISTER.md](RESEARCH_REGISTER.md) for external game/design/engine references, and [TESTING_GUIDE.md](TESTING_GUIDE.md) for repeatable checks.
 
-The repository includes a headless smoke/physics test at tests/physics_smoke_test.gd and a GitHub Actions workflow at .github/workflows/godot-validation.yml. The boot smoke test also checks that switching back to windowed mode restores window decorations.
+The repository includes a headless smoke/physics test at `tests/physics_smoke_test.gd` and a GitHub Actions workflow at `.github/workflows/godot-validation.yml`. The boot smoke test also checks that switching back to windowed mode restores window decorations.
 
 Run locally from the project root:
 
