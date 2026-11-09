@@ -12,8 +12,9 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - Added a regression assertion to `tests/boot_smoke_test.gd` for the borderless flag during windowed initialization and when returning to windowed mode.
 - The first headless regression attempt exposed a test-environment limitation: Godot's headless DisplayServer reported the root window mode as minimized (value 1), so asserting MODE_WINDOWED was invalid in that environment. The test now checks the borderless flag only; the actual mode transition remains a manual desktop verification requirement.
 - Added `TESTING_GUIDE.md` and linked it from the README. Extended the CI push trigger to include `fix/**` branches.
-- Latest Godot CI result: pending. An earlier run passed import, script parsing, and physics smoke tests but failed the boot test because of the headless mode assertion. The corrected boot test has not yet been verified.
-- Local Godot runtime was not available; no local import, parser, or runtime result is claimed.
+- **CI verified:** Godot 4.7.2 import, all tracked GDScript parsing, physics smoke test, and boot/display-decoration regression test all passed on commit `8e408aa0a8c9cfa38e89743b23aa7071581eec9c`. Run: https://github.com/Legioniz/LatchPoint/actions/runs/42571742673
+- CI logs still report existing AudioStreamMP3/ObjectDB resources in use at shutdown after both smoke tests, although the commands exit successfully. This is recorded as a separate cleanup issue; it was not changed in this display-settings fix.
+- Local Godot runtime was not available. Actual fullscreen/windowed transitions and native title-bar behavior still require manual desktop verification.
 
 **Research:** Godot DisplayServer documentation — https://docs.godotengine.org/en/latest/classes/class_displayserver.html
 
