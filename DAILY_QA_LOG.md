@@ -20,13 +20,14 @@
 
 ### Pull request dependency order
 
-All three relevant PRs are open and draft:
+The three code/foundation PRs and this documentation PR are open and draft:
 
 1. [PR #1 — Improve LatchPoint gameplay foundation](https://github.com/Legioniz/LatchPoint/pull/1), base `main`, head `feature/gameplay-foundation`.
 2. [PR #2 — Fix fullscreen toggle window decorations](https://github.com/Legioniz/LatchPoint/pull/2), base `feature/gameplay-foundation`, head `fix/windowed-borderless-toggle`.
 3. [PR #4 — Document audio playback shutdown warning investigation](https://github.com/Legioniz/LatchPoint/pull/4), base `fix/windowed-borderless-toggle`, head `docs/audio-shutdown-leak-investigation`.
+4. [PR #5 — Add daily repository quality and multi-bot guidance](https://github.com/Legioniz/LatchPoint/pull/5), base `feature/gameplay-foundation`, head `docs/daily-quality-management`.
 
-Keep this dependency order. PR #2 and PR #4 are based on prior PR work, not independent changes against main. Re-check live SHAs and statuses before any merge.
+PR #5 is a documentation-only sibling PR based on the foundation branch. It does not modify the game code or the existing active branches. Review its documentation and links before merging it into `feature/gameplay-foundation`. Keep PR #1 → PR #2 → PR #4 dependency order intact. Re-check live SHAs and statuses before any merge.
 
 ### Project tree and dependency findings
 
@@ -68,14 +69,17 @@ Keep this dependency order. PR #2 and PR #4 are based on prior PR work, not inde
 ### Changes in this documentation-only task branch
 
 - Added shared bot instructions, current project charter, architecture map, file structure guide, task board, issue register and this daily QA record.
+- Updated the README to make the contributor and project-management documents discoverable.
 - Did not move or delete game assets or code.
 - Did not modify main or any active gameplay/fix branch.
 - Did not run Godot locally. Documentation-only changes do not require a gameplay test; review links and consistency before merge.
+- Opened [draft PR #5](https://github.com/Legioniz/LatchPoint/pull/5) targeting `feature/gameplay-foundation`. Its CI status should not be inferred from this docs-only change.
 
 ### Next recommended actions
 
 1. Keep issue #3 open and investigate the audio playback resource retention without suppressing warnings.
-2. Review the PR #1 → PR #2 → PR #4 dependency chain and retain draft status until all evidence and manual requirements are satisfied.
-3. Obtain the product owner's decision on the core gameplay loop.
-4. Add broader, deterministic physics coverage.
-5. Verify remaining MP3 asset ownership and licenses before removing or reclassifying them.
+2. Review PR #5 and merge it into the foundation branch only after documentation review.
+3. Review the PR #1 → PR #2 → PR #4 dependency chain and retain draft status until all evidence and manual requirements are satisfied.
+4. Obtain the product owner's decision on the core gameplay loop.
+5. Add broader, deterministic physics coverage.
+6. Verify remaining MP3 asset ownership and licenses before removing or reclassifying them.
