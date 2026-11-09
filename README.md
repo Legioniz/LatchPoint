@@ -34,9 +34,23 @@ Review **Project Settings → Input Map** for the active key bindings.
 
 ## Development and validation
 
-Read [DEVELOPMENT_PLAYBOOK.md](DEVELOPMENT_PLAYBOOK.md) before making substantial changes. Use [IMPROVEMENT_BACKLOG.md](IMPROVEMENT_BACKLOG.md) for priorities, [IMPROVEMENT_LOG.md](IMPROVEMENT_LOG.md) for completed work, and [RESEARCH_REGISTER.md](RESEARCH_REGISTER.md) for external game/design/engine references.
+Start with [AGENTS.md](AGENTS.md) for contributor rules and required reading.
 
-The repository includes a headless smoke/physics test at `tests/physics_smoke_test.gd` and a GitHub Actions workflow at `.github/workflows/godot-validation.yml`.
+Project direction and coordination:
+- [PROJECT_CHARTER.md](PROJECT_CHARTER.md) — confirmed scope and unresolved game-design decisions.
+- [BOT_TASK_BOARD.md](BOT_TASK_BOARD.md) — prioritized work, dependencies, suggested roles and acceptance criteria.
+- [ARCHITECTURE.md](ARCHITECTURE.md) — scene and system relationships.
+- [FILE_STRUCTURE.md](FILE_STRUCTURE.md) — current file placement and safe relocation rules.
+- [ISSUE_REGISTER.md](ISSUE_REGISTER.md) — evidence-based issues and investigations.
+- [DAILY_QA_LOG.md](DAILY_QA_LOG.md) — repository health checks and next priorities.
+
+Development references:
+- [DEVELOPMENT_PLAYBOOK.md](DEVELOPMENT_PLAYBOOK.md) — research, implementation, integration and quality standards.
+- [IMPROVEMENT_BACKLOG.md](IMPROVEMENT_BACKLOG.md) — upcoming improvements.
+- [IMPROVEMENT_LOG.md](IMPROVEMENT_LOG.md) — completed work and verification evidence.
+- [RESEARCH_REGISTER.md](RESEARCH_REGISTER.md) — external game/design/engine references.
+
+The repository includes a headless smoke/physics test at `tests/physics_smoke_test.gd` and a GitHub Actions workflow at `.github/workflows/godot-validation.yml`. The current test coverage is a baseline, not complete gameplay certification.
 
 Run locally from the project root:
 
@@ -46,4 +60,4 @@ godot --headless --path . --script res://tests/physics_smoke_test.gd
 godot --headless --path . --quit-after 120
 ```
 
-A test is considered passed only when its command actually completes successfully. Headless checks do not replace hands-on playtesting, visual review or testing on the target hardware.
+A test is considered passed only when its command actually completes successfully and its output has been inspected. Headless checks do not replace hands-on playtesting, visual review or testing on target hardware.
