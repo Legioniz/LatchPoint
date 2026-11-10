@@ -144,14 +144,23 @@ func _check_settings_persistence() -> bool:
 func _check_audio_settings_integration() -> bool:
 	var settings_manager := root.get_node_or_null("Settings")
 	var audio_manager := root.get_node_or_null("Audio")
+	var settings_script := load("res://Settings.gd") as Script
 	if (
 		settings_manager == null
 		or audio_manager == null
-		or not settings_manager.has_method("get_bus_volume_linear")
+		or settings_script == null
+		or audio_manager.get("settings_manager") != settings_manager
 		or not audio_manager.has_method("set_bus_volume_linear")
 	):
 		push_error("Audio and Settings autoloads are not integrated.")
 		return false
+	if not _remove_test_settings_file():
+		return false
+
+	var isolated_settings := settings_script.new() as Node
+	isolated_settings.set("settings_file_path", SETTINGS_TEST_PATH)
+	isolated_settings.call("load_settings")
+	audio_manager.set("settings_manager", isolated_settings)
 
 	var original_volume := float(audio_manager.call("get_bus_volume_linear", "Music"))
 	var test_volume := 0.37
@@ -160,16 +169,20 @@ func _check_audio_settings_integration() -> bool:
 
 	audio_manager.call("set_bus_volume_linear", "Music", test_volume)
 	var audio_volume := float(audio_manager.call("get_bus_volume_linear", "Music"))
-	var saved_volume := float(settings_manager.call("get_bus_volume_linear", "Music"))
+	var saved_volume := float(isolated_settings.call("get_bus_volume_linear", "Music"))
 	var synchronized := (
 		is_equal_approx(audio_volume, test_volume)
 		and is_equal_approx(saved_volume, test_volume)
 	)
 
 	audio_manager.call("set_bus_volume_linear", "Music", original_volume)
+	audio_manager.set("settings_manager", settings_manager)
+	isolated_settings.free()
+	var cleanup_passed := _remove_test_settings_file()
+
 	if not synchronized:
 		push_error("Music bus changes were not synchronized with persistent settings.")
-	return synchronized
+	return synchronized and cleanup_passed
 
 
 func _remove_test_settings_file() -> bool:
