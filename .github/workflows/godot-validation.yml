@@ -1,0 +1,52 @@
+name: Godot validation
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Import, parse, smoke test and boot
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Godot 4.7.2
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+
+      - name: Verify engine version
+        run: godot --version
+
+      - name: Import project resources
+        run: godot --headless --editor --path . --import
+
+      - name: Parse every GDScript file
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r script; do
+            echo "::group::Parsing $script"
+            godot --headless --path . --check-only --script "res://$script"
+            echo "::endgroup::"
+          done < <(git ls-files '*.gd' | sort)
+
+      - name: Run scene and physics smoke tests
+        run: godot --headless --path . --verbose --script res://tests/physics_smoke_test.gd
+
+      - name: Boot the configured main scene
+        run: godot --headless --path . --verbose --script res://tests/boot_smoke_test.gd

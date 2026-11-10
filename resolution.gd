@@ -1,7 +1,9 @@
 extends CheckButton
 
-func _on_toggled(_toggled_on: bool) -> void:
-	if get_viewport().mode != Window.MODE_FULLSCREEN:
-		get_viewport().mode = Window.MODE_FULLSCREEN
-	else:
-		get_viewport().mode = Window.MODE_MAXIMIZED
+
+func _ready() -> void:
+	button_pressed = get_window().mode == Window.MODE_FULLSCREEN
+
+
+func _on_toggled(toggled_on: bool) -> void:
+	get_window().mode = Window.MODE_FULLSCREEN if toggled_on else Window.MODE_WINDOWED
