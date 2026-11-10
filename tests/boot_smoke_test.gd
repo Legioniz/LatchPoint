@@ -79,7 +79,7 @@ func _check_settings_persistence() -> bool:
 	if not _remove_test_settings_file():
 		return false
 
-	var defaults: Object = settings_script.new()
+	var defaults := settings_script.new() as Node
 	defaults.set("settings_file_path", SETTINGS_TEST_PATH)
 	defaults.call("load_settings")
 	if (
@@ -88,6 +88,7 @@ func _check_settings_persistence() -> bool:
 		or bool(defaults.call("get_fullscreen"))
 	):
 		push_error("Missing settings file did not fall back to safe defaults.")
+		defaults.free()
 		_remove_test_settings_file()
 		return false
 
@@ -96,10 +97,11 @@ func _check_settings_persistence() -> bool:
 	var save_error := int(defaults.call("save_now"))
 	if save_error != OK:
 		push_error("Settings smoke test could not write its isolated ConfigFile.")
+		defaults.free()
 		_remove_test_settings_file()
 		return false
 
-	var reloaded: Object = settings_script.new()
+	var reloaded := settings_script.new() as Node
 	reloaded.set("settings_file_path", SETTINGS_TEST_PATH)
 	reloaded.call("load_settings")
 	var round_trip_passed := (
@@ -116,10 +118,12 @@ func _check_settings_persistence() -> bool:
 	var invalid_save_error := invalid_config.save(SETTINGS_TEST_PATH)
 	if invalid_save_error != OK:
 		push_error("Settings smoke test could not write its invalid-value fixture.")
+		reloaded.free()
+		defaults.free()
 		_remove_test_settings_file()
 		return false
 
-	var invalid_settings: Object = settings_script.new()
+	var invalid_settings := settings_script.new() as Node
 	invalid_settings.set("settings_file_path", SETTINGS_TEST_PATH)
 	invalid_settings.call("load_settings")
 	var invalid_values_recovered := (
@@ -130,6 +134,9 @@ func _check_settings_persistence() -> bool:
 	if not invalid_values_recovered:
 		push_error("Invalid saved settings did not recover to validated defaults.")
 
+	invalid_settings.free()
+	reloaded.free()
+	defaults.free()
 	var cleanup_passed := _remove_test_settings_file()
 	return round_trip_passed and invalid_values_recovered and cleanup_passed
 
