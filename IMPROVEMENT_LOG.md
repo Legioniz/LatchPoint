@@ -17,7 +17,7 @@ Each completed cycle records its purpose, affected files, sources, verification 
 
 **Verification**
 - Local Godot execution: not run; no Godot executable is installed in this environment.
-- Godot 4.7.2 GitHub Actions validation: passed on 2026-11-10 in run [42774794219](https://github.com/Legioniz/LatchPoint/actions/runs/42774794219): resource import, every tracked GDScript parse check, physics smoke test, and boot/settings persistence test all completed successfully.
+- Godot 4.7.2 GitHub Actions validation: passed on 2026-11-10 in run [42775181753](https://github.com/Legioniz/LatchPoint/actions/runs/42775181753): resource import, every tracked GDScript parse check, physics smoke test, and boot/settings persistence test all completed successfully.
 - Manual desktop fullscreen/restart verification: pending; headless tests cannot verify native title-bar behavior on a real desktop.
 - Performance: no runtime profiler was available. The 0.5-second debounce is a write-frequency safeguard, not a measured performance improvement.
 - The same CI logs still report two ObjectDB instances and one `AudioStreamMP3` resource retained at shutdown for `res://Project_bullshit.mp3` after both smoke-test processes. This remains the separate, unresolved issue [#3](https://github.com/Legioniz/LatchPoint/issues/3); no Settings.gd resource leak or out-of-tree Node-path errors remained after the test fixtures were explicitly freed.
@@ -25,7 +25,7 @@ Each completed cycle records its purpose, affected files, sources, verification 
 
 **Research:** Godot 4.7 ConfigFile and user-data-path documentation; MIT-licensed Godot Settings Menu Lite as an open-source architectural comparison; a Godot ConfigFile settings tutorial. See `RESEARCH_REGISTER.md`.
 
-**Branch:** `feature/settings-persistence`, based on `feature/player-movement-regression-tests`. **Commit:** `79247183725cc22cca3796e663d91aa58c892ee3` plus test-cleanup follow-up `0986d559cfafdbb3de88fb129dbc7ea8dafb6444`.
+**Branch:** `feature/settings-persistence`, based on `feature/player-movement-regression-tests`. **Commits:** `79247183725cc22cca3796e663d91aa58c892ee3` (feature), `0986d559cfafdbb3de88fb129dbc7ea8dafb6444` (fixture cleanup), `c2cfa17107f26884556239cbc0cc2dff26953fe8` (verification docs), and `91fcf91369e1751ac2a2cd08ce2ac2e9ccaf6240` (isolated audio integration fixture).
 
 ## 2026-11-10 — Player movement regression coverage
 
