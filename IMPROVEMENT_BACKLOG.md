@@ -31,6 +31,7 @@ Items are not promises to implement immediately. Re-score them after inspecting 
 - [ ] **Export/import save package.** Goal: allow users to export and restore a compatible save. Acceptance: version metadata, integrity checks, clear locked-state semantics and graceful incompatibility handling.
 - [ ] **ML-assisted playtesting.** Goal: evaluate a local agent only when a measurable objective and game-state interface exist. Acceptance: repeatable traces identify a bug or a measurable coverage gap; compare with deterministic and human tests.
 - [ ] **Performance baseline and profiling.** Goal: establish frame-time, load-time, memory and physics budgets on target hardware. Acceptance: profiler evidence and before/after metrics for optimizations.
+- [ ] **Release/export pipeline.** Goal: reproducible builds for the chosen platforms. Acceptance: clean export, launch verification, versioning and documented build steps.
 
 ## Resolved in the current foundation PR
 
