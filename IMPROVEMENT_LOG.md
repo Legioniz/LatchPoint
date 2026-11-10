@@ -8,7 +8,7 @@ Each completed cycle records its purpose, affected files, sources, verification 
 
 - Extended `tests/physics_smoke_test.gd` to instantiate the actual `res://Scene/player.tscn` against a temporary static floor fixture.
 - Simulated the existing `ui_right` and `ui_accept` actions with Godot's Input singleton and synchronized assertions to completed physics callbacks.
-- The first CI attempt exposed a one-tick overrun in a timer-based wait (180 px/s observed versus 150 px/s expected at 60 Hz). A second attempt using the `physics_frame` signal retained the same off-by-one because that signal fires before node callbacks. The final helper is a test-only physics waiter at priority 100; it counts exactly the requested ticks after the player's default-priority physics callback.
+- The first CI attempt exposed a one-tick overrun in a timer-based wait (180 px/s observed versus 150 px/s expected at 60 Hz). A second attempt using the `physics_frame` signal retained the same off-by-one because that signal fires before node callbacks. The final helper is a persistent test-only physics waiter at physics priority 100; it counts exact ticks after the player's default-priority callback and is reused between assertions to avoid creating a new frame boundary.
 - Added assertions for configured horizontal acceleration, friction after release, grounded jump velocity, gravity increasing vertical velocity, and rejection of a second jump while airborne.
 - Kept the existing scene-load, floor-landing, and floor/wall/ceiling probe checks intact.
 - No shipping gameplay script, scene, asset, project setting, input map, or dependency was changed. The test fixture is transient and exists only in the smoke-test process.
@@ -21,7 +21,7 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - Performance: no runtime profiling performed because this is test-only code and no runtime optimization was made.
 - ML: not used; deterministic input simulation is ordinary scripted testing, not machine learning.
 
-**Status:** deterministic waiter correction committed after two CI runs exposed frame-boundary over-counting; final CI validation is pending.
+**Status:** persistent waiter correction committed after two CI runs exposed frame-boundary over-counting; final CI validation is pending.
 
 **Research:** Godot 4.7 CharacterBody2D, Input, and SceneTree documentation; Godot demo-project platformer and Celeste developer notes. See `RESEARCH_REGISTER.md`.
 

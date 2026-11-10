@@ -196,23 +196,28 @@ func _check_player_movement() -> void:
 
 	player.position = Vector2.ZERO
 	fixture.add_child(player)
+
+	var physics_waiter := PhysicsFrameWaiter.new()
+	physics_waiter.process_physics_priority = 100
+	root.add_child(physics_waiter)
 	_release_test_inputs()
 
 	await process_frame
-	await _wait_for_physics_frames(PHYSICS_FRAMES_TO_SIMULATE)
+	await _wait_for_physics_frames(physics_waiter, PHYSICS_FRAMES_TO_SIMULATE)
 
 	if not player.is_on_floor():
 		failures.append("Player movement fixture did not establish a grounded starting state.")
 	elif actions_available:
-		await _check_horizontal_movement(player)
-		await _check_jump_behavior(player)
+		await _check_horizontal_movement(player, physics_waiter)
+		await _check_jump_behavior(player, physics_waiter)
 
 	_release_test_inputs()
+	physics_waiter.queue_free()
 	fixture.queue_free()
 	await process_frame
 
 
-func _check_horizontal_movement(player: CharacterBody2D) -> void:
+func _check_horizontal_movement(player: CharacterBody2D, waiter: PhysicsFrameWaiter) -> void:
 	if (
 		player.get("move_speed") == null
 		or player.get("acceleration") == null
@@ -231,7 +236,7 @@ func _check_horizontal_movement(player: CharacterBody2D) -> void:
 	var ticks_per_second := _get_physics_ticks_per_second()
 	var physics_delta := Engine.time_scale / float(ticks_per_second)
 	Input.action_press("ui_right")
-	await _wait_for_physics_frames(ACCELERATION_TEST_FRAMES)
+	await _wait_for_physics_frames(waiter, ACCELERATION_TEST_FRAMES)
 
 	var expected_speed := minf(
 		move_speed,
@@ -245,7 +250,7 @@ func _check_horizontal_movement(player: CharacterBody2D) -> void:
 
 	var speed_after_acceleration := player.velocity.x
 	Input.action_release("ui_right")
-	await _wait_for_physics_frames(FRICTION_TEST_FRAMES)
+	await _wait_for_physics_frames(waiter, FRICTION_TEST_FRAMES)
 
 	var expected_speed_after_friction := maxf(
 		0.0,
@@ -259,7 +264,7 @@ func _check_horizontal_movement(player: CharacterBody2D) -> void:
 	)
 
 
-func _check_jump_behavior(player: CharacterBody2D) -> void:
+func _check_jump_behavior(player: CharacterBody2D, waiter: PhysicsFrameWaiter) -> void:
 	if player.get("jump_velocity") == null:
 		failures.append("Player controller is missing its exported jump velocity.")
 		return
@@ -274,7 +279,7 @@ func _check_jump_behavior(player: CharacterBody2D) -> void:
 		return
 
 	Input.action_press("ui_accept")
-	await _wait_for_physics_frames(1)
+	await _wait_for_physics_frames(waiter, 1)
 	_expect_approx(
 		player.velocity.y,
 		jump_velocity,
@@ -282,7 +287,7 @@ func _check_jump_behavior(player: CharacterBody2D) -> void:
 	)
 
 	Input.action_release("ui_accept")
-	await _wait_for_physics_frames(3)
+	await _wait_for_physics_frames(waiter, 3)
 
 	if player.velocity.y <= jump_velocity:
 		failures.append("Gravity did not increase vertical velocity after the jump.")
@@ -290,7 +295,7 @@ func _check_jump_behavior(player: CharacterBody2D) -> void:
 		failures.append("Player unexpectedly landed before the airborne jump rejection check.")
 	else:
 		Input.action_press("ui_accept")
-		await _wait_for_physics_frames(1)
+		await _wait_for_physics_frames(waiter, 1)
 		if player.velocity.y <= jump_velocity + MOVEMENT_ASSERTION_TOLERANCE:
 			failures.append("Jump input reset vertical velocity while the player was airborne.")
 
@@ -304,17 +309,12 @@ func _get_physics_ticks_per_second() -> int:
 	)
 
 
-func _wait_for_physics_frames(frame_count: int) -> void:
+func _wait_for_physics_frames(waiter: PhysicsFrameWaiter, frame_count: int) -> void:
 	if frame_count <= 0:
 		return
 
-	var waiter := PhysicsFrameWaiter.new()
-	waiter.process_physics_priority = 100
-	root.add_child(waiter)
 	waiter.start(frame_count)
 	await waiter.completed
-	waiter.queue_free()
-	await process_frame
 
 
 func _expect_approx(actual: float, expected: float, message: String) -> void:
