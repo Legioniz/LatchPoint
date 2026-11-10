@@ -9,9 +9,13 @@ var volumes: Dictionary = {
 }
 
 var music_player: AudioStreamPlayer
+var settings_manager: Node
 
 
 func _ready() -> void:
+	settings_manager = get_node_or_null("/root/Settings")
+	_load_saved_volumes()
+
 	get_tree().scene_changed.connect(_on_scene_changed)
 	_apply_all_volumes()
 
@@ -60,6 +64,19 @@ func set_bus_volume_linear(bus_name: String, linear_value: float) -> void:
 
 	AudioServer.set_bus_volume_db(bus_id, linear_to_db(maxf(normalized_value, 0.0001)))
 	AudioServer.set_bus_mute(bus_id, is_zero_approx(normalized_value))
+
+	if settings_manager != null and settings_manager.has_method("set_bus_volume_linear"):
+		settings_manager.call("set_bus_volume_linear", bus_name, normalized_value)
+
+
+func _load_saved_volumes() -> void:
+	if settings_manager == null or not settings_manager.has_method("get_bus_volume_linear"):
+		return
+
+	for bus_name: String in volumes:
+		volumes[bus_name] = float(
+			settings_manager.call("get_bus_volume_linear", bus_name)
+		)
 
 
 func _apply_all_volumes() -> void:

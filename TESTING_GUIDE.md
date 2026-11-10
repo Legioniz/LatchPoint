@@ -29,7 +29,7 @@ Run the deterministic scene, physics and player-movement smoke test:
 godot --headless --path . --verbose --script res://tests/physics_smoke_test.gd
 ```
 
-Run the menu boot and display-settings regression test:
+Run the menu boot, settings-persistence and display regression test:
 
 ```sh
 godot --headless --path . --verbose --script res://tests/boot_smoke_test.gd
@@ -45,22 +45,36 @@ The physics smoke test checks required scene loading, gameplay player landing, a
 
 These are regression checks for the current controller, not a final movement-feel approval. They do not yet cover slopes, one-way platforms, moving platforms, hazards, high-speed gameplay movement, corners, collision masks, or respawn overlap.
 
+## Settings persistence diagnostics
+
+The boot smoke test uses an isolated `user://latchpoint_settings_smoke_test.cfg` file and removes it after the assertions. It checks:
+
+- First-run defaults when no settings file exists.
+- Music-volume and fullscreen save/reload round trips.
+- Safe recovery when stored values have the wrong type.
+- Clamping of out-of-range numeric audio values.
+- Synchronization between the Audio and Settings autoloads.
+- Windowed-mode restoration of the borderless flag.
+
+The runtime settings file is `user://settings.cfg`; it is separate from gameplay-progress save data. Audio slider changes are applied immediately and disk writes are debounced. Pending settings are flushed when the Settings autoload exits.
+
 ## Audio shutdown diagnostics
 
 - Run both smoke-test commands with `--verbose` and inspect the complete process output, not just the exit code.
-- The initial inspected CI run `42573252526` reported retained `AudioStreamPlaybackMP3` / `AudioStreamMP3` references after the physics test but not after the boot test. Later successful runs `42772371690` and `42772488665` report the same retained references after both smoke-test processes, each pointing to `res://Project_bullshit.mp3`.
+- The initial inspected CI run `42573252526` reported retained `AudioStreamPlaybackMP3` / `AudioStreamMP3` references after the physics test but not after the boot test. Later successful runs `42772371690`, `42772488665` and `42775181753` report the same retained references after both smoke-test processes, each pointing to `res://Project_bullshit.mp3`. The latest run also confirms the settings fixtures no longer leave a Settings.gd resource or out-of-tree Node-path errors.
 - The tests call `Audio.shutdown_audio()` and wait two process frames. This has not yet been demonstrated to release the AudioServer's playback-list reference before either process exits.
 - Track investigation in [issue #3](https://github.com/Legioniz/LatchPoint/issues/3). Do not hide the warning or remove the music check to make CI appear clean. A fix is accepted only after the verbose CI logs show the expected shutdown behavior or the engine limitation is reproduced and documented.
 
-## Manual display-settings check
+## Manual display and audio-settings check
 
 Headless checks cannot confirm how each operating system changes display modes or draws native window decorations. On each supported desktop platform:
 
-1. Launch LatchPoint and confirm it starts in a normal window with a title bar and native decorations.
+1. Launch LatchPoint and confirm it starts in a normal window with a title bar and native decorations on first run.
 2. Open Options and enable **Fullscreen**. Confirm the game covers the display.
 3. Disable **Fullscreen**. Confirm the game returns to a normal decorated window.
 4. Move and resize the window to confirm native window controls are available.
-5. Restart the game and confirm the default windowed presentation is restored.
+5. Change the Music volume, close the game normally, restart it, and confirm the chosen volume is restored.
+6. Restart after selecting Fullscreen and confirm the selected preference is restored. Headless checks do not prove native window-mode behavior.
 
 Record the operating system, display setup, Godot version, and observed result in the improvement log. Do not mark platform-specific manual verification complete based only on headless CI.
 

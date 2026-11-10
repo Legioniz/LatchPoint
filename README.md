@@ -29,22 +29,23 @@ Review **Project Settings → Input Map** for the active key bindings.
 - The game scene contains static collision platforms and a player collision shape.
 - The pause menu is attached to the gameplay scene.
 - Music and display settings are connected to the options screen.
+- Master, Music and SFX volumes plus the fullscreen preference persist in `user://settings.cfg`.
 - The fullscreen toggle restores native window decorations when returning to windowed mode.
-- Load Game is intentionally disabled until a real save/load system exists.
+- Load Game is intentionally disabled until a real gameplay save/load system exists.
 - The current dark gameplay background is a safe fallback; final environment art awaits a confirmed visual direction.
 
 ## Development and validation
 
 Read [DEVELOPMENT_PLAYBOOK.md](DEVELOPMENT_PLAYBOOK.md) before making substantial changes. Use [IMPROVEMENT_BACKLOG.md](IMPROVEMENT_BACKLOG.md) for priorities, [IMPROVEMENT_LOG.md](IMPROVEMENT_LOG.md) for completed work, [RESEARCH_REGISTER.md](RESEARCH_REGISTER.md) for external game/design/engine references, and [TESTING_GUIDE.md](TESTING_GUIDE.md) for repeatable checks.
 
-The repository includes a headless smoke/physics test at `tests/physics_smoke_test.gd` and a GitHub Actions workflow at `.github/workflows/godot-validation.yml`. The physics smoke test covers the current player's acceleration, friction, grounded jump and airborne jump rejection in addition to scene loading, landing, and floor/wall/ceiling collision probes. The boot smoke test also checks that switching back to windowed mode restores window decorations.
+The repository includes a headless smoke/physics test at `tests/physics_smoke_test.gd` and a GitHub Actions workflow at `.github/workflows/godot-validation.yml`. The physics smoke test covers the current player's acceleration, friction, grounded jump and airborne jump rejection in addition to scene loading, landing, and floor/wall/ceiling collision probes. The boot smoke test checks settings persistence and Audio/Settings synchronization in addition to menu loading and window-decoration restoration.
 
 Run locally from the project root:
 
 ```sh
 godot --headless --editor --path . --import
 godot --headless --path . --script res://tests/physics_smoke_test.gd
-godot --headless --path . --quit-after 120
+godot --headless --path . --script res://tests/boot_smoke_test.gd
 ```
 
 A test is considered passed only when its command actually completes successfully. Headless checks do not replace hands-on playtesting, visual review or testing on the target hardware.

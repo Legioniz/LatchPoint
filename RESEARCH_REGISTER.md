@@ -2,12 +2,35 @@
 
 Checked 2026-11-10. These references establish the first research baseline. Re-check them when a design decision depends on an API or current implementation detail.
 
+## Settings persistence and user-data storage
+
+### Godot 4.7 — ConfigFile
+- Source: https://docs.godotengine.org/en/4.7/classes/class_configfile.html
+- Relevant behavior: ConfigFile stores Variant values by section/key in an INI-style file. Mutating the in-memory ConfigFile does not write it to disk; `save()` must be called explicitly. `get_value()` supports defaults for missing keys.
+- Project decision: use ConfigFile for small per-install preferences, validate loaded types and numeric ranges, and keep these preferences separate from future gameplay save slots.
+
+### Godot 4.7 — Persistent user-data paths
+- Source: https://docs.godotengine.org/en/4.7/tutorials/io/data_paths.html
+- Relevant behavior: `user://` is created automatically and is writable in exported projects; `res://` is the project resource path and may be read-only at runtime.
+- Project decision: write preferences to `user://settings.cfg`, never into the project resource tree.
+
+### Settings Menu Lite — open-source Godot 4 settings example
+- Source: https://github.com/godot-forge/settings-menu-lite-godot
+- Scale: small independent Godot 4 settings utility with an autoload, an options panel and ConfigFile persistence.
+- Observed principle: centralize settings ownership, apply values through engine APIs, and load preferences before scenes need them.
+- License: repository declares MIT. The license was inspected on 2026-11-10. Used as an architectural reference only; no code, scenes, UI, icons or other assets were copied.
+
+### Saltmire — ConfigFile settings implementation article
+- Source: https://dev.to/saltmire/how-to-save-game-settings-volume-fullscreen-keybinds-in-godot-4-with-configfile-abp
+- Relevant observation: keep per-machine preferences in `user://settings.cfg`, apply settings separately from loading them, and avoid writing to disk on every slider value change.
+- Project decision: apply volume changes immediately, then debounce ConfigFile writes for 0.5 seconds and flush pending changes when the Settings autoload exits. No article code was copied.
+
 ## Audio playback shutdown and resource lifetime
 
 ### Godot 4.7 — AudioStreamPlayer
 - Source: https://docs.godotengine.org/en/4.7/classes/class_audiostreamplayer.html
 - Relevant behavior: assigning an empty `stream` stops currently playing sounds; `stop()` stops all sounds from the player. The API does not promise that AudioServer-side playback references are released synchronously with the call.
-- Project observation: the initial inspected CI run `42573252526` reported retained `AudioStreamPlaybackMP3` and `AudioStreamMP3` references after the physics smoke test but not after boot. Later successful runs `42772371690` and `42772488665` report the same resources after both physics and boot smoke-test processes. The warning persists despite `shutdown_audio()` stopping the player and clearing its stream.
+- Project observation: the initial inspected CI run `42573252526` reported retained `AudioStreamPlaybackMP3` and `AudioStreamMP3` references after the physics smoke test but not after boot. Later successful runs `42772371690` and `42772488665` report the same resources after both physics and boot smoke-test processes. The warning persists despite `shutdown_audio()` stopping the player and clearing its stream. The 2026-11-10 settings branch CI run `42775181753` also reports two ObjectDB instances and one `AudioStreamMP3` resource at shutdown after both smoke-test processes; after freeing isolated settings-test nodes, no Settings.gd resource leak or out-of-tree Node-path errors remain. The remaining MP3 warning is tracked separately by issue #3.
 
 ### Godot 4.7-stable — AudioStreamPlayerInternal and AudioServer implementation
 - Sources: https://github.com/godotengine/godot/blob/4.7-stable/scene/audio/audio_stream_player_internal.cpp and https://github.com/godotengine/godot/blob/4.7-stable/servers/audio/audio_server.cpp
