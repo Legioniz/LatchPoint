@@ -37,7 +37,7 @@ Review **Project Settings → Input Map** for the active key bindings.
 
 Read [DEVELOPMENT_PLAYBOOK.md](DEVELOPMENT_PLAYBOOK.md) before making substantial changes. Use [IMPROVEMENT_BACKLOG.md](IMPROVEMENT_BACKLOG.md) for priorities, [IMPROVEMENT_LOG.md](IMPROVEMENT_LOG.md) for completed work, [RESEARCH_REGISTER.md](RESEARCH_REGISTER.md) for external game/design/engine references, and [TESTING_GUIDE.md](TESTING_GUIDE.md) for repeatable checks.
 
-The repository includes a headless smoke/physics test at `tests/physics_smoke_test.gd` and a GitHub Actions workflow at `.github/workflows/godot-validation.yml`. The boot smoke test also checks that switching back to windowed mode restores window decorations.
+The repository includes a headless smoke/physics test at `tests/physics_smoke_test.gd` and a GitHub Actions workflow at `.github/workflows/godot-validation.yml`. The physics smoke test covers the current player's acceleration, friction, grounded jump and airborne jump rejection in addition to scene loading, landing, and floor/wall/ceiling collision probes. The boot smoke test also checks that switching back to windowed mode restores window decorations.
 
 Run locally from the project root:
 

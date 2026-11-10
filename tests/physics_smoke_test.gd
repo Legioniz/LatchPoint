@@ -12,6 +12,11 @@ const REQUIRED_SCENES: Array[String] = [
 const PHYSICS_FRAMES_TO_SIMULATE := 120
 const PROBE_FRAMES_TO_SIMULATE := 30
 const PROBE_SIZE := Vector2(20.0, 20.0)
+const MOVEMENT_TEST_FLOOR_Y := 160.0
+const MOVEMENT_TEST_FLOOR_WIDTH := 1200.0
+const ACCELERATION_TEST_FRAMES := 5
+const FRICTION_TEST_FRAMES := 3
+const MOVEMENT_ASSERTION_TOLERANCE := 1.0
 
 var failures: Array[String] = []
 
@@ -24,11 +29,15 @@ func _run() -> void:
 	_check_required_scenes()
 	_check_music_asset()
 	await _check_gameplay_physics()
+	await _check_player_movement()
 	await _check_solid_collision_directions()
 	await _shutdown_audio_before_exit()
 
 	if failures.is_empty():
-		print("LatchPoint tests passed: scenes loaded; player landed; floor, wall and ceiling collisions held.")
+		print(
+			"LatchPoint tests passed: scenes loaded; player landed; acceleration, friction, " +
+			"grounded jump and airborne jump rejection held; floor, wall and ceiling collisions held."
+		)
 		quit(0)
 		return
 
@@ -119,6 +128,169 @@ func _check_gameplay_physics() -> void:
 
 	world.queue_free()
 	await process_frame
+
+
+func _check_player_movement() -> void:
+	var player_scene := load("res://Scene/player.tscn") as PackedScene
+	if player_scene == null:
+		failures.append("Player scene is unavailable; movement regression checks cannot run.")
+		return
+
+	var required_actions: Array[String] = ["ui_left", "ui_right", "ui_accept"]
+	var actions_available := true
+	for action in required_actions:
+		if not InputMap.has_action(action):
+			failures.append("Player movement test requires Input Map action: %s" % action)
+			actions_available = false
+
+	var fixture := Node2D.new()
+	fixture.name = "PlayerMovementTestFixture"
+	root.add_child(fixture)
+
+	var floor_body := StaticBody2D.new()
+	floor_body.position = Vector2(0.0, MOVEMENT_TEST_FLOOR_Y)
+
+	var floor_shape := CollisionShape2D.new()
+	var floor_rectangle := RectangleShape2D.new()
+	floor_rectangle.size = Vector2(MOVEMENT_TEST_FLOOR_WIDTH, 20.0)
+	floor_shape.shape = floor_rectangle
+	floor_body.add_child(floor_shape)
+	fixture.add_child(floor_body)
+
+	var player_instance := player_scene.instantiate()
+	var player := player_instance as CharacterBody2D
+	if player == null:
+		failures.append("Player scene root is not a CharacterBody2D.")
+		player_instance.free()
+		fixture.queue_free()
+		await process_frame
+		_release_test_inputs()
+		return
+
+	player.position = Vector2.ZERO
+	fixture.add_child(player)
+	_release_test_inputs()
+
+	await process_frame
+	await _wait_for_physics_frames(PHYSICS_FRAMES_TO_SIMULATE)
+
+	if not player.is_on_floor():
+		failures.append("Player movement fixture did not establish a grounded starting state.")
+	elif actions_available:
+		await _check_horizontal_movement(player)
+		await _check_jump_behavior(player)
+
+	_release_test_inputs()
+	fixture.queue_free()
+	await process_frame
+
+
+func _check_horizontal_movement(player: CharacterBody2D) -> void:
+	if (
+		player.get("move_speed") == null
+		or player.get("acceleration") == null
+		or player.get("friction") == null
+	):
+		failures.append("Player controller is missing its exported movement tuning properties.")
+		return
+
+	var move_speed := float(player.get("move_speed"))
+	var acceleration := float(player.get("acceleration"))
+	var friction := float(player.get("friction"))
+	if move_speed <= 0.0 or acceleration <= 0.0 or friction <= 0.0:
+		failures.append("Player movement tuning values must be positive for this regression test.")
+		return
+
+	var ticks_per_second := _get_physics_ticks_per_second()
+	Input.action_press("ui_right")
+	await _wait_for_physics_frames(ACCELERATION_TEST_FRAMES)
+
+	var expected_speed := minf(
+		move_speed,
+		acceleration * float(ACCELERATION_TEST_FRAMES) / float(ticks_per_second)
+	)
+	_expect_approx(
+		player.velocity.x,
+		expected_speed,
+		"Player horizontal acceleration did not match the configured rate."
+	)
+
+	var speed_after_acceleration := player.velocity.x
+	Input.action_release("ui_right")
+	await _wait_for_physics_frames(FRICTION_TEST_FRAMES)
+
+	var expected_speed_after_friction := maxf(
+		0.0,
+		speed_after_acceleration -
+		friction * float(FRICTION_TEST_FRAMES) / float(ticks_per_second)
+	)
+	_expect_approx(
+		player.velocity.x,
+		expected_speed_after_friction,
+		"Player horizontal friction did not reduce speed at the configured rate."
+	)
+
+
+func _check_jump_behavior(player: CharacterBody2D) -> void:
+	if player.get("jump_velocity") == null:
+		failures.append("Player controller is missing its exported jump velocity.")
+		return
+
+	var jump_velocity := float(player.get("jump_velocity"))
+	if jump_velocity >= 0.0:
+		failures.append("Player jump velocity must be negative for an upward jump.")
+		return
+
+	if not player.is_on_floor():
+		failures.append("Player must be grounded before the jump regression check.")
+		return
+
+	Input.action_press("ui_accept")
+	await _wait_for_physics_frames(1)
+	_expect_approx(
+		player.velocity.y,
+		jump_velocity,
+		"Grounded jump did not apply the configured vertical velocity."
+	)
+
+	Input.action_release("ui_accept")
+	await _wait_for_physics_frames(3)
+
+	if player.velocity.y <= jump_velocity:
+		failures.append("Gravity did not increase vertical velocity after the jump.")
+	if player.is_on_floor():
+		failures.append("Player unexpectedly landed before the airborne jump rejection check.")
+	else:
+		Input.action_press("ui_accept")
+		await _wait_for_physics_frames(1)
+		if player.velocity.y <= jump_velocity + MOVEMENT_ASSERTION_TOLERANCE:
+			failures.append("Jump input reset vertical velocity while the player was airborne.")
+
+	Input.action_release("ui_accept")
+
+
+func _get_physics_ticks_per_second() -> int:
+	return maxi(
+		1,
+		int(ProjectSettings.get_setting("physics/common/physics_ticks_per_second", 60))
+	)
+
+
+func _wait_for_physics_frames(frame_count: int) -> void:
+	var duration := float(frame_count) / float(_get_physics_ticks_per_second())
+	# Physics timers emit after physics nodes have processed the corresponding step.
+	await create_timer(duration, true, true).timeout
+
+
+func _expect_approx(actual: float, expected: float, message: String) -> void:
+	if absf(actual - expected) > MOVEMENT_ASSERTION_TOLERANCE:
+		failures.append("%s Expected %.2f, got %.2f." % [message, expected, actual])
+
+
+func _release_test_inputs() -> void:
+	for action in ["ui_left", "ui_right", "ui_accept"]:
+		if InputMap.has_action(action):
+			Input.action_release(action)
 
 
 func _check_solid_collision_directions() -> void:

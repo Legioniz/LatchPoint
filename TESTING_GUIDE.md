@@ -23,7 +23,7 @@ while IFS= read -r script; do
 done < <(git ls-files '*.gd' | sort)
 ```
 
-Run the deterministic scene and physics smoke test:
+Run the deterministic scene, physics and player-movement smoke test:
 
 ```sh
 godot --headless --path . --verbose --script res://tests/physics_smoke_test.gd
@@ -35,9 +35,15 @@ Run the menu boot and display-settings regression test:
 godot --headless --path . --verbose --script res://tests/boot_smoke_test.gd
 ```
 
-The physics smoke test currently checks scene loading, player landing, and solid floor, wall, and ceiling collision probes. It does not yet cover slopes, one-way platforms, moving platforms, hazards, or high-speed gameplay movement.
+The physics smoke test checks required scene loading, gameplay player landing, and solid floor, wall, and ceiling collision probes. It also instantiates the real `Scene/player.tscn` in an isolated floor fixture and checks:
 
-The boot test checks the menu controls and verifies that the fullscreen toggle clears the borderless flag during windowed initialization and when switching back to windowed mode. The headless display server does not reliably report the actual window mode, so mode transitions must also be checked manually on a desktop platform.
+- Horizontal acceleration against the configured movement rate.
+- Horizontal friction after releasing right movement.
+- Grounded jump velocity against the configured jump value.
+- Gravity increasing vertical velocity after the jump.
+- A second jump press does not reset vertical velocity while the player is airborne.
+
+These are regression checks for the current controller, not a final movement-feel approval. They do not yet cover slopes, one-way platforms, moving platforms, hazards, high-speed gameplay movement, corners, collision masks, or respawn overlap.
 
 ## Audio shutdown diagnostics
 

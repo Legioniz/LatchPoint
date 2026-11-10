@@ -1,6 +1,6 @@
 # Research Register
 
-Checked 2026-11-09. These references establish the first research baseline. Re-check them when a design decision depends on an API or current implementation detail.
+Checked 2026-11-10. These references establish the first research baseline. Re-check them when a design decision depends on an API or current implementation detail.
 
 ## Audio playback shutdown and resource lifetime
 
@@ -69,10 +69,26 @@ Checked 2026-11-09. These references establish the first research baseline. Re-c
 - Relevant points: `CharacterBody2D` is manually controlled; movement belongs in `_physics_process`; `move_and_slide()` is appropriate for many platformer situations; `move_and_collide()` returns collision information for custom responses; slide collisions can be inspected after movement.
 - Project application: use physics APIs with a deliberate response model and test collision cases in the running project.
 
+### Godot 4.7 — Input action simulation
+- Source: https://docs.godotengine.org/en/4.7/classes/class_input.html
+- Relevant points: `Input.action_press()` and `Input.action_release()` simulate Input Map actions; the documentation says these methods are intended to work with `is_action_pressed()` and `is_action_just_pressed()`, but do not invoke `Node._input()`.
+- Project application: the current player controller reads the global Input state directly in `_physics_process()`, so the smoke test can drive the real controller without hardware input or a second input abstraction.
+
+### Godot 4.7 — SceneTree physics timers
+- Source: https://docs.godotengine.org/en/4.7/classes/class_scenetree.html
+- Relevant points: `SceneTree.create_timer()` supports `process_in_physics=true`; the documentation notes that a timer updates after all nodes in the corresponding frame have processed. `physics_frame` is emitted immediately before node `_physics_process()` callbacks.
+- Project application: the movement regression helper waits for fixed physics-time intervals and inspects velocity after the player has processed those steps, rather than relying on rendered frame timing.
+
+### Godot Demo Projects — 2D platformer and kinematic character
+- Source: https://github.com/godotengine/godot-demo-projects
+- Scale: official open-source Godot demonstration projects, including Godot 4.7-compatible 2D platformer examples written in GDScript.
+- Observed principle: platformer controllers should keep movement and collision responses in the physics loop; the examples provide a useful comparison for acceleration, stopping, jump and platform interactions.
+- License: the demo-project repository is MIT licensed. It is used as a design/technical reference only; no source code, art, audio or levels are copied.
+
 ### Godot command-line validation
 - Source: https://docs.godotengine.org/en/latest/tutorials/editor/command_line_tutorial.html
 - Relevant points: headless import and command-line execution can be used in CI; `--import` performs project resource import; headless runs can execute scripts and projects without opening a game window.
-- Project application: the initial GitHub Actions workflow imports the project and runs a deterministic smoke/physics test.
+- Project application: the initial GitHub Actions workflow imports the project and runs deterministic scene, physics and player-movement smoke checks.
 
 ### GdUnit4
 - Source: https://godot-gdunit-labs.github.io/gdUnit4/latest/
