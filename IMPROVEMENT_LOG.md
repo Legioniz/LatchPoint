@@ -7,7 +7,8 @@ Each completed cycle records its purpose, affected files, sources, verification 
 **Objective:** establish a deterministic regression baseline for the existing CharacterBody2D controller without changing the unconfirmed game design.
 
 - Extended `tests/physics_smoke_test.gd` to instantiate the actual `res://Scene/player.tscn` against a temporary static floor fixture.
-- Simulated the existing `ui_right` and `ui_accept` actions with Godot's Input singleton and advanced fixed physics-time intervals.
+- Simulated the existing `ui_right` and `ui_accept` actions with Godot's Input singleton and synchronized assertions to completed physics callbacks.
+- The first CI attempt exposed an off-by-one in the timer-based wait (180 px/s observed versus 150 px/s expected at 60 Hz). Replaced it with explicit `physics_frame` synchronization so each assertion follows the requested number of player physics callbacks.
 - Added assertions for configured horizontal acceleration, friction after release, grounded jump velocity, gravity increasing vertical velocity, and rejection of a second jump while airborne.
 - Kept the existing scene-load, floor-landing, and floor/wall/ceiling probe checks intact.
 - No shipping gameplay script, scene, asset, project setting, input map, or dependency was changed. The test fixture is transient and exists only in the smoke-test process.
@@ -20,7 +21,7 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - Performance: no runtime profiling performed because this is test-only code and no runtime optimization was made.
 - ML: not used; deterministic input simulation is ordinary scripted testing, not machine learning.
 
-**Status:** implementation committed for CI validation; update this entry with the exact workflow result before treating the test as verified.
+**Status:** timing correction committed after the first CI run exposed the extra physics tick; follow-up CI validation is pending.
 
 **Research:** Godot 4.7 CharacterBody2D, Input, and SceneTree documentation; Godot demo-project platformer and Celeste developer notes. See `RESEARCH_REGISTER.md`.
 

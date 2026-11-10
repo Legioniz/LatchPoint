@@ -74,10 +74,10 @@ Checked 2026-11-10. These references establish the first research baseline. Re-c
 - Relevant points: `Input.action_press()` and `Input.action_release()` simulate Input Map actions; the documentation says these methods are intended to work with `is_action_pressed()` and `is_action_just_pressed()`, but do not invoke `Node._input()`.
 - Project application: the current player controller reads the global Input state directly in `_physics_process()`, so the smoke test can drive the real controller without hardware input or a second input abstraction.
 
-### Godot 4.7 — SceneTree physics timers
+### Godot 4.7 — SceneTree physics-frame synchronization
 - Source: https://docs.godotengine.org/en/4.7/classes/class_scenetree.html
-- Relevant points: `SceneTree.create_timer()` supports `process_in_physics=true`; the documentation notes that a timer updates after all nodes in the corresponding frame have processed. `physics_frame` is emitted immediately before node `_physics_process()` callbacks.
-- Project application: the movement regression helper waits for fixed physics-time intervals and inspects velocity after the player has processed those steps, rather than relying on rendered frame timing.
+- Relevant points: `physics_frame` is emitted immediately before every node's `_physics_process()` callback. A coroutine resumed by this signal runs before the current tick's node callbacks.
+- Project application: the movement regression helper waits for one more signal than the requested callback count, ensuring that the requested number of player physics steps have completed before velocity assertions are read. The first timer-based implementation was one physics tick longer than expected in CI, so the test now uses explicit signal ordering instead of elapsed-time timers.
 
 ### Godot Demo Projects — 2D platformer and kinematic character
 - Source: https://github.com/godotengine/godot-demo-projects

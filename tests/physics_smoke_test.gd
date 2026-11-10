@@ -158,6 +158,13 @@ func _check_player_movement() -> void:
 	fixture.add_child(floor_body)
 
 	var player_instance := player_scene.instantiate()
+	if player_instance == null:
+		failures.append("Player scene could not be instantiated.")
+		fixture.queue_free()
+		await process_frame
+		_release_test_inputs()
+		return
+
 	var player := player_instance as CharacterBody2D
 	if player == null:
 		failures.append("Player scene root is not a CharacterBody2D.")
@@ -277,9 +284,10 @@ func _get_physics_ticks_per_second() -> int:
 
 
 func _wait_for_physics_frames(frame_count: int) -> void:
-	var duration := float(frame_count) / float(_get_physics_ticks_per_second())
-	# Physics timers emit after physics nodes have processed the corresponding step.
-	await create_timer(duration, true, true).timeout
+	# physics_frame fires before node callbacks, so the extra signal wait
+	# ensures exactly frame_count player physics callbacks have completed.
+	for _frame_index in range(frame_count + 1):
+		await physics_frame
 
 
 func _expect_approx(actual: float, expected: float, message: String) -> void:
