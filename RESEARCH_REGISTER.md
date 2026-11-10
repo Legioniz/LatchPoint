@@ -74,10 +74,10 @@ Checked 2026-11-10. These references establish the first research baseline. Re-c
 - Relevant points: `Input.action_press()` and `Input.action_release()` simulate Input Map actions; the documentation says these methods are intended to work with `is_action_pressed()` and `is_action_just_pressed()`, but do not invoke `Node._input()`.
 - Project application: the current player controller reads the global Input state directly in `_physics_process()`, so the smoke test can drive the real controller without hardware input or a second input abstraction.
 
-### Godot 4.7 — SceneTree physics-frame synchronization
-- Source: https://docs.godotengine.org/en/4.7/classes/class_scenetree.html
-- Relevant points: `physics_frame` is emitted immediately before every node's `_physics_process()` callback. A coroutine resumed by this signal runs before the current tick's node callbacks.
-- Project application: the movement regression helper waits for one more signal than the requested callback count, ensuring that the requested number of player physics steps have completed before velocity assertions are read. The first timer-based implementation was one physics tick longer than expected in CI, so the test now uses explicit signal ordering instead of elapsed-time timers.
+### Godot 4.7 — deterministic physics callback ordering
+- Sources: https://docs.godotengine.org/en/4.7/classes/class_node.html and https://docs.godotengine.org/en/4.7/classes/class_scenetree.html
+- Relevant points: `Node._physics_process()` runs once per physics tick; its `delta` is based on `Engine.time_scale / Engine.physics_ticks_per_second`. Lower `process_physics_priority` values run first. The SceneTree `physics_frame` signal itself is emitted before node physics callbacks.
+- Project application: the smoke test uses a test-only physics waiter at priority 100 to count exact ticks after the player's default-priority controller callback. CI showed that elapsed-time and signal-await helpers could each include an extra step in this harness, so assertions now wait for the explicit counter signal before reading velocity.
 
 ### Godot Demo Projects — 2D platformer and kinematic character
 - Source: https://github.com/godotengine/godot-demo-projects

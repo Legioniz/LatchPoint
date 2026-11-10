@@ -18,6 +18,26 @@ const ACCELERATION_TEST_FRAMES := 5
 const FRICTION_TEST_FRAMES := 3
 const MOVEMENT_ASSERTION_TOLERANCE := 1.0
 
+
+class PhysicsFrameWaiter:
+	extends Node
+
+	signal completed
+
+	var remaining_frames := 0
+
+	func start(frame_count: int) -> void:
+		remaining_frames = frame_count
+
+	func _physics_process(_delta: float) -> void:
+		if remaining_frames <= 0:
+			return
+
+		remaining_frames -= 1
+		if remaining_frames == 0:
+			completed.emit()
+
+
 var failures: Array[String] = []
 
 
@@ -209,12 +229,13 @@ func _check_horizontal_movement(player: CharacterBody2D) -> void:
 		return
 
 	var ticks_per_second := _get_physics_ticks_per_second()
+	var physics_delta := Engine.time_scale / float(ticks_per_second)
 	Input.action_press("ui_right")
 	await _wait_for_physics_frames(ACCELERATION_TEST_FRAMES)
 
 	var expected_speed := minf(
 		move_speed,
-		acceleration * float(ACCELERATION_TEST_FRAMES) / float(ticks_per_second)
+		acceleration * float(ACCELERATION_TEST_FRAMES) * physics_delta
 	)
 	_expect_approx(
 		player.velocity.x,
@@ -229,7 +250,7 @@ func _check_horizontal_movement(player: CharacterBody2D) -> void:
 	var expected_speed_after_friction := maxf(
 		0.0,
 		speed_after_acceleration -
-		friction * float(FRICTION_TEST_FRAMES) / float(ticks_per_second)
+		friction * float(FRICTION_TEST_FRAMES) * physics_delta
 	)
 	_expect_approx(
 		player.velocity.x,
@@ -284,10 +305,16 @@ func _get_physics_ticks_per_second() -> int:
 
 
 func _wait_for_physics_frames(frame_count: int) -> void:
-	# physics_frame fires before node callbacks, so the extra signal wait
-	# ensures exactly frame_count player physics callbacks have completed.
-	for _frame_index in range(frame_count + 1):
-		await physics_frame
+	if frame_count <= 0:
+		return
+
+	var waiter := PhysicsFrameWaiter.new()
+	waiter.process_physics_priority = 100
+	root.add_child(waiter)
+	waiter.start(frame_count)
+	await waiter.completed
+	waiter.queue_free()
+	await process_frame
 
 
 func _expect_approx(actual: float, expected: float, message: String) -> void:
