@@ -48,8 +48,8 @@ These are regression checks for the current controller, not a final movement-fee
 ## Audio shutdown diagnostics
 
 - Run both smoke-test commands with `--verbose` and inspect the complete process output, not just the exit code.
-- The observed CI run `42573252526` passes its physics assertions but the physics-test process then reports retained `AudioStreamPlaybackMP3` / `AudioStreamMP3` references to `res://Project_bullshit.mp3`. The boot-test process in that same job did not show the same warning in the inspected log.
-- The test currently calls `Audio.shutdown_audio()` and waits two process frames. This has not yet been demonstrated to release the AudioServer's playback-list reference before process shutdown.
+- The initial inspected CI run `42573252526` reported retained `AudioStreamPlaybackMP3` / `AudioStreamMP3` references after the physics test but not after the boot test. Later successful runs `42772371690` and `42772488665` report the same retained references after both smoke-test processes, each pointing to `res://Project_bullshit.mp3`.
+- The tests call `Audio.shutdown_audio()` and wait two process frames. This has not yet been demonstrated to release the AudioServer's playback-list reference before either process exits.
 - Track investigation in [issue #3](https://github.com/Legioniz/LatchPoint/issues/3). Do not hide the warning or remove the music check to make CI appear clean. A fix is accepted only after the verbose CI logs show the expected shutdown behavior or the engine limitation is reproduced and documented.
 
 ## Manual display-settings check

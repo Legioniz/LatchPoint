@@ -7,7 +7,7 @@ Checked 2026-11-10. These references establish the first research baseline. Re-c
 ### Godot 4.7 — AudioStreamPlayer
 - Source: https://docs.godotengine.org/en/4.7/classes/class_audiostreamplayer.html
 - Relevant behavior: assigning an empty `stream` stops currently playing sounds; `stop()` stops all sounds from the player. The API does not promise that AudioServer-side playback references are released synchronously with the call.
-- Project observation: CI's physics smoke-test process still reports retained `AudioStreamPlaybackMP3` and `AudioStreamMP3` references after `shutdown_audio()` stops the player and clears its stream. The next boot-test process does not show the same warning in the inspected run.
+- Project observation: the initial inspected CI run `42573252526` reported retained `AudioStreamPlaybackMP3` and `AudioStreamMP3` references after the physics smoke test but not after boot. Later successful runs `42772371690` and `42772488665` report the same resources after both physics and boot smoke-test processes. The warning persists despite `shutdown_audio()` stopping the player and clearing its stream.
 
 ### Godot 4.7-stable — AudioStreamPlayerInternal and AudioServer implementation
 - Sources: https://github.com/godotengine/godot/blob/4.7-stable/scene/audio/audio_stream_player_internal.cpp and https://github.com/godotengine/godot/blob/4.7-stable/servers/audio/audio_server.cpp

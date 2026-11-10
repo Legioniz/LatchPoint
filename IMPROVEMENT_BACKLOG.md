@@ -5,7 +5,7 @@ Items are not promises to implement immediately. Re-score them after inspecting 
 ## P0 — Foundation and design clarity
 
 - [ ] **Confirm the core game loop and design pillars.** Goal: define what makes LatchPoint distinct before choosing major mechanics. Acceptance: a one-page concept with player promise, moment-to-moment loop, win/fail states, progression and three to five design pillars.
-- [ ] **Establish reliable GitHub Actions validation.** Goal: catch import, parser, scene-load and physics-smoke failures on every relevant branch/PR. Acceptance: workflow completes on Godot 4.7.2 and logs are reviewed; fix any failures rather than weakening the test.
+- [x] **Establish reliable GitHub Actions validation.** Goal: catch import, parser, scene-load and physics-smoke failures on every relevant branch/PR. Acceptance: workflow completes on Godot 4.7.2 and logs are reviewed; fix any failures rather than weakening the test. Verified on 2026-11-10 with the import, GDScript parse, expanded physics/movement and boot checks passing (run [42772488665](https://github.com/Legioniz/LatchPoint/actions/runs/42772488665)). Audio shutdown warnings remain a separate open issue (#3).
 - [ ] **Resolve world presentation.** Goal: replace the temporary flat-color background and icon-shaped platform placeholders with a coherent, original art direction once the concept is confirmed. Acceptance: art style supports gameplay readability and does not obscure collision boundaries.
 
 ## P1 — Playable core and physics
