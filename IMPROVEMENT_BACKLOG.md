@@ -15,7 +15,7 @@ Items are not promises to implement immediately. Re-score them after inspecting 
 - [ ] **Expand deterministic physics coverage.** Goal: test walls, ceilings, corners, slopes, one-way platforms, moving platforms, high-speed motion, collision masks and respawn overlap. Acceptance: each test is reproducible and has a regression assertion.
 - [ ] **Tune player feel against the confirmed game loop.** Candidate controls: jump buffering, coyote time, variable jump height, air control and knockback. Acceptance: measured feel improvement, no unintended exploits, frame-step independence.
 - [ ] **Audit all interactive collision geometry.** Goal: verify sprite/collision alignment and document layers/masks for players, platforms, hazards and interactables. Acceptance: visible collision-shape playtest and automated checks.
-- [ ] **Make options fully persistent.** Goal: save audio and display settings locally and restore them safely. Acceptance: settings survive application restart and invalid settings recover to defaults.
+- [ ] **Make options fully persistent.** Goal: save audio and display settings locally and restore them safely. Acceptance: settings survive application restart and invalid settings recover to defaults. Implementation is in `feature/settings-persistence`; mark complete only after Godot 4.7.2 CI passes.
 - [ ] **Finish pause and menu UX.** Goal: responsive layout, keyboard/gamepad focus, consistent transitions and meaningful disabled states. Acceptance: every control works or clearly explains why unavailable.
 
 ## P2 — Game systems (dependent on core-loop decision)
@@ -27,11 +27,10 @@ Items are not promises to implement immediately. Re-score them after inspecting 
 
 ## P3 — Persistence, agents and release
 
-- [ ] **Local save/load.** Goal: persist settings, checkpoints and progression with versioning. Acceptance: atomic writes, validation, backups, migrations, corrupted-save recovery and repeatable tests.
+- [ ] **Local save/load.** Goal: persist settings, checkpoints and progression with versioning. Acceptance: atomic writes, validation, backups, migrations, corrupted-save recovery and repeatable tests. This is gameplay-progress persistence and remains separate from the completed options-settings slice.
 - [ ] **Export/import save package.** Goal: allow users to export and restore a compatible save. Acceptance: version metadata, integrity checks, clear locked-state semantics and graceful incompatibility handling.
 - [ ] **ML-assisted playtesting.** Goal: evaluate a local agent only when a measurable objective and game-state interface exist. Acceptance: repeatable traces identify a bug or a measurable coverage gap; compare with deterministic and human tests.
 - [ ] **Performance baseline and profiling.** Goal: establish frame-time, load-time, memory and physics budgets on target hardware. Acceptance: profiler evidence and before/after metrics for optimizations.
-- [ ] **Release/export pipeline.** Goal: reproducible builds for the chosen platforms. Acceptance: clean export, launch verification, versioning and documented build steps.
 
 ## Resolved in the current foundation PR
 

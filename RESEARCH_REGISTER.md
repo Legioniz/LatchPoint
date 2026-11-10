@@ -2,6 +2,29 @@
 
 Checked 2026-11-10. These references establish the first research baseline. Re-check them when a design decision depends on an API or current implementation detail.
 
+## Settings persistence and user-data storage
+
+### Godot 4.7 — ConfigFile
+- Source: https://docs.godotengine.org/en/4.7/classes/class_configfile.html
+- Relevant behavior: ConfigFile stores Variant values by section/key in an INI-style file. Mutating the in-memory ConfigFile does not write it to disk; `save()` must be called explicitly. `get_value()` supports defaults for missing keys.
+- Project decision: use ConfigFile for small per-install preferences, validate loaded types and numeric ranges, and keep these preferences separate from future gameplay save slots.
+
+### Godot 4.7 — Persistent user-data paths
+- Source: https://docs.godotengine.org/en/4.7/tutorials/io/data_paths.html
+- Relevant behavior: `user://` is created automatically and is writable in exported projects; `res://` is the project resource path and may be read-only at runtime.
+- Project decision: write preferences to `user://settings.cfg`, never into the project resource tree.
+
+### Settings Menu Lite — open-source Godot 4 settings example
+- Source: https://github.com/godot-forge/settings-menu-lite-godot
+- Scale: small independent Godot 4 settings utility with an autoload, an options panel and ConfigFile persistence.
+- Observed principle: centralize settings ownership, apply values through engine APIs, and load preferences before scenes need them.
+- License: repository declares MIT. The license was inspected on 2026-11-10. Used as an architectural reference only; no code, scenes, UI, icons or other assets were copied.
+
+### Saltmire — ConfigFile settings implementation article
+- Source: https://dev.to/saltmire/how-to-save-game-settings-volume-fullscreen-keybinds-in-godot-4-with-configfile-abp
+- Relevant observation: keep per-machine preferences in `user://settings.cfg`, apply settings separately from loading them, and avoid writing to disk on every slider value change.
+- Project decision: apply volume changes immediately, then debounce ConfigFile writes for 0.5 seconds and flush pending changes when the Settings autoload exits. No article code was copied.
+
 ## Audio playback shutdown and resource lifetime
 
 ### Godot 4.7 — AudioStreamPlayer

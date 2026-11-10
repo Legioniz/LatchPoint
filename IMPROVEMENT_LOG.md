@@ -2,6 +2,31 @@
 
 Each completed cycle records its purpose, affected files, sources, verification evidence, remaining risks and PR/commit link. Unrun tests are explicitly marked as unverified.
 
+## 2026-11-10 — Persistent audio and fullscreen preferences
+
+**Objective:** implement the existing backlog item for options persistence without changing the unconfirmed gameplay direction.
+
+- Added `Settings.gd` as a small autoload that owns the user settings file, defaults, validation and persistence.
+- Stored Master, Music and SFX bus levels as linear values plus the fullscreen preference in `user://settings.cfg`. The settings file is separate from future gameplay save slots.
+- Registered Settings before Audio so the Audio autoload can load saved bus values before applying them to AudioServer.
+- Routed fullscreen changes through Settings so the stored preference is applied at startup and when the Options screen is opened or toggled.
+- Debounced disk writes by 0.5 seconds while a slider is moving and flush pending changes when the Settings autoload exits.
+- Extended the boot smoke test to cover first-run defaults, save/reload round trips, invalid-value recovery, Music bus synchronization and window-decoration restoration.
+- The test uses a dedicated temporary settings file and removes it after the assertions; it does not overwrite the player's real preferences.
+- No game-progress save/load, new gameplay mechanic, third-party dependency, code, music or asset was added.
+
+**Verification**
+- Local Godot execution: not run; no Godot executable is installed in this environment.
+- Godot 4.7.2 GitHub Actions validation: pending the feature-branch push.
+- Manual desktop fullscreen/restart verification: pending; headless tests cannot verify native title-bar behavior on a real desktop.
+- Performance: no runtime profiler was available. The 0.5-second debounce is a write-frequency safeguard, not a measured performance improvement.
+- Existing MP3 playback shutdown warnings remain tracked by issue #3 and are not addressed by this change.
+- ML: not used.
+
+**Research:** Godot 4.7 ConfigFile and user-data-path documentation; MIT-licensed Godot Settings Menu Lite as an open-source architectural comparison; a Godot ConfigFile settings tutorial. See `RESEARCH_REGISTER.md`.
+
+**Branch:** `feature/settings-persistence`, based on `feature/player-movement-regression-tests`.
+
 ## 2026-11-10 — Player movement regression coverage
 
 **Objective:** establish a deterministic regression baseline for the existing CharacterBody2D controller without changing the unconfirmed game design.
