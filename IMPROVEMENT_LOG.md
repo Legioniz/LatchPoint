@@ -51,3 +51,34 @@ Each completed cycle records its purpose, affected files, sources, verification 
 **Research:** Godot 4.7 CharacterBody2D, Input, and SceneTree documentation; Godot demo-project platformer and Celeste developer notes. See `RESEARCH_REGISTER.md`.
 
 **Branch:** `feature/player-movement-regression-tests` (dependent on the open foundation/window/audio documentation PR chain).
+
+## 2026-11-11 — Player/platform collision-layer contract
+
+**Objective:** add one bounded, deterministic regression check for the current gameplay scene's collision-layer configuration without changing the unconfirmed game loop.
+
+- Extended `tests/physics_smoke_test.gd` to inspect the real gameplay scene's enabled `StaticBody2D` platforms.
+- Each enabled platform must have a non-zero collision layer, and at least one of its layer bits must be included in the instantiated player's collision mask.
+- Error messages identify the platform, player mask and platform layer to make configuration failures actionable.
+- Kept the existing real-player landing check and generic floor/wall/ceiling probes intact.
+- No runtime controller, scene, collision geometry, collision layer/mask setting, asset or dependency was changed.
+- Updated the backlog, research register and testing guide. No architecture document change was needed because runtime responsibilities and scene composition are unchanged.
+
+**Acceptance criteria**
+- The actual gameplay player is instantiated from `res://Scene/main.tscn`.
+- Every enabled static platform has a valid shape, a non-zero collision layer and a layer bit scanned by the player.
+- Existing movement and collision assertions remain enabled and unchanged.
+
+**Verification**
+- Local Godot execution: not run; no Godot executable is installed in this environment.
+- GitHub Actions: passed on 2026-11-11 in [run 42978084594](https://github.com/Legioniz/LatchPoint/actions/runs/42978084594) using Godot 4.7.2. Resource import, every tracked GDScript parse check, the physics smoke test and the boot/settings test all completed successfully. The physics output confirms the platform-layer/player-mask contract and the existing movement and floor/wall/ceiling assertions.
+- The verbose log still reports two ObjectDB instances and one retained `AudioStreamMP3`/`AudioStreamPlaybackMP3` reference for `res://Project_bullshit.mp3` after both smoke-test processes. This remains the separate unresolved [issue #3](https://github.com/Legioniz/LatchPoint/issues/3); no warning was suppressed and no test was weakened.
+- Existing baseline run [42775603750](https://github.com/Legioniz/LatchPoint/actions/runs/42775603750) passed import, GDScript parsing, physics smoke tests and boot tests on the parent branch. Its verbose log still reports the separate unresolved MP3/ObjectDB shutdown warning tracked by [issue #3](https://github.com/Legioniz/LatchPoint/issues/3).
+- Manual in-game verification: not performed.
+- Physics: this is a configuration assertion plus the existing automated floor/wall/ceiling tests; no new geometry or physics response was introduced.
+- Performance: no runtime code changed and no profiler measurement was available.
+- ML: not used; these are deterministic assertions, not machine learning.
+
+**Research:** Godot 4.7 CollisionObject2D and CharacterBody2D documentation; the MIT-licensed Godot demo-project Kinematic Character sample; a secondary CharacterBody2D technical guide. See `RESEARCH_REGISTER.md`.
+
+**Branch:** `feature/physics-layer-mask-regressions`, based on `feature/settings-persistence`. **Implementation commit:** `44243da11c612df07cf8a9871f80f82a6e9b7bad`.
+
