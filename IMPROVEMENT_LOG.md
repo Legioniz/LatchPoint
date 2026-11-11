@@ -70,7 +70,8 @@ Each completed cycle records its purpose, affected files, sources, verification 
 
 **Verification**
 - Local Godot execution: not run; no Godot executable is installed in this environment.
-- GitHub Actions: pending for this branch at the time of this commit.
+- GitHub Actions: passed on 2026-11-11 in [run 42978084594](https://github.com/Legioniz/LatchPoint/actions/runs/42978084594) using Godot 4.7.2. Resource import, every tracked GDScript parse check, the physics smoke test and the boot/settings test all completed successfully. The physics output confirms the platform-layer/player-mask contract and the existing movement and floor/wall/ceiling assertions.
+- The verbose log still reports two ObjectDB instances and one retained `AudioStreamMP3`/`AudioStreamPlaybackMP3` reference for `res://Project_bullshit.mp3` after both smoke-test processes. This remains the separate unresolved [issue #3](https://github.com/Legioniz/LatchPoint/issues/3); no warning was suppressed and no test was weakened.
 - Existing baseline run [42775603750](https://github.com/Legioniz/LatchPoint/actions/runs/42775603750) passed import, GDScript parsing, physics smoke tests and boot tests on the parent branch. Its verbose log still reports the separate unresolved MP3/ObjectDB shutdown warning tracked by [issue #3](https://github.com/Legioniz/LatchPoint/issues/3).
 - Manual in-game verification: not performed.
 - Physics: this is a configuration assertion plus the existing automated floor/wall/ceiling tests; no new geometry or physics response was introduced.
@@ -79,5 +80,5 @@ Each completed cycle records its purpose, affected files, sources, verification 
 
 **Research:** Godot 4.7 CollisionObject2D and CharacterBody2D documentation; the MIT-licensed Godot demo-project Kinematic Character sample; a secondary CharacterBody2D technical guide. See `RESEARCH_REGISTER.md`.
 
-**Branch:** `feature/physics-layer-mask-regressions`, based on `feature/settings-persistence`. CI verification pending.
+**Branch:** `feature/physics-layer-mask-regressions`, based on `feature/settings-persistence`. **Implementation commit:** `44243da11c612df07cf8a9871f80f82a6e9b7bad`.
 
