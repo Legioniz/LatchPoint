@@ -123,6 +123,32 @@ Checked 2026-11-10. These references establish the first research baseline. Re-c
 - Relevant points: installs Godot 4.x on GitHub Actions Linux/macOS/Windows runners and supports standard builds without .NET.
 - Project application: install Godot 4.7.2 in the repository validation workflow.
 
+## Collision layer and mask regression coverage
+
+### Godot 4.7 — CollisionObject2D
+- Source: https://docs.godotengine.org/en/4.7/classes/class_collisionobject2d.html
+- Relevant behavior: a collision layer describes which 2D physics layers an object occupies; a collision mask describes which layers it scans. Godot supports 32 2D physics layers. A body detects another body when the other body's layer overlaps the querying body's mask.
+- Project decision: inspect the instantiated gameplay player and each enabled static platform. Require a non-zero platform layer and a bitwise overlap between `player.collision_mask` and `platform.collision_layer`. Do not require a reciprocal platform mask: the CharacterBody2D player is the querying body for this collision contract.
+
+### Godot 4.7 — Using CharacterBody2D
+- Source: https://docs.godotengine.org/en/4.7/tutorials/physics/using_character_body_2d.html
+- Relevant behavior: CharacterBody2D movement and collision response should be driven from physics processing using `move_and_slide()` or `move_and_collide()`; the former is intended for common sliding movement and exposes collision results.
+- Project decision: leave the shipping player controller unchanged. Validate the actual scene's collision configuration alongside the existing real-player floor-landing test.
+
+### Godot demo projects — Kinematic Character 2D
+- Source: https://github.com/godotengine/godot-demo-projects/tree/master/2d/kinematic_character
+- Relevant example: the sample uses a GDScript CharacterBody2D controller with `move_and_slide()`; its README describes moving-platform and one-way-platform behavior as additional platformer cases.
+- License: the repository's LICENSE.md declares MIT. Reviewed on 2026-11-11. This is an architectural/test-scope reference only; no code, scenes, art, audio or other assets were copied.
+- Project decision: use the sample to identify future coverage candidates, not to add moving or one-way platforms to LatchPoint before those mechanics are part of the confirmed design.
+
+### GDSense — CharacterBody2D player movement
+- Source: https://gdsense.com/docs/guides/characterbody2d-player-movement
+- Relevant observation: the secondary guide recommends checking that the player mask includes the floor layer when diagnosing missed platform collisions.
+- Status: non-normative technical reading; official Godot documentation remains authoritative. No code was copied.
+
+### Design-scope note
+No commercial or indie gameplay mechanic is being adopted in this test-only cycle. The core loop remains unconfirmed, and this change does not alter player-facing behavior.
+
 ## Decision rule
 
 The references are inspiration and technical evidence, not a feature checklist. Each adopted pattern must be tied to the LatchPoint design pillars, implemented originally, tested and recorded in the improvement log. No external code, art, sound, level or character is copied by this register.

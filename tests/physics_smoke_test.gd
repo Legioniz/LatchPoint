@@ -55,8 +55,8 @@ func _run() -> void:
 
 	if failures.is_empty():
 		print(
-			"LatchPoint tests passed: scenes loaded; player landed; acceleration, friction, " +
-			"grounded jump and airborne jump rejection held; floor, wall and ceiling collisions held."
+			"LatchPoint tests passed: scenes loaded; player landed; movement regressions held; " +
+			"platform collision layers matched the player mask; floor, wall and ceiling collisions held."
 		)
 		quit(0)
 		return
@@ -131,8 +131,19 @@ func _check_gameplay_physics() -> void:
 		if body == null:
 			continue
 		var shape_node := body.get_node_or_null("CollisionShape2D") as CollisionShape2D
-		if shape_node != null and shape_node.shape != null and not shape_node.disabled:
-			valid_platform_shapes += 1
+		if shape_node == null or shape_node.shape == null or shape_node.disabled:
+			continue
+
+		valid_platform_shapes += 1
+		if body.collision_layer <= 0:
+			failures.append(
+				"Platform '%s' has no collision layer; the player cannot detect it." % body.name
+			)
+		elif (player.collision_mask & body.collision_layer) == 0:
+			failures.append(
+				"Player collision mask (%d) does not include platform '%s' layer (%d)." %
+				[player.collision_mask, body.name, body.collision_layer]
+			)
 
 	if valid_platform_shapes == 0:
 		failures.append("Gameplay scene has no enabled StaticBody2D collision shapes.")

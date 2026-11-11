@@ -43,7 +43,9 @@ The physics smoke test checks required scene loading, gameplay player landing, a
 - Gravity increasing vertical velocity after the jump.
 - A second jump press does not reset vertical velocity while the player is airborne.
 
-These are regression checks for the current controller, not a final movement-feel approval. They do not yet cover slopes, one-way platforms, moving platforms, hazards, high-speed gameplay movement, corners, collision masks, or respawn overlap.
+The real gameplay scene is also checked for a collision-layer contract: every enabled `StaticBody2D` platform must have a non-zero collision layer with at least one bit included in the player's `collision_mask`. The assertion uses bitwise overlap rather than assuming a specific layer number. This covers the current static platforms only; it does not claim coverage for hazards, one-way platforms, moving platforms, or future interactables.
+
+These are regression checks for the current controller, not a final movement-feel approval. Slopes, one-way platforms, moving platforms, hazards, high-speed gameplay movement, corners, and respawn overlap remain untested.
 
 ## Settings persistence diagnostics
 
