@@ -62,10 +62,10 @@ The runtime settings file is `user://settings.cfg`; it is separate from gameplay
 
 ## Audio shutdown diagnostics
 
-- Run both smoke-test commands with `--verbose` and inspect the complete process output, not just the exit code.
-- The initial inspected CI run `42573252526` reported retained `AudioStreamPlaybackMP3` / `AudioStreamMP3` references after the physics test but not after the boot test. Later successful runs `42772371690`, `42772488665` and `42775181753` report the same retained references after both smoke-test processes, each pointing to `res://Project_bullshit.mp3`. The latest run also confirms the settings fixtures no longer leave a Settings.gd resource or out-of-tree Node-path errors.
-- The tests call `Audio.shutdown_audio()` and wait two process frames. This has not yet been demonstrated to release the AudioServer's playback-list reference before either process exits.
-- Track investigation in [issue #3](https://github.com/Legioniz/LatchPoint/issues/3). Do not hide the warning or remove the music check to make CI appear clean. A fix is accepted only after the verbose CI logs show the expected shutdown behavior or the engine limitation is reproduced and documented.
+- Run both smoke-test commands with `--verbose` and inspect the complete process output after each process, not just the exit code.
+- Both processes must stop and clear their AudioStreamPlayer, assert that no playback or stream remains, observe a reset in `AudioServer.get_time_since_last_mix()` (maximum 120 process frames), and allow two more process frames for main-thread cleanup. Each process has an independent AudioServer lifecycle.
+- Godot headless mode selects the Dummy audio driver. A missing mix-age reset is a test failure.
+- In final Godot 4.7.2 run [43174879566](https://github.com/Legioniz/LatchPoint/actions/runs/43174879566), the physics process observed a mix reset after 10 frames and the boot process after 2 frames (Dummy driver, 44,100 Hz). The complete verbose job log contains no retained MP3/ObjectDB warnings, `ERROR` or `WARNING` lines after either process. Issue [#3](https://github.com/Legioniz/LatchPoint/issues/3) is resolved on this branch; leave it open until the stacked change is integrated.
 
 ## Manual display and audio-settings check
 

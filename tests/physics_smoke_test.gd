@@ -17,6 +17,8 @@ const MOVEMENT_TEST_FLOOR_WIDTH := 1200.0
 const ACCELERATION_TEST_FRAMES := 5
 const FRICTION_TEST_FRAMES := 3
 const MOVEMENT_ASSERTION_TOLERANCE := 1.0
+const AUDIO_MIX_WAIT_MAX_FRAMES := 120
+const AUDIO_MIX_AGE_RESET_TOLERANCE := 0.001
 
 
 class PhysicsFrameWaiter:
@@ -56,7 +58,8 @@ func _run() -> void:
 	if failures.is_empty():
 		print(
 			"LatchPoint tests passed: scenes loaded; player landed; movement regressions held; " +
-			"platform collision layers matched the player mask; floor, wall and ceiling collisions held."
+			"platform collision layers matched the player mask; floor, wall and ceiling collisions held; " +
+			"audio shutdown observed a completed mix cycle."
 		)
 		quit(0)
 		return
@@ -70,11 +73,52 @@ func _run() -> void:
 
 func _shutdown_audio_before_exit() -> void:
 	var audio_manager := root.get_node_or_null("Audio")
-	if audio_manager != null and audio_manager.has_method("shutdown_audio"):
-		audio_manager.call("shutdown_audio")
+	if audio_manager == null or not audio_manager.has_method("shutdown_audio"):
+		failures.append("Audio autoload is unavailable; playback shutdown cannot be verified.")
+	else:
+		var music_player := audio_manager.get("music_player") as AudioStreamPlayer
+		if music_player == null:
+			failures.append("Audio autoload did not create its background music player.")
+		else:
+			if not music_player.has_stream_playback():
+				failures.append("Background music did not start; playback shutdown cannot be verified.")
+			audio_manager.call("shutdown_audio")
+			if music_player.is_playing() or music_player.has_stream_playback() or music_player.stream != null:
+				failures.append("Audio shutdown left the music player active or holding its stream.")
 
+	var audio_driver := AudioServer.get_driver_name()
+	var mix_rate := AudioServer.get_mix_rate()
+	var next_mix_seconds := AudioServer.get_time_to_next_mix()
+	var frames_waited := await _wait_for_audio_mix_after_shutdown()
+	if frames_waited < 0:
+		failures.append(
+			"AudioServer driver '%s' did not complete an observable mix cycle within %d process frames." %
+			[audio_driver, AUDIO_MIX_WAIT_MAX_FRAMES]
+		)
+		return
+
+	var diagnostic_message := (
+		"Audio shutdown diagnostic passed: driver=%s, mix_rate=%.0f Hz, initial_next_mix=%.4fs, " +
+		"observed_mix_after=%d process frames."
+	) % [audio_driver, mix_rate, next_mix_seconds, frames_waited]
+	print(diagnostic_message)
+
+	# AudioServer removes stopped playback on its mix thread and defers list cleanup
+	# to the main thread. Allow the main-thread update to process that deferred cleanup.
 	await process_frame
 	await process_frame
+
+
+func _wait_for_audio_mix_after_shutdown() -> int:
+	var previous_mix_age := AudioServer.get_time_since_last_mix()
+	for frame_index in range(AUDIO_MIX_WAIT_MAX_FRAMES):
+		await process_frame
+		var current_mix_age := AudioServer.get_time_since_last_mix()
+		if current_mix_age + AUDIO_MIX_AGE_RESET_TOLERANCE < previous_mix_age:
+			return frame_index + 1
+		previous_mix_age = current_mix_age
+
+	return -1
 
 
 func _check_required_scenes() -> void:
