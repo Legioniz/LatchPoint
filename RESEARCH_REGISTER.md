@@ -152,3 +152,29 @@ No commercial or indie gameplay mechanic is being adopted in this test-only cycl
 ## Decision rule
 
 The references are inspiration and technical evidence, not a feature checklist. Each adopted pattern must be tied to the LatchPoint design pillars, implemented originally, tested and recorded in the improvement log. No external code, art, sound, level or character is copied by this register.
+
+## 2026-11-12 — Audio playback shutdown and mix-cycle synchronization
+
+### Godot 4.7 — AudioStreamPlayer
+- Source: https://docs.godotengine.org/en/4.7/classes/class_audiostreamplayer.html
+- Relevant behavior: assigning an empty `stream` stops all currently playing sounds; `has_stream_playback()` reports whether a sound is still active. These player-side checks do not by themselves prove that the AudioServer has released its playback-list reference.
+- Project decision: after calling the existing Audio autoload shutdown method, assert that the player is stopped, has no active playback and has no stream assigned.
+
+### Godot 4.7 — AudioServer timing API
+- Source: https://docs.godotengine.org/en/4.7/classes/class_audioserver.html
+- Relevant behavior: `get_time_since_last_mix()` reports the time since the previous audio mix, while `get_time_to_next_mix()` estimates the time until the next mix. Audio mixing does not occur once per rendered/process frame.
+- Project decision: replace the arbitrary two-frame-only wait in the physics smoke test with a bounded observation of an actual mix-age reset (maximum 120 process frames), then allow two further process frames for main-thread cleanup. The test logs the active driver, mix rate, initial next-mix estimate and number of process frames waited. A timeout is a test failure, not a reason to suppress the engine warning.
+
+### Godot 4.7-stable — AudioServer playback lifecycle
+- Sources: https://github.com/godotengine/godot/blob/4.7-stable/servers/audio/audio_server.cpp#L1289-L1319, https://github.com/godotengine/godot/blob/4.7-stable/servers/audio/audio_server.cpp#L534-L540, https://github.com/godotengine/godot/blob/4.7-stable/servers/audio/audio_server.cpp#L734-L742, and https://github.com/godotengine/godot/blob/4.7-stable/servers/audio/audio_server.cpp#L1626-L1638
+- Relevant implementation: stopping a non-sample playback marks its list node for fade-out/deletion; the audio mix step removes it, and the list's destructor is deferred for main-thread cleanup. This supports the hypothesis that a test can exit before a mix and cleanup cycle has completed. It does not prove the hypothesis until the updated CI log is checked.
+- License: Godot Engine source is MIT licensed. Source was inspected for lifecycle behavior only; no engine code was copied.
+
+### Godot 4.7-stable — Dummy audio driver
+- Source: https://github.com/godotengine/godot/blob/4.7-stable/servers/audio/audio_driver_dummy.cpp#L56-L72
+- Relevant implementation: the dummy driver processes audio on its own thread and delays between buffers according to `buffer_frames / mix_rate`. Godot's headless mode selects the Dummy driver; see https://docs.godotengine.org/en/4.7/classes/class_audioserver.html#class-audioserver-method-get-driver-name.
+- Project implication: process-frame waits and audio-mix timing are separate clocks. The previous two-process-frame wait did not guarantee that the dummy driver's next mix had run before process exit.
+
+### Scope and licensing
+- This is a test-harness lifecycle correction only. No production audio behavior, game mechanic, asset or dependency is changed.
+- No commercial/indie mechanic is relevant to this engine-lifecycle objective. No external code or assets are reused.

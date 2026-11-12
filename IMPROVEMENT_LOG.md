@@ -82,3 +82,29 @@ Each completed cycle records its purpose, affected files, sources, verification 
 
 **Branch:** `feature/physics-layer-mask-regressions`, based on `feature/settings-persistence`. **Implementation commit:** `44243da11c612df07cf8a9871f80f82a6e9b7bad`.
 
+## 2026-11-12 — Synchronize audio-test shutdown with the AudioServer mix cycle
+
+**Objective:** investigate the retained `AudioStreamMP3` / `AudioStreamPlaybackMP3` references reported after the physics smoke test (issue #3) without changing runtime audio behavior.
+
+- Re-inspected the latest repository branches and PR chain. The existing `fix/audio-shutdown-grace-experiment` branch contains documentation-only changes; no existing code fix was duplicated.
+- The latest inspected CI run [42978273469](https://github.com/Legioniz/LatchPoint/actions/runs/42978273469) passed, but its verbose log still reported two ObjectDB instances and one retained `AudioStreamMP3` / `AudioStreamPlaybackMP3` for `res://Project_bullshit.mp3` after the physics test. The following boot test did not show the same warning in that run.
+- Godot 4.7 documentation and engine source show that stopping playback marks its AudioServer list node for deletion; actual list removal occurs during an audio mix, with list cleanup deferred to the main thread. Headless mode uses the Dummy audio driver, whose mix cadence is independent of process frames.
+- Replaced the physics smoke test's two-process-frame-only shutdown wait with player-side stopped/empty assertions, a bounded observation of an AudioServer mix-age reset (120-frame maximum), and two additional process frames for deferred cleanup. The test records the driver, mix rate, initial next-mix estimate and frames waited.
+- No production audio script, scene, asset, audio bus, project setting or gameplay behavior was changed.
+
+**Acceptance criteria**
+- The background music player must report no active playback and no assigned stream after shutdown.
+- The test must observe a completed AudioServer mix cycle within the bounded wait.
+- The subsequent verbose CI log must be checked for retained MP3/ObjectDB warnings; a green exit code alone is insufficient.
+
+**Verification**
+- Local Godot execution: not available in this environment.
+- GitHub Actions: pending the new feature-branch push.
+- Manual desktop audio verification: not performed.
+- Performance profiling: not performed; this is test-only code.
+- Physics/collision behavior: unchanged; existing physics assertions remain enabled.
+- ML: not used.
+
+**Research:** Godot 4.7 AudioStreamPlayer and AudioServer documentation; Godot 4.7-stable AudioServer and Dummy audio-driver source. See `RESEARCH_REGISTER.md`.
+
+**Branch:** `fix/audio-mix-cycle-shutdown`, based on `feature/physics-layer-mask-regressions`. CI verification pending.

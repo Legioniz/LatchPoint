@@ -63,9 +63,10 @@ The runtime settings file is `user://settings.cfg`; it is separate from gameplay
 ## Audio shutdown diagnostics
 
 - Run both smoke-test commands with `--verbose` and inspect the complete process output, not just the exit code.
-- The initial inspected CI run `42573252526` reported retained `AudioStreamPlaybackMP3` / `AudioStreamMP3` references after the physics test but not after the boot test. Later successful runs `42772371690`, `42772488665` and `42775181753` report the same retained references after both smoke-test processes, each pointing to `res://Project_bullshit.mp3`. The latest run also confirms the settings fixtures no longer leave a Settings.gd resource or out-of-tree Node-path errors.
-- The tests call `Audio.shutdown_audio()` and wait two process frames. This has not yet been demonstrated to release the AudioServer's playback-list reference before either process exits.
-- Track investigation in [issue #3](https://github.com/Legioniz/LatchPoint/issues/3). Do not hide the warning or remove the music check to make CI appear clean. A fix is accepted only after the verbose CI logs show the expected shutdown behavior or the engine limitation is reproduced and documented.
+- Historical verbose CI runs `42573252526`, `42772371690`, `42772488665` and `42775181753` reported retained `AudioStreamPlaybackMP3` / `AudioStreamMP3` references to `res://Project_bullshit.mp3` after one or both smoke-test processes. The latest inspected run `42978273469` reported the warning after the physics process but not after the boot process.
+- The physics smoke test now checks that the AudioStreamPlayer is stopped and has no active playback or stream, then waits for an observed reset in `AudioServer.get_time_since_last_mix()` (maximum 120 process frames) and two more process frames for main-thread cleanup. It logs the audio driver, mix rate, next-mix estimate and wait count.
+- Godot headless mode selects the Dummy audio driver. The test must observe an actual mix-age reset; a timeout is a failure. Continue inspecting the full verbose output for retained resources and ObjectDB warnings.
+- Track the investigation in [issue #3](https://github.com/Legioniz/LatchPoint/issues/3). Do not hide warnings, remove the music check or weaken physics assertions. Do not mark the issue resolved until the updated CI logs demonstrate clean shutdown.
 
 ## Manual display and audio-settings check
 
