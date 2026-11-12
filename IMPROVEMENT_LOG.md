@@ -112,3 +112,31 @@ Each completed cycle records its purpose, affected files, sources, verification 
 **Status:** CI shutdown warning resolved; no production audio behavior changed.
 
 **Branch:** `fix/audio-mix-cycle-shutdown`, based on `feature/physics-layer-mask-regressions`. **Commits:** `c35b7f5aa10fee6eea9f555b0265cb5f0317813c` (mix-cycle wait and research), `4e2fc4db38adbe0b1d141a841af2894b3bb9631f` (diagnostic formatting).
+
+
+## 2026-11-12 — Extend audio shutdown verification to the boot smoke test
+
+**Objective:** complete issue #3 coverage across both independent Godot smoke-test processes without changing production audio behavior.
+
+- Reviewed the latest workflow run [43170846659](https://github.com/Legioniz/LatchPoint/actions/runs/43170846659), including its full job log. The physics smoke test observed the Dummy driver's mix cycle and exited without the earlier MP3/ObjectDB warning, but the subsequent boot smoke-test process still reported two ObjectDB instances and retained `AudioStreamMP3` / `AudioStreamPlaybackMP3` for `res://Project_bullshit.mp3`.
+- Root cause of the remaining test gap: `tests/boot_smoke_test.gd` still stopped the Audio autoload and waited only two process frames. Each smoke-test command runs in its own Godot process, so the physics test's successful shutdown wait cannot clean up the boot test's independent playback.
+- Extended the boot test to stop and clear the player, assert that it is inactive and stream-free, observe a bounded `AudioServer.get_time_since_last_mix()` reset (120 process frames maximum), and allow two further process frames for deferred main-thread cleanup.
+- Applied cleanup on early failure exits as well as the successful path. A missing Audio autoload/player or mix-cycle timeout now fails the boot test rather than silently skipping shutdown verification.
+- No production audio scripts, scenes, assets, project settings, audio buses or gameplay behavior changed.
+
+**Acceptance criteria**
+- Both physics and boot smoke-test processes must verify player shutdown and observe a completed mix cycle.
+- The final verbose Godot 4.7.2 workflow must show no retained MP3/ObjectDB warnings after either process.
+- Existing import, parser, movement, collision, settings and menu checks remain enabled.
+
+**Verification**
+- Local Godot execution: unavailable; no Godot executable is installed in this environment.
+- Latest pre-change CI evidence: [run 43170846659](https://github.com/Legioniz/LatchPoint/actions/runs/43170846659) passed the workflow steps but exposed the remaining boot-process shutdown warning.
+- New branch CI: pending.
+- Manual desktop audio verification and performance profiling: not performed.
+- Physics/collision behavior: unchanged; existing physics assertions remain enabled.
+- ML: not used.
+
+**Research:** existing Godot 4.7 AudioStreamPlayer and AudioServer API documentation plus Godot 4.7-stable AudioServer/Dummy-driver source; see the audio shutdown section in `RESEARCH_REGISTER.md`.
+
+**Branch:** `fix/audio-mix-cycle-boot-smoke-shutdown`, based on `fix/audio-mix-cycle-shutdown` at `8226be2bf3b2fdef2412a8e3207a4e90889db4d7`. CI verification pending.

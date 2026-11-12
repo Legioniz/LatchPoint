@@ -178,3 +178,9 @@ The references are inspiration and technical evidence, not a feature checklist. 
 ### Scope and licensing
 - This is a test-harness lifecycle correction only. No production audio behavior, game mechanic, asset or dependency is changed.
 - No commercial/indie mechanic is relevant to this engine-lifecycle objective. No external code or assets are reused.
+
+
+### Additional process coverage — boot smoke test
+- Evidence: workflow run [43170846659](https://github.com/Legioniz/LatchPoint/actions/runs/43170846659) showed the physics smoke test's mix-cycle cleanup passing, followed by the boot smoke-test process reporting retained MP3/ObjectDB references at exit.
+- Finding: each CI smoke-test command is a separate Godot process with its own Audio autoload and AudioServer playback lifecycle. Cleanup performed in one process cannot satisfy the next process's shutdown contract.
+- Project decision: apply the same player stopped/empty assertions, bounded observed mix-age reset and deferred main-thread cleanup wait in `tests/boot_smoke_test.gd`. Verify cleanup on early failure paths as well as successful completion. Keep the production Audio autoload unchanged.

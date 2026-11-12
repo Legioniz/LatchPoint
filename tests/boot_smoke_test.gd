@@ -4,6 +4,8 @@ const MAIN_MENU_PATH := "res://menu.tscn"
 const FRAMES_TO_RUN := 120
 const SETTINGS_TEST_PATH := "user://latchpoint_settings_smoke_test.cfg"
 const SETTINGS_TEST_FILE_NAME := "latchpoint_settings_smoke_test.cfg"
+const AUDIO_MIX_WAIT_MAX_FRAMES := 120
+const AUDIO_MIX_AGE_RESET_TOLERANCE := 0.001
 
 
 func _initialize() -> void:
@@ -14,12 +16,14 @@ func _run() -> void:
 	var packed_scene := load(MAIN_MENU_PATH) as PackedScene
 	if packed_scene == null:
 		push_error("Could not load the configured LatchPoint main menu.")
+		await _shutdown_audio()
 		quit(1)
 		return
 
 	var main_menu := packed_scene.instantiate()
 	if main_menu == null:
 		push_error("Could not instantiate the configured LatchPoint main menu.")
+		await _shutdown_audio()
 		quit(1)
 		return
 
@@ -62,7 +66,10 @@ func _run() -> void:
 
 	main_menu.queue_free()
 	await process_frame
-	await _shutdown_audio()
+	var audio_shutdown_passed: bool = await _shutdown_audio()
+	if not audio_shutdown_passed:
+		quit(1)
+		return
 
 	print(
 		"LatchPoint boot test passed: menu loaded, audio/display settings persisted, " +
@@ -235,10 +242,53 @@ func _check_windowed_mode_restores_decorations() -> bool:
 	return initialization_restored_decorations and toggle_restored_decorations
 
 
-func _shutdown_audio() -> void:
+func _shutdown_audio() -> bool:
 	var audio_manager := root.get_node_or_null("Audio")
-	if audio_manager != null and audio_manager.has_method("shutdown_audio"):
-		audio_manager.call("shutdown_audio")
+	if audio_manager == null or not audio_manager.has_method("shutdown_audio"):
+		push_error("Audio autoload is unavailable; boot-test shutdown cannot be verified.")
+		return false
 
+	var music_player := audio_manager.get("music_player") as AudioStreamPlayer
+	if music_player == null:
+		push_error("Audio autoload did not create its background music player.")
+		return false
+
+	audio_manager.call("shutdown_audio")
+	if music_player.is_playing() or music_player.has_stream_playback() or music_player.stream != null:
+		push_error("Boot-test audio shutdown left the music player active or holding its stream.")
+		return false
+
+	var audio_driver := AudioServer.get_driver_name()
+	var mix_rate := AudioServer.get_mix_rate()
+	var next_mix_seconds := AudioServer.get_time_to_next_mix()
+	var frames_waited := await _wait_for_audio_mix_after_shutdown()
+	if frames_waited < 0:
+		push_error(
+			"AudioServer driver '%s' did not complete an observable mix cycle within %d process frames." %
+			[audio_driver, AUDIO_MIX_WAIT_MAX_FRAMES]
+		)
+		return false
+
+	var diagnostic_message := (
+		"Boot-test audio shutdown passed: driver=%s, mix_rate=%.0f Hz, initial_next_mix=%.4fs, " +
+		"observed_mix_after=%d process frames."
+	) % [audio_driver, mix_rate, next_mix_seconds, frames_waited]
+	print(diagnostic_message)
+
+	# AudioServer removes stopped playback on its mix thread and defers list cleanup
+	# to the main thread. Allow the main-thread update to process that deferred cleanup.
 	await process_frame
 	await process_frame
+	return true
+
+
+func _wait_for_audio_mix_after_shutdown() -> int:
+	var previous_mix_age := AudioServer.get_time_since_last_mix()
+	for frame_index in range(AUDIO_MIX_WAIT_MAX_FRAMES):
+		await process_frame
+		var current_mix_age := AudioServer.get_time_since_last_mix()
+		if current_mix_age + AUDIO_MIX_AGE_RESET_TOLERANCE < previous_mix_age:
+			return frame_index + 1
+		previous_mix_age = current_mix_age
+
+	return -1
