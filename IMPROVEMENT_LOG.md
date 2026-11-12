@@ -109,7 +109,7 @@ Each completed cycle records its purpose, affected files, sources, verification 
 
 **Research:** Godot 4.7 AudioStreamPlayer and AudioServer documentation; Godot 4.7-stable AudioServer and Dummy audio-driver source. See `RESEARCH_REGISTER.md`.
 
-**Status:** CI shutdown warning resolved; no production audio behavior changed.
+**Status:** the physics smoke-test process was verified clean; a later full-workflow run exposed a separate boot-test shutdown gap, corrected in the follow-up entry below.
 
 **Branch:** `fix/audio-mix-cycle-shutdown`, based on `feature/physics-layer-mask-regressions`. **Commits:** `c35b7f5aa10fee6eea9f555b0265cb5f0317813c` (mix-cycle wait and research), `4e2fc4db38adbe0b1d141a841af2894b3bb9631f` (diagnostic formatting).
 
@@ -131,12 +131,14 @@ Each completed cycle records its purpose, affected files, sources, verification 
 
 **Verification**
 - Local Godot execution: unavailable; no Godot executable is installed in this environment.
-- Latest pre-change CI evidence: [run 43170846659](https://github.com/Legioniz/LatchPoint/actions/runs/43170846659) passed the workflow steps but exposed the remaining boot-process shutdown warning.
-- New branch CI: pending.
+- Latest pre-change CI evidence: [run 43170846659](https://github.com/Legioniz/LatchPoint/actions/runs/43170846659) passed the workflow steps but exposed the remaining boot-process shutdown warning. The follow-up resolved that second process's timing gap.
+- Final Godot 4.7.2 GitHub Actions run [43174879566](https://github.com/Legioniz/LatchPoint/actions/runs/43174879566) passed resource import, every tracked GDScript parse check, the physics smoke test and the boot/settings test. The physics process observed a Dummy-driver mix reset after 10 process frames (44,100 Hz; initial next-mix estimate 0.0629 s); the boot process observed one after 2 frames (44,100 Hz; initial estimate 0.0089 s). The full verbose log contains no retained MP3/ObjectDB warnings, `ERROR` or `WARNING` lines after either smoke-test process.
 - Manual desktop audio verification and performance profiling: not performed.
 - Physics/collision behavior: unchanged; existing physics assertions remain enabled.
 - ML: not used.
 
 **Research:** existing Godot 4.7 AudioStreamPlayer and AudioServer API documentation plus Godot 4.7-stable AudioServer/Dummy-driver source; see the audio shutdown section in `RESEARCH_REGISTER.md`.
 
-**Branch:** `fix/audio-mix-cycle-boot-smoke-shutdown`, based on `fix/audio-mix-cycle-shutdown` at `8226be2bf3b2fdef2412a8e3207a4e90889db4d7`. CI verification pending.
+**Status:** both smoke-test shutdown paths are verified clean on the branch; issue #3 remains open until integration.
+
+**Branch:** `fix/audio-mix-cycle-boot-smoke-shutdown`, based on `fix/audio-mix-cycle-shutdown` at `8226be2bf3b2fdef2412a8e3207a4e90889db4d7`. **Implementation commit:** `96f36a9f0e6c9ca905d20120668276cd5b322bc9`.

@@ -65,7 +65,7 @@ The runtime settings file is `user://settings.cfg`; it is separate from gameplay
 - Run both smoke-test commands with `--verbose` and inspect the complete process output after each process, not just the exit code.
 - Both processes must stop and clear their AudioStreamPlayer, assert that no playback or stream remains, observe a reset in `AudioServer.get_time_since_last_mix()` (maximum 120 process frames), and allow two more process frames for main-thread cleanup. Each process has an independent AudioServer lifecycle.
 - Godot headless mode selects the Dummy audio driver. A missing mix-age reset is a test failure.
-- The physics test was clean in run [43170846659](https://github.com/Legioniz/LatchPoint/actions/runs/43170846659), but that run still reported two ObjectDB instances and retained `AudioStreamMP3` / `AudioStreamPlaybackMP3` for `res://Project_bullshit.mp3` after the boot test. Issue [#3](https://github.com/Legioniz/LatchPoint/issues/3) remains open until both processes exit without these warnings.
+- In final Godot 4.7.2 run [43174879566](https://github.com/Legioniz/LatchPoint/actions/runs/43174879566), the physics process observed a mix reset after 10 frames and the boot process after 2 frames (Dummy driver, 44,100 Hz). The complete verbose job log contains no retained MP3/ObjectDB warnings, `ERROR` or `WARNING` lines after either process. Issue [#3](https://github.com/Legioniz/LatchPoint/issues/3) is resolved on this branch; leave it open until the stacked change is integrated.
 
 ## Manual display and audio-settings check
 
