@@ -97,11 +97,11 @@ func _shutdown_audio_before_exit() -> void:
 		)
 		return
 
-	print(
+	var diagnostic_message := (
 		"Audio shutdown diagnostic passed: driver=%s, mix_rate=%.0f Hz, initial_next_mix=%.4fs, " +
-		"observed_mix_after=%d process frames." %
-		[audio_driver, mix_rate, next_mix_seconds, frames_waited]
-	)
+		"observed_mix_after=%d process frames."
+	) % [audio_driver, mix_rate, next_mix_seconds, frames_waited]
+	print(diagnostic_message)
 
 	# AudioServer removes stopped playback on its mix thread and defers list cleanup
 	# to the main thread. Allow the main-thread update to process that deferred cleanup.
