@@ -99,7 +99,9 @@ Each completed cycle records its purpose, affected files, sources, verification 
 
 **Verification**
 - Local Godot execution: not available in this environment.
-- GitHub Actions run [43170390237](https://github.com/Legioniz/LatchPoint/actions/runs/43170390237) passed import, GDScript parsing, physics smoke tests and boot tests. The mix-cycle wait completed and the previous MP3/ObjectDB shutdown warnings were absent. Verbose output exposed a formatting error in the new diagnostic print, so the log output is being corrected before final verification.
+- GitHub Actions run [43170390237](https://github.com/Legioniz/LatchPoint/actions/runs/43170390237) passed import, GDScript parsing, physics smoke tests and boot tests, and the MP3/ObjectDB warnings were absent. Its verbose output exposed a formatting error in the new diagnostic print; that logging-only defect was corrected in commit `4e2fc4db38adbe0b1d141a841af2894b3bb9631f`.
+- Final Godot 4.7.2 validation run [43170548756](https://github.com/Legioniz/LatchPoint/actions/runs/43170548756) passed all import, parser, physics smoke-test and boot-test steps. The diagnostic measured `driver=Dummy`, `mix_rate=44100 Hz`, `initial_next_mix=0.0645s`, and an observed mix reset after 10 process frames. The complete relevant log contained no retained MP3/ObjectDB warnings and no `ERROR` or `WARNING` lines after either smoke-test process.
+- This confirms the warning was caused by the test exiting before the asynchronous audio mix/deferred cleanup cycle had completed; the test now waits for that cycle rather than an arbitrary two process frames.
 - Manual desktop audio verification: not performed.
 - Performance profiling: not performed; this is test-only code.
 - Physics/collision behavior: unchanged; existing physics assertions remain enabled.
@@ -107,4 +109,6 @@ Each completed cycle records its purpose, affected files, sources, verification 
 
 **Research:** Godot 4.7 AudioStreamPlayer and AudioServer documentation; Godot 4.7-stable AudioServer and Dummy audio-driver source. See `RESEARCH_REGISTER.md`.
 
-**Branch:** `fix/audio-mix-cycle-shutdown`, based on `feature/physics-layer-mask-regressions`. CI verification pending.
+**Status:** CI shutdown warning resolved; no production audio behavior changed.
+
+**Branch:** `fix/audio-mix-cycle-shutdown`, based on `feature/physics-layer-mask-regressions`. **Commits:** `c35b7f5aa10fee6eea9f555b0265cb5f0317813c` (mix-cycle wait and research), `4e2fc4db38adbe0b1d141a841af2894b3bb9631f` (diagnostic formatting).

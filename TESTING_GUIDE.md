@@ -66,7 +66,8 @@ The runtime settings file is `user://settings.cfg`; it is separate from gameplay
 - Historical verbose CI runs `42573252526`, `42772371690`, `42772488665` and `42775181753` reported retained `AudioStreamPlaybackMP3` / `AudioStreamMP3` references to `res://Project_bullshit.mp3` after one or both smoke-test processes. The latest inspected run `42978273469` reported the warning after the physics process but not after the boot process.
 - The physics smoke test now checks that the AudioStreamPlayer is stopped and has no active playback or stream, then waits for an observed reset in `AudioServer.get_time_since_last_mix()` (maximum 120 process frames) and two more process frames for main-thread cleanup. It logs the audio driver, mix rate, next-mix estimate and wait count.
 - Godot headless mode selects the Dummy audio driver. The test must observe an actual mix-age reset; a timeout is a failure. Continue inspecting the full verbose output for retained resources and ObjectDB warnings.
-- Track the investigation in [issue #3](https://github.com/Legioniz/LatchPoint/issues/3). Do not hide warnings, remove the music check or weaken physics assertions. Do not mark the issue resolved until the updated CI logs demonstrate clean shutdown.
+- Latest verified sample, Godot 4.7.2 run [43170548756](https://github.com/Legioniz/LatchPoint/actions/runs/43170548756): Dummy driver, 44,100 Hz, initial next-mix estimate 0.0645 seconds, observed mix reset after 10 process frames. No MP3/ObjectDB shutdown warnings or errors followed either smoke-test process.
+- Issue [#3](https://github.com/Legioniz/LatchPoint/issues/3) is resolved as a test-harness timing problem. Keep the mix-cycle assertion and inspect future verbose logs; do not suppress warnings, remove the music check or weaken physics assertions.
 
 ## Manual display and audio-settings check
 
