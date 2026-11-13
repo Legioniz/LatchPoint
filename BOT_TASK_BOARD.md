@@ -1,15 +1,16 @@
 # LatchPoint — Bot Task Board
 
-**Last reviewed:** 2026-11-09  
+**Last reviewed:** 2026-11-13  
 **Purpose:** This is the coordination source of truth for agents contributing to LatchPoint. Suggested roles are not confirmed assignments. Check live GitHub issues, branches and PRs before claiming work.
 
 ## Working order
 
-1. Protect and stabilize the foundation PR chain.
-2. Resolve the observed audio shutdown resource warning.
-3. Expand repeatable physics/collision coverage.
-4. Confirm the core game direction before designing major new mechanics.
-5. Improve persistence, settings, UI, art and performance when dependencies are ready.
+1. Reconcile the foundation PR against the latest `main` before integrating downstream branches.
+2. Review the dependent PR stacks in their actual base/head order; do not merge automatically.
+3. Keep issue #3 open until the audio shutdown fix is integrated, even though PR #8's branch CI is clean.
+4. Obtain the product-owner decision for the core game loop. A neutral reference comparison is now prepared; no direction has been selected.
+5. Expand physics/collision coverage only against agreed movement and gameplay rules.
+6. Improve art, UX, progression and performance after the design and integration dependencies are ready.
 
 ## Active work and priorities
 
@@ -26,63 +27,66 @@
 ### LP-QA-001 — Investigate MP3 playback references at shutdown
 
 - **Priority:** P1
-- **Status:** In progress / tracked by GitHub issue #3.
+- **Status:** Verified on the PR #8 branch; pending integration. GitHub issue #3 remains open until the dependent change reaches the default branch.
 - **Suggested role:** Audio systems + QA engineer.
-- **Evidence:** CI run [42573252526](https://github.com/Legioniz/LatchPoint/actions/runs/42573252526) passes physics assertions but then reports two leaked ObjectDB instances, one resource still in use, and retained AudioStreamPlaybackMP3 / AudioStreamMP3 references to `res://Project_bullshit.mp3`.
-- **Goal:** Determine whether the retained reference is caused by project-owned references, test shutdown timing, the audio driver or an engine lifecycle limitation.
-- **Likely files:** `AUDIO.gd`, `tests/physics_smoke_test.gd`, `.github/workflows/godot-validation.yml`.
+- **Evidence:** The earlier [run 42573252526](https://github.com/Legioniz/LatchPoint/actions/runs/42573252526) exposed retained ObjectDB/MP3 references. PR #8 adds cleanup verification to both independent smoke-test processes. Godot 4.7.2 [run 43175060644](https://github.com/Legioniz/LatchPoint/actions/runs/43175060644) completed successfully; the job log contains passing physics and boot smoke-test messages and no matching ObjectDB/MP3 shutdown warning lines.
+- **Goal:** Keep the verified shutdown behavior in the integrated project and ensure future test processes follow the same lifecycle contract.
+- **Likely files:** `AUDIO.gd`, `tests/physics_smoke_test.gd`, `tests/boot_smoke_test.gd`, `.github/workflows/godot-validation.yml`.
 - **Non-goals:** Do not remove music checks, suppress warnings or weaken physics assertions.
-- **Acceptance:** Reproduce, isolate the cause, add a deterministic regression check where possible, and show clean shutdown or document a minimal verified engine limitation.
+- **Acceptance:** Integrate the dependent PR stack, rerun Godot 4.7.2 CI on the resulting branch, and inspect full process logs for retained playback resources.
 - **Issue:** [#3](https://github.com/Legioniz/LatchPoint/issues/3)
+- **PR:** [#8](https://github.com/Legioniz/LatchPoint/pull/8)
 
 ### LP-DES-001 — Confirm the core game loop and design pillars
-
 - **Priority:** P0
-- **Status:** Blocked on product-owner/user direction.
+- **Status:** Blocked on product-owner/user direction; reference comparison prepared 2026-11-13.
 - **Suggested role:** Game designer + research agent.
 - **Goal:** Define the player promise, repeated action/feedback/reward loop, win/fail states, progression and first playable milestone.
-- **Likely files:** `PROJECT_CHARTER.md`, `IMPROVEMENT_BACKLOG.md`, `RESEARCH_REGISTER.md`.
+- **Evidence:** `RESEARCH_REGISTER.md` now compares authored course surprise (`Super Mario Bros. Wonder`), precision movement challenge (`Celeste`) and compact exploration (`A Short Hike`), with Godot 4.7 and MIT-licensed demo-project references. The comparison is decision support only.
 - **Non-goals:** Do not invent the mechanic from the name LatchPoint or commit to a genre based only on the prototype.
 - **Acceptance:** Approved one-page concept with three to five design pillars and a testable first-playable scope.
-- **Dependencies:** User/product-owner decision.
-- **Handoff:** Research agent should prepare examples from at least one larger and one smaller/independent game, then present a short comparison and recommendation.
+- **Dependencies:** Product-owner decision. The owner may choose one of the researched patterns or specify a different direction.
+- **Handoff:** Present the comparison and wait for direction before implementing a signature mechanic. After approval, prototype one short greybox slice and evaluate goal comprehension, input reliability, meaningful decisions, feedback and retry/continuation clarity.
 
 ### LP-QA-002 — Expand deterministic physics and collision tests
-
 - **Priority:** P1
-- **Status:** Ready after reviewing the current tests and core movement assumptions.
+- **Status:** In review (partial layer/mask slice in PR #7); broader coverage remains open.
 - **Suggested role:** Gameplay QA / physics engineer.
 - **Goal:** Increase physics regression coverage beyond the current floor, wall and ceiling probes.
+- **Evidence:** PR #7 checks that each enabled static platform in the current gameplay scene has a collision layer overlapping the real player's collision mask.
 - **Likely files:** `tests/physics_smoke_test.gd`, `tests/physics_probe.gd`, possible test-only scenes.
 - **Required scenarios:** corners, slopes, one-way platforms, moving platforms, high-speed movement/tunneling, spawn overlap, layers/masks, frame-rate consistency. Add item/pickup, hazard/projectile and power-up interactions when those systems exist.
 - **Acceptance:** Each scenario has a reproducible setup, deterministic result and clear failure message; tests must validate real game objects where applicable, not only generic test probes.
 - **Dependencies:** Confirm intended movement/collision rules before setting expected behavior.
+- **PR:** [#7](https://github.com/Legioniz/LatchPoint/pull/7)
 
 ### LP-INT-001 — Review and settle the dependent foundation PR chain
-
 - **Priority:** P1
-- **Status:** In review; do not merge automatically.
+- **Status:** In review; integration is blocked by the current foundation PR's stale base/mergeability state.
 - **Suggested role:** GitHub integration lead / senior reviewer.
-- **Current chain:**
-  1. [PR #1 — gameplay foundation](https://github.com/Legioniz/LatchPoint/pull/1), base `main`, head `feature/gameplay-foundation`.
+- **Current repository evidence:** `main` is at `cc7b304d9636353c5de1a056955bd24168a4906c`. PR #1 is open/draft, GitHub reports it as not mergeable, and comparison shows its head 52 commits ahead and 5 behind `main` (merge base `f7bb59d9ef9385a9f62c12c68b32d4ca11328f74`). No merge or branch rewrite was performed.
+- **Current PR relationships:**
+  1. [PR #1 — gameplay foundation](https://github.com/Legioniz/LatchPoint/pull/1), base `main`, head `feature/gameplay-foundation`. Reconcile the base and review the complete 40-file diff before integration.
   2. [PR #2 — fullscreen/window decoration fix](https://github.com/Legioniz/LatchPoint/pull/2), base `feature/gameplay-foundation`, head `fix/windowed-borderless-toggle`.
   3. [PR #4 — audio shutdown investigation docs](https://github.com/Legioniz/LatchPoint/pull/4), base `fix/windowed-borderless-toggle`, head `docs/audio-shutdown-leak-investigation`.
   4. [PR #5 — daily quality and multi-bot guidance](https://github.com/Legioniz/LatchPoint/pull/5), base `feature/gameplay-foundation`, head `docs/daily-quality-management`.
-- **Goal:** Preserve intended dependency order and ensure each PR's base/head SHA and checks are current.
-- **Acceptance:** Review each complete diff, review comments, CI logs and manual-test limitations; merge only with explicit project-owner approval and required evidence.
+  5. [PR #6 — settings persistence](https://github.com/Legioniz/LatchPoint/pull/6), base `feature/player-movement-regression-tests`, head `feature/settings-persistence`.
+  6. [PR #7 — platform collision-layer regression](https://github.com/Legioniz/LatchPoint/pull/7), base `feature/settings-persistence`, head `feature/physics-layer-mask-regressions`.
+  7. [PR #8 — clean audio shutdown in both smoke-test processes](https://github.com/Legioniz/LatchPoint/pull/8), base `feature/physics-layer-mask-regressions`, head `fix/audio-mix-cycle-boot-smoke-shutdown`.
+- **Goal:** Preserve intended dependency order and ensure each PR's base/head SHA, complete diff, review state and checks are current.
+- **Acceptance:** Reconcile PR #1 with current `main` without force-push; review each dependent diff and manual-test limitation; rerun CI after integration; merge only with explicit project-owner approval and required evidence.
 - **Do not:** Retarget or merge downstream PRs before their dependencies are settled.
 
 ### LP-UI-001 — Verify display behavior on a real desktop
-
 - **Priority:** P2
 - **Status:** Needs manual verification.
 - **Suggested role:** Desktop QA / UI engineer.
 - **Goal:** Confirm fullscreen/windowed switching and native window decorations outside the headless DisplayServer.
 - **Likely files:** `resolution.gd`, `options_menu.tscn`, `project.godot`, `tests/boot_smoke_test.gd`.
 - **Acceptance:** Record OS, display setup and Godot version; test startup window, fullscreen on/off, title-bar/decorations, resize and restart behavior. Headless flag assertions do not prove real desktop mode behavior.
+- **Related PR:** [#2](https://github.com/Legioniz/LatchPoint/pull/2)
 
 ### LP-AUD-001 — Classify remaining audio assets
-
 - **Priority:** P2
 - **Status:** Investigation required.
 - **Suggested role:** Audio integrator / asset librarian.
@@ -90,17 +94,14 @@
 - **Acceptance:** Record references, intended use and license/source. Keep assets unless safely proven redundant and approved for deletion.
 
 ### LP-SYS-001 — Persist options across application restart
-
 - **Priority:** P2
-- **Status:** Proposed.
+- **Status:** Implemented and automated-tested on PR #6; in review, not yet integrated. Manual desktop restart/fullscreen verification remains pending.
 - **Suggested role:** Systems engineer.
 - **Goal:** Persist audio levels and display preferences with defaults and validation.
-- **Likely files:** `AUDIO.gd`, `Music-Control.gd`, `resolution.gd`, a future settings resource/service and tests.
 - **Acceptance:** Values survive restart, invalid settings recover safely, volume remains synchronized, and platform-specific settings are tested.
-- **Dependency:** Agree on a configuration/save ownership model first.
+- **PR:** [#6](https://github.com/Legioniz/LatchPoint/pull/6)
 
 ### LP-SAVE-001 — Design and implement local save/load
-
 - **Priority:** P2
 - **Status:** Blocked by core loop and progression design.
 - **Suggested role:** Persistence/backend engineer.
@@ -109,7 +110,6 @@
 - **Non-goals:** Do not claim client-side locked/encrypted saves cannot be tampered with.
 
 ### LP-ARCH-001 — Propose a consistent directory migration
-
 - **Priority:** P3
 - **Status:** Planned; defer until the current PR chain is settled.
 - **Suggested role:** Repository steward.
@@ -117,7 +117,6 @@
 - **Acceptance:** Full dependency map, before/after tree, path/UID/import migration, Linux case-sensitive validation and rollback plan. No mass move until approved.
 
 ### LP-ART-001 — Replace prototype placeholder visuals
-
 - **Priority:** P3
 - **Status:** Blocked on visual direction and core game design.
 - **Suggested role:** Art/UX agent.
@@ -143,4 +142,4 @@ Do not create a task for a role unless there is actual work to perform. These ar
 
 For each task, retain: ID, priority, status, evidence, objective, player/project value, scope, non-goals, affected paths, dependencies/conflicts, suggested role, acceptance criteria, test proof, branch/PR/issue links, and next handoff.
 
-Use statuses: proposed, ready, assigned, in progress, blocked, in review, completed. Only mark assigned when an actual contributor accepted or was assigned the task.
+Use statuses: proposed, ready, assigned, in progress, blocked, in review, completed. Only mark assigned when an actual contributor accepted or was assigned.
