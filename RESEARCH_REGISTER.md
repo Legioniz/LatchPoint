@@ -1,12 +1,12 @@
 # Research Register
 
-Checked 2026-11-09. These references establish the first research baseline. Re-check them when a design decision depends on an API or current implementation detail.
+Initial baseline checked 2026-11-09; subsequent entries include their own check dates. Re-check sources when a design decision depends on an API or current implementation detail.
 
 ## Game-feel and player-control references
 
 ### Celeste — Maddy Thorson, developer-authored notes
 - Source: https://www.maddymakesgames.com/articles/celeste_and_forgiveness/
-- Scale: major commercial precision platformer.
+- Scale: commercially released indie precision platformer.
 - Observed design principles: coyote time, jump buffering, reduced gravity near the jump apex while jump is held, and corner correction are used to make platforming feel more forgiving and controllable.
 - Potential LatchPoint application: evaluate input forgiveness only after the intended jump/interaction loop is defined. Measure whether it improves control without undermining challenge.
 - Do not copy proprietary implementation or claim that every technique belongs in LatchPoint by default.
@@ -65,7 +65,7 @@ The references are inspiration and technical evidence, not a feature checklist. 
 
 ### Super Mario Bros. Wonder — Nintendo, large commercial 2D platformer
 - Sources: Nintendo's official developer interview (Japanese, published 2023-10-18): https://www.nintendo.com/jp/interview/aqmxa/index.html
-- Scale/context: a major, long-running commercial side-scrolling platform series. The interview identifies Wonder Flower as a trigger for substantial changes to the play of an individual course.
+- Scale/context: a major, long-running commercial side-scrolling platform series. The official interview is in Japanese; the findings below are an English paraphrase. It identifies Wonder Flower as a trigger for substantial changes to the play of an individual course.
 - Observed design principle: the developers describe wanting each course to contain at least one moment that surprises or delights players, and describe cross-discipline ideation followed by prototyping. They also discuss keeping familiar world rules trustworthy while presenting unusual changes as a distinct "Wonder" event.
 - Potential LatchPoint application: if the owner chooses authored course-based play, a small first slice could center on one readable course-specific twist while keeping basic movement and collision rules consistent.
 - Trade-offs: course-by-course novelty requires a steady supply of original ideas and authored content; Nintendo's team size and production budget are not a realistic scope template for this prototype.
