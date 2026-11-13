@@ -49,6 +49,7 @@
 - **Acceptance:** Approved one-page concept with three to five design pillars and a testable first-playable scope.
 - **Dependencies:** Product-owner decision. The owner may choose one of the researched patterns or specify a different direction.
 - **Handoff:** Present the comparison and wait for direction before implementing a signature mechanic. After approval, prototype one short greybox slice and evaluate goal comprehension, input reliability, meaningful decisions, feedback and retry/continuation clarity.
+- **Branch/PR:** `docs/core-loop-reference-research`, draft [PR #9](https://github.com/Legioniz/LatchPoint/pull/9) targeting `docs/daily-quality-management`.
 
 ### LP-QA-002 — Expand deterministic physics and collision tests
 - **Priority:** P1
