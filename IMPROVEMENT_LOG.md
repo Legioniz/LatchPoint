@@ -62,6 +62,8 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - Recorded PR #6 settings persistence, PR #7 platform layer/mask coverage and PR #8 audio shutdown verification as downstream work, not as changes already present on `main`.
 - Current default-branch HEAD at inspection: `cc7b304d9636353c5de1a056955bd24168a4906c`.
 - PR #1 remains open/draft and GitHub reports it as not mergeable. Comparing its base to `main` showed the branch 52 commits ahead and 5 behind, with the merge base at `f7bb59d9ef9385a9f62c12c68b32d4ca11328f74`. Reconcile this integration state before merging any downstream work.
+- PR #6 uses `feature/player-movement-regression-tests` as its base. That branch is 25 commits ahead of `feature/gameplay-foundation`, and no open or closed PR with that branch as its head appeared in the current PR listing. Recover/review this parent integration path before merging PR #6 or its descendants.
+- The current validation workflow pushes only on `main` and `feature/**`, and its pull-request filter targets only `main`. This leaves active `docs/**`/`fix/**` pushes and stacked PRs targeting non-main branches without guaranteed automatic coverage. Run [43175060644](https://github.com/Legioniz/LatchPoint/actions/runs/43175060644) completed successfully, but the event type was not available in the retrieved job details.
 - PR #8's Godot 4.7.2 workflow run [43175060644](https://github.com/Legioniz/LatchPoint/actions/runs/43175060644) completed successfully. The job log includes successful physics and boot smoke-test messages; the extracted log contains no matching ObjectDB/MP3 shutdown warning lines. Issue #3 remains open until the dependent change is integrated.
 
 ### Verification and limitations
