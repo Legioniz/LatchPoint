@@ -6,11 +6,13 @@
 ## Working order
 
 1. Reconcile the foundation PR against the latest `main` before integrating downstream branches.
-2. Review the dependent PR stacks in their actual base/head order; do not merge automatically.
-3. Keep issue #3 open until the audio shutdown fix is integrated, even though PR #8's branch CI is clean.
-4. Obtain the product-owner decision for the core game loop. A neutral reference comparison is now prepared; no direction has been selected.
-5. Expand physics/collision coverage only against agreed movement and gameplay rules.
-6. Improve art, UX, progression and performance after the design and integration dependencies are ready.
+2. Recover/review the unrepresented movement-regression parent branch before integrating PR #6 and its descendants.
+3. Correct GitHub Actions trigger coverage for active branch prefixes and stacked PR targets.
+4. Review the dependent PR stacks in their actual base/head order; do not merge automatically.
+5. Keep issue #3 open until the audio shutdown fix is integrated, even though PR #8's branch CI is clean.
+6. Obtain the product-owner decision for the core game loop. A neutral reference comparison is now prepared; no direction has been selected.
+7. Expand physics/collision coverage only against agreed movement and gameplay rules.
+8. Improve art, UX, progression and performance after the design and integration dependencies are ready.
 
 ## Active work and priorities
 
@@ -62,9 +64,10 @@
 
 ### LP-INT-001 — Review and settle the dependent foundation PR chain
 - **Priority:** P1
-- **Status:** In review; integration is blocked by the current foundation PR's stale base/mergeability state.
+- **Status:** In review; integration is blocked by stale and unrepresented parent branches.
 - **Suggested role:** GitHub integration lead / senior reviewer.
 - **Current repository evidence:** `main` is at `cc7b304d9636353c5de1a056955bd24168a4906c`. PR #1 is open/draft, GitHub reports it as not mergeable, and comparison shows its head 52 commits ahead and 5 behind `main` (merge base `f7bb59d9ef9385a9f62c12c68b32d4ca11328f74`). No merge or branch rewrite was performed.
+- **Unrepresented parent dependency:** PR #6 targets `feature/player-movement-regression-tests`. That branch is 25 commits ahead of `feature/gameplay-foundation`, and no open or closed PR with that branch as its head appeared in the current PR listing. Recover or review its intended integration path before merging PR #6 or its descendants.
 - **Current PR relationships:**
   1. [PR #1 — gameplay foundation](https://github.com/Legioniz/LatchPoint/pull/1), base `main`, head `feature/gameplay-foundation`. Reconcile the base and review the complete 40-file diff before integration.
   2. [PR #2 — fullscreen/window decoration fix](https://github.com/Legioniz/LatchPoint/pull/2), base `feature/gameplay-foundation`, head `fix/windowed-borderless-toggle`.
@@ -73,8 +76,9 @@
   5. [PR #6 — settings persistence](https://github.com/Legioniz/LatchPoint/pull/6), base `feature/player-movement-regression-tests`, head `feature/settings-persistence`.
   6. [PR #7 — platform collision-layer regression](https://github.com/Legioniz/LatchPoint/pull/7), base `feature/settings-persistence`, head `feature/physics-layer-mask-regressions`.
   7. [PR #8 — clean audio shutdown in both smoke-test processes](https://github.com/Legioniz/LatchPoint/pull/8), base `feature/physics-layer-mask-regressions`, head `fix/audio-mix-cycle-boot-smoke-shutdown`.
+- **CI trigger gap:** the workflow currently pushes only on `main` and `feature/**`, while its pull-request trigger targets only `main`. This does not automatically cover the active `docs/**`/`fix/**` pushes or PRs targeting non-main branches. Run #43175060644 passed, but its event type was not available in the retrieved job details; do not infer that the current filters cover PR #8.
 - **Goal:** Preserve intended dependency order and ensure each PR's base/head SHA, complete diff, review state and checks are current.
-- **Acceptance:** Reconcile PR #1 with current `main` without force-push; review each dependent diff and manual-test limitation; rerun CI after integration; merge only with explicit project-owner approval and required evidence.
+- **Acceptance:** Reconcile PR #1 with current `main` without force-push; recover/review the movement-regression parent; update CI filters and prove checks run on the intended PRs; review each dependent diff and manual-test limitation; merge only with explicit project-owner approval and required evidence.
 - **Do not:** Retarget or merge downstream PRs before their dependencies are settled.
 
 ### LP-UI-001 — Verify display behavior on a real desktop
