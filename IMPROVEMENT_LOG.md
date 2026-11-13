@@ -73,4 +73,4 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - The current workflow's push filter does not include `docs/**`, and its pull-request filter targets `main`; no CI run is expected for this docs branch/stack.
 - No performance profiling or ML was performed.
 
-**Branch:** `docs/core-loop-reference-research` (based on `docs/daily-quality-management`). **Head commit:** `55c9669139687812ed3b05de0078f23e0a986b9d`. **Draft PR:** [#9](https://github.com/Legioniz/LatchPoint/pull/9), currently open and mergeable; review/integration pending.
+**Branch:** `docs/core-loop-reference-research` (based on `docs/daily-quality-management`). **Draft PR:** [#9](https://github.com/Legioniz/LatchPoint/pull/9), open and mergeable at last inspection; review/integration pending.
