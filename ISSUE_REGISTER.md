@@ -1,27 +1,27 @@
 # LatchPoint — Issue Register
 
-**Reviewed:** 2026-11-09  
+**Reviewed:** 2026-11-13  
 This register separates confirmed defects from missing features, design decisions and investigations. Do not report a hypothesis as a root cause. Link to GitHub issues when they exist.
 
 ## P1 — Confirmed investigation
 
 ### LP-ISSUE-001: MP3 playback resources retained after physics smoke test
 
-- **Status:** Open; tracked by [GitHub issue #3](https://github.com/Legioniz/LatchPoint/issues/3).
-- **Evidence:** [Workflow run 42573252526](https://github.com/Legioniz/LatchPoint/actions/runs/42573252526), job “Import, parse, smoke test and boot”.
-- **Observed output:** The physics smoke test prints that the scene/physics checks passed. On process shutdown, Godot reports two leaked ObjectDB instances, one resource still in use, retained AudioStreamPlaybackMP3 and AudioStreamMP3 references, and the path `res://Project_bullshit.mp3`.
-- **Current behavior:** The test calls the Audio autoload's `shutdown_audio()`, stops playback and clears the stream, then waits two process frames.
-- **Root cause:** Not proven. Asynchronous AudioServer playback cleanup is a plausible lead but requires a reproducible experiment.
-- **Affected areas:** `AUDIO.gd`, `tests/physics_smoke_test.gd`, Godot audio lifecycle.
-- **Acceptance:** Reproduce, identify project-owned references versus test/driver/engine lifecycle, add a deterministic regression test where possible, and show clean shutdown or document a verified minimal engine limitation.
-- **Safety:** Do not suppress logs, remove music tests or weaken physics assertions.
+- **Status:** Open; tracked by [GitHub issue #3](https://github.com/Legioniz/LatchPoint/issues/3). The failure is no longer reproduced on the current PR #8 head, but the fix is not integrated into main.
+- **Original evidence:** [Workflow run 42573252526](https://github.com/Legioniz/LatchPoint/actions/runs/42573252526), job “Import, parse, smoke test and boot”, reported two leaked ObjectDB instances, one resource still in use, retained AudioStreamPlaybackMP3 / AudioStreamMP3 references and `res://Project_bullshit.mp3` after the physics smoke test.
+- **Latest branch evidence:** Godot 4.7.2 [workflow run 43175060644](https://github.com/Legioniz/LatchPoint/actions/runs/43175060644) passed on `fix/audio-mix-cycle-boot-smoke-shutdown` at `31ada925876e611b02b6ec2f6830cf5f7b932a27`. The full job log contains successful physics and boot smoke-test messages, with no matching ObjectDB/MP3-retention warnings. The physics process observed an AudioServer mix reset after 11 process frames; the boot process observed one after 2 frames, followed by two additional process frames.
+- **Current test behavior:** The smoke tests stop the Audio autoload's player, clear its stream, wait for an observable AudioServer mix-cycle reset, and allow deferred main-thread cleanup frames.
+- **Root cause:** The branch evidence supports an asynchronous audio-cleanup timing explanation, but the exact engine/project lifecycle cause has not been conclusively isolated. Do not state that the engine itself is defective.
+- **Affected areas:** `AUDIO.gd`, `tests/physics_smoke_test.gd`, `tests/boot_smoke_test.gd`, Godot audio lifecycle.
+- **Acceptance:** Integrate the dependent PR stack, rerun Godot 4.7.2 validation on the integrated head, inspect both complete smoke-test logs for retained playback resources, and retain the regression checks. Keep this issue open until that integration evidence exists.
+- **Safety:** Do not suppress logs, remove music checks or weaken physics assertions.
 
 ## P0 — Product decision needed
 
 ### LP-DES-001: Definitive game loop and design pillars are not established
 
 - **Status:** Blocked on user/product-owner decision.
-- **Evidence:** Current README and development playbook explicitly describe an early 2D prototype whose core loop is still being established.
+- **Evidence:** Current README and development playbook describe an early 2D prototype whose core loop is still being established. PR #9 adds a neutral comparison of authored course surprise, precision movement challenge and compact exploration; it does not select a direction.
 - **Risk:** Large feature decisions could build the wrong game.
 - **Action:** Confirm the player promise, repeatable core loop, win/fail states, progression and first playable milestone before expanding major mechanics.
 
@@ -29,17 +29,21 @@ This register separates confirmed defects from missing features, design decision
 
 ### LP-INT-001: Foundation changes are staged across dependent draft PRs
 
-- **Status:** Open / in review.
-- **Evidence:** PR #1 targets main; PR #2 is based on the foundation branch; PR #4 is based on the fullscreen follow-up branch.
-- **Risk:** The default branch still represents the older project state until the foundation PR is merged. Downstream branches must not be merged out of order.
-- **Action:** Review the complete diff and checks in dependency order. Reconfirm each base/head SHA before merging. Keep the draft state until review and verification are complete.
+- **Status:** Open / in review; integration is blocked by a stale foundation PR base and an unrepresented parent branch.
+- **Current main:** `cc7b304d9636353c5de1a056955bd24168a4906c`.
+- **Foundation PR:** [PR #1](https://github.com/Legioniz/LatchPoint/pull/1) records base SHA `f7bb59d9ef9385a9f62c12c68b32d4ca11328f74`, head `58310c34342eed3bbe7b80cf3e2c9fd253acb566`, and GitHub reports `mergeable=false`. Commit comparison reports 52 commits ahead and 5 behind current main. No rebase, force-push or branch update has been performed.
+- **Missing parent:** [PR #6](https://github.com/Legioniz/LatchPoint/pull/6) targets `feature/player-movement-regression-tests`; that branch is 25 commits ahead of `feature/gameplay-foundation`, but no PR with it as head appeared in the current all-state PR inventory.
+- **Current dependent PRs:** [#2](https://github.com/Legioniz/LatchPoint/pull/2), [#4](https://github.com/Legioniz/LatchPoint/pull/4), [#5](https://github.com/Legioniz/LatchPoint/pull/5), [#6](https://github.com/Legioniz/LatchPoint/pull/6), [#7](https://github.com/Legioniz/LatchPoint/pull/7), [#8](https://github.com/Legioniz/LatchPoint/pull/8), and [#9](https://github.com/Legioniz/LatchPoint/pull/9) remain open/draft. Their bases form separate feature and documentation stacks; verify live SHAs before any integration.
+- **CI trigger gap:** Inspected workflow variants push only on `main` and `feature/**`, or on those branches plus `fix/**`; all inspected pull-request filters target only `main`, and none includes `docs/**` in push filters. Docs branches and stacked PRs targeting non-main branches therefore lack automatic validation triggers.
+- **Risk:** Main still represents the older project state. Downstream branches must not be merged out of order or treated as integrated fixes.
+- **Action:** Reconcile PR #1 with current main using a reviewed non-destructive branch update; recover/review the movement-regression parent; correct workflow trigger coverage; then review each dependent diff, checks and manual-test limitations. Do not merge without review and explicit project-owner approval.
 
 ## P2 — Incomplete coverage or manual verification
 
 ### LP-QA-002: Physics test coverage is still limited
 
-- **Status:** Open backlog item.
-- **Evidence:** The current smoke test exercises player landing and floor, wall and ceiling probes. It does not yet cover corners, slopes, one-way platforms, moving platforms, high-speed gameplay movement, spawn/respawn overlap, or frame-rate consistency.
+- **Status:** Open backlog item; PR #7 adds a current-scene static-platform layer/player-mask assertion but broader coverage remains incomplete.
+- **Evidence:** The current smoke test exercises player landing, movement and floor/wall/ceiling probes. It does not yet cover corners, slopes, one-way platforms, moving platforms, high-speed gameplay movement, spawn/respawn overlap, or frame-rate consistency.
 - **Action:** Add deterministic, reproducible scenarios as those mechanics enter the game. Test actual gameplay objects in addition to generic probes.
 
 ### LP-UI-001: Native display behavior requires desktop verification
@@ -54,11 +58,11 @@ This register separates confirmed defects from missing features, design decision
 - **Evidence:** The tree contains `Tung.mp3`, `maj.mp3` and `yi.mp3` with import sidecars. The inspected Audio autoload references `Project_bullshit.mp3`; no purpose or license record for the other tracks was found in the inspected documentation.
 - **Action:** Search all branches, scenes, scripts, dynamic loaders and commit history; ask the asset owner where necessary; record license/source and intended use. Remove only after usage and ownership are verified.
 
-### LP-SET-001: Settings are not persisted across application restarts
+### LP-SET-001: Persist audio and fullscreen settings
 
-- **Status:** Known missing feature, not a regression.
-- **Evidence:** The Audio autoload stores volume values in memory. No persistent settings service is present in the reviewed tree.
-- **Action:** Design settings persistence with validation and safe defaults. Coordinate with save-system architecture.
+- **Status:** Implemented and automated-tested on [PR #6](https://github.com/Legioniz/LatchPoint/pull/6), but not integrated into main. Manual desktop restart/fullscreen verification remains pending.
+- **Evidence:** PR #6 adds the Settings autoload, validated ConfigFile persistence and boot-smoke coverage for defaults, round trips, invalid-value recovery and Audio integration. The feature remains in a downstream draft stack.
+- **Action:** Review and integrate only after the movement-regression parent and earlier foundation dependencies are settled. Complete native desktop restart/fullscreen verification separately.
 
 ### LP-SAVE-001: Save/load is not implemented
 
