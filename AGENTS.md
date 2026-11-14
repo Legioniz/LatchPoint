@@ -13,7 +13,7 @@ Start every task by checking the current branch, default branch, open pull reque
 5. [ISSUE_REGISTER.md](ISSUE_REGISTER.md) — confirmed defects and investigations.
 6. [IMPROVEMENT_BACKLOG.md](IMPROVEMENT_BACKLOG.md) — future work and its priority.
 7. [DEVELOPMENT_PLAYBOOK.md](DEVELOPMENT_PLAYBOOK.md) — design, research, implementation and quality standards.
-8. [TESTING_GUIDE.md](TESTING_GUIDE.md), when present on the branch you are using — test commands and known limitations.
+8. [TESTING_GUIDE.md](TESTING_GUIDE.md) — read it when present on your branch. If it is absent, inspect the newest test-bearing branch/PR before relying on test commands; do not assume an older guide matches your code.
 9. [RESEARCH_REGISTER.md](RESEARCH_REGISTER.md) — previous references, findings and decisions.
 10. [IMPROVEMENT_LOG.md](IMPROVEMENT_LOG.md) and [DAILY_QA_LOG.md](DAILY_QA_LOG.md) — recent changes and quality checks.
 
@@ -32,6 +32,7 @@ The current development PR stack may not yet be merged into main. Check the PR b
 - Select work from BOT_TASK_BOARD.md. Check for an existing task, issue, branch or PR before creating a duplicate.
 - Coordinate file ownership before editing. Do not assume another bot has completed work simply because a branch exists.
 - Suggested specialist roles are recommendations, not real assignments. Do not claim a bot has been assigned unless an actual assignment or handoff exists.
+- Claim or coordinate the task and exact file ownership before editing; change only files required for the assigned objective. If no assignment system exists, coordinate through the task board, issue or PR and never imply a bot was assigned without confirmation.
 - Prefer one coherent, testable objective per PR. Avoid parallel edits to the same scenes, scripts, settings or resource paths.
 - Inspect incoming contributions, licenses, tests and dependencies before integrating them.
 - Use issues and PR discussions for decisions that affect other contributors. Keep the task board synchronized.
@@ -93,6 +94,7 @@ If the runtime or a tool is unavailable, state what was not tested and leave the
 - Never commit directly to main.
 - Use focused, descriptive feature/fix/docs branches.
 - Never force-push or rewrite shared history.
+- Do not merge another contributor's or bot's PR unless the repository owner explicitly authorizes you to do so. Do not edit or commit directly to `main`; use a focused branch and reviewable PR.
 - Inspect active branches and PR dependency chains before changing them.
 - Do not overwrite another contributor's branch.
 - Keep uncertain or unverified changes in a draft PR.
