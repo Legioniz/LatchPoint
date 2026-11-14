@@ -31,7 +31,7 @@
   - `fix/audio-mix-cycle-shutdown` — `8226be2bf3b2fdef2412a8e3207a4e90889db4d7`
   - `fix/audio-server-shutdown-grace` and `fix/windowed-borderless-toggle` — both `ae7c8de03b6502d3b38fa1c481fb6fdf89df6f62`
   - `fix/audio-shutdown-grace-experiment` — `b0a7fca59f9515b083cfaae9bbe22e27e6fc701b`
-  - `quality/daily-audit-2026-11-13` — `e0dc779756b00cf7de2fb5ff473c71d9655a6eff`
+  - `quality/daily-audit-2026-11-13` — `e0dc779756b00cf7de2fb5ff473c71d9655a6eff` (head at audit start; advanced to `fb88ade63bb6335744ab963b3b716a27ad0fd376` during this cycle)
 - The duplicate-head names may be aliases or historical refs; none was deleted. The `automation/playability-baseline` branch is still at the original baseline commit and has no corresponding PR. Its tree contains tracked `COMMIT_EDITMSG`, `FETCH_HEAD` and `HEAD` files.
 - Main still contains root-level `config`, `description` and binary `index` files. The text `config` is copied Git configuration pointing to the former `Codfyyy/Latchpoint-` origin; it contains no credential/token in the inspected text. PR #1 already deletes these three files, so no duplicate cleanup was made here. The binary index was not decoded.
 - No empty directories, symlink entries, Godot cache directory, export output, temporary logs or obvious backup files appeared in the inspected main tree. Existing `Asset/` and `Scene/` capitalization and root-level scripts were preserved. No broad relocation is justified while the PR stack is unsettled.
@@ -40,7 +40,7 @@
 - Ten PRs are open and draft: #1, #2, #4, #5, #6, #7, #8, #9, #10 and #11. The inspected PR comment/review feeds contain no comments or submitted reviews; no requested reviewers or assignees were present. No PR was merged, retargeted or closed.
 - PR #1 remains the critical integration blocker: GitHub reports `mergeable=false` / `dirty`; comparison against current main is **52 commits ahead and 9 behind**, with merge base `f7bb59d9ef9385a9f62c12c68b32d4ca11328f74`. Both main and the PR independently add `README.md`, creating an add/add reconciliation requirement. No rebase, force-push or branch update was attempted.
 - PR #6 still targets `feature/player-movement-regression-tests`, a branch 25 commits ahead of the foundation branch with no PR using it as its head. Recover/review that parent before integrating PR #6 or descendants.
-- PR #10 remains a clean two-commit draft on the existing quality branch. PR #11 is a clean two-commit draft targeting `feature/gameplay-foundation`; it does not update the separate downstream feature/docs branch lines automatically.
+- At audit start PR #10 was a clean two-commit draft; after this cycle it is five commits ahead, zero behind, mergeable and still draft. PR #11 is a clean two-commit draft targeting `feature/gameplay-foundation`; it does not update the separate downstream feature/docs branch lines automatically.
 
 ### File structure and Godot integrity
 
@@ -73,7 +73,7 @@
 
 ### Changes in this quality cycle
 
-- Updated only `DAILY_QA_LOG.md`, `ISSUE_REGISTER.md`, `BOT_TASK_BOARD.md` and `AGENTS.md` on the existing `quality/daily-audit-2026-11-13` branch / PR #10.
+- Updated only `DAILY_QA_LOG.md`, `ISSUE_REGISTER.md`, `BOT_TASK_BOARD.md` and `AGENTS.md` on the existing `quality/daily-audit-2026-11-13` branch / PR #10. The branch advanced from `e0dc779756b00cf7de2fb5ff473c71d9655a6eff` to `fb88ade63bb6335744ab963b3b716a27ad0fd376` through commits `0cd29591bb57c004d495b72f3706515f2a6ad2d4`, `5871c7612d8ea3fcb4bca0a8d033566087ab6bcc` and `fb88ade63bb6335744ab963b3b716a27ad0fd376`.
 - Added the current audio-warning evidence to GitHub issue #3.
 - No gameplay scripts, scenes, resources, UIDs, import sidecars, licenses, project settings, workflows or assets were modified. No files were moved or deleted. No other contributor branch was changed.
 
