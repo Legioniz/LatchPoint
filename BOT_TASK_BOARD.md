@@ -105,7 +105,7 @@
 
 ### LP-DOC-002 — Synchronize the current testing guide into shared documentation
 
-- **Priority:** P2
+- **Priority:** P3
 - **Status:** Proposed; defer until the feature/test stack settles.
 - **Problem/evidence:** `TESTING_GUIDE.md` exists on `feature/physics-layer-mask-regressions` and `fix/audio-mix-cycle-boot-smoke-shutdown`, but is absent from the docs PR #10 base `docs/core-loop-reference-research`.
 - **Goal/value:** Give every contributor one current source for import, parse, physics, settings, audio shutdown and manual desktop verification.

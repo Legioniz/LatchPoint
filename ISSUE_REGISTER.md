@@ -81,6 +81,8 @@ This register separates confirmed defects from missing features, design decision
 - **Evidence:** Load Game is disabled and marked “Coming Soon”; `new_load.gd` does not implement save loading.
 - **Action:** Keep disabled until versioned local persistence and recovery are ready.
 
+## P3 — Repository hygiene and contributor documentation
+
 ### LP-ARCH-001: Directory naming is inconsistent
 
 - **Status:** Improvement proposal, not a runtime bug.
