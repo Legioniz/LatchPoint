@@ -103,7 +103,7 @@
 - **Required proof:** Re-read GitHub repository visibility and branch-protection metadata after the authorized settings change.
 - **Branch/PR/issue:** No issue or PR created; owner decision pending.
 
-### LP-DOC-001 — Synchronize the current testing guide into shared documentation
+### LP-DOC-002 — Synchronize the current testing guide into shared documentation
 
 - **Priority:** P2
 - **Status:** Proposed; defer until the feature/test stack settles.

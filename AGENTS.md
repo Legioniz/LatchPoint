@@ -13,7 +13,7 @@ Start every task by checking the current branch, default branch, open pull reque
 5. [ISSUE_REGISTER.md](ISSUE_REGISTER.md) — confirmed defects and investigations.
 6. [IMPROVEMENT_BACKLOG.md](IMPROVEMENT_BACKLOG.md) — future work and its priority.
 7. [DEVELOPMENT_PLAYBOOK.md](DEVELOPMENT_PLAYBOOK.md) — design, research, implementation and quality standards.
-8. [TESTING_GUIDE.md](TESTING_GUIDE.md) — read it when present on your branch. If it is absent, inspect the newest test-bearing branch/PR before relying on test commands; do not assume an older guide matches your code.
+8. `TESTING_GUIDE.md` — read it when present on your branch. If it is absent, inspect the newest test-bearing branch/PR before relying on test commands; do not assume an older guide matches your code.
 9. [RESEARCH_REGISTER.md](RESEARCH_REGISTER.md) — previous references, findings and decisions.
 10. [IMPROVEMENT_LOG.md](IMPROVEMENT_LOG.md) and [DAILY_QA_LOG.md](DAILY_QA_LOG.md) — recent changes and quality checks.
 

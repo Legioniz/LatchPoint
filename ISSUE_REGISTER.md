@@ -87,7 +87,7 @@ This register separates confirmed defects from missing features, design decision
 - **Evidence:** Existing source directories include `Asset/` and `Scene/`, while tests are in `tests/` and several scripts are at the root.
 - **Action:** Keep current paths stable. Consider a single planned migration only after the foundation PR chain settles and every UID/resource reference is mapped.
 
-### LP-DOC-001: Testing guide is missing from the shared documentation PR line
+### LP-DOC-002: Testing guide is missing from the shared documentation PR line
 
 - **Status:** Proposed; no files copied or moved.
 - **Evidence:** `TESTING_GUIDE.md` exists on `feature/physics-layer-mask-regressions` and `fix/audio-mix-cycle-boot-smoke-shutdown`, but it is absent from the `docs/core-loop-reference-research` base used by PR #10. The shared `AGENTS.md` correctly says to read the guide when present.
