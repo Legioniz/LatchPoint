@@ -84,6 +84,14 @@ For each physics change, retain a minimal regression test and a reproducible set
 
 GdUnit4 or a small in-project test harness can be used depending on dependency cost. Keep tests outside shipping scenes and document the purpose of each test file.
 
+### Workflow trigger and dependency policy
+
+- Keep validation active for every branch push and every pull-request target branch in this stacked-PR repository. Prefer an unfiltered event or a catch-all `**` branch pattern; do not maintain a partial list of current branch prefixes.
+- Avoid path filters that can silently leave required checks pending unless the filtered-out paths have a separate, verified check.
+- Pin external actions to verified full-length commit SHAs. Keep the upstream release tag beside each SHA as a human-readable comment, and record the upstream license and runtime compatibility in `RESEARCH_REGISTER.md`.
+- Keep workflow permissions minimal. The current validation workflow needs only `contents: read`.
+- When a workflow file is copied into downstream branches, synchronize or retire those copies as the PR stack is integrated; a change to a parent branch does not rewrite an existing descendant branch.
+
 ### Machine-learning-assisted tests
 
 Once the core loop provides a reliable state/action interface and measurable objectives, evaluate a local playtesting agent. Suitable objectives may include completing a level, reaching a checkpoint, collecting an item, surviving hazards or discovering stuck/unreachable states. Save the seed, input trace and game state for each failure so it can be reproduced.

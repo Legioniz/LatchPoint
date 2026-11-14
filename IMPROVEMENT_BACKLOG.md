@@ -5,7 +5,7 @@ Items are not promises to implement immediately. Re-score them after inspecting 
 ## P0 — Foundation and design clarity
 
 - [ ] **Confirm the core game loop and design pillars.** Goal: define what makes LatchPoint distinct before choosing major mechanics. Acceptance: a one-page concept with player promise, moment-to-moment loop, win/fail states, progression and three to five design pillars.
-- [ ] **Establish reliable GitHub Actions validation.** Goal: catch import, parser, scene-load and physics-smoke failures on every relevant branch/PR. Acceptance: workflow completes on Godot 4.7.2 and logs are reviewed; fix any failures rather than weakening the test.
+- [ ] **Complete GitHub Actions validation across the PR stack.** Goal: run import, parser, scene-load and physics-smoke checks on every branch push and every pull-request target branch. The foundation workflow now uses catch-all branch filters and SHA-pinned Node 24 action releases in the CI follow-up branch. Acceptance: Godot 4.7.2 validation passes; downstream branch copies are synchronized or retired; one canonical workflow reaches `main` after the foundation integration is resolved; logs contain no deprecated action-runtime warnings.
 - [ ] **Resolve world presentation.** Goal: replace the temporary flat-color background and icon-shaped platform placeholders with a coherent, original art direction once the concept is confirmed. Acceptance: art style supports gameplay readability and does not obscure collision boundaries.
 
 ## P1 — Playable core and physics
