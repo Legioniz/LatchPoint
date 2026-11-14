@@ -1,13 +1,13 @@
 name: Godot validation
 
 on:
+  # Keep every branch and stacked-PR base covered; do not narrow this to prefixes.
   push:
     branches:
-      - main
-      - "feature/**"
+      - "**"
   pull_request:
     branches:
-      - main
+      - "**"
   workflow_dispatch:
 
 permissions:
@@ -21,10 +21,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Godot 4.7.2
-        uses: chickensoft-games/setup-godot@v2
+        uses: chickensoft-games/setup-godot@ac93246ea68518a384c1c280a496e5989341f2f6 # v2.4.3
         with:
           version: 4.7.2
           use-dotnet: false

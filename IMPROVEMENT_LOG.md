@@ -38,3 +38,32 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - No ML model was trained or executed. The playbook defines ML-assisted exploration as a future, conditional test strategy; it is not represented as completed work.
 
 **PR:** https://github.com/Legioniz/LatchPoint/pull/1
+
+
+## 2026-11-14 — Normalize CI trigger coverage and action runtimes
+
+**Objective:** close the branch-filter gap in the foundation validation workflow and remove its deprecated Node.js 20 checkout action.
+
+### Repository evidence
+- The foundation workflow previously ran pushes only on `main` and `feature/**`, and pull requests only when targeting `main`.
+- The live branch set includes `automation/**`, `docs/**`, `feature/**`, `fix/**` and `quality/**`; stacked PRs also target non-main branches.
+- Downstream workflow copies differ: some include `fix/**`, while docs/quality branches still lack push coverage and PR filters still target only `main`.
+- Latest observed run [43175060644](https://github.com/Legioniz/LatchPoint/actions/runs/43175060644) passed its Godot import, parser, physics and boot checks, but emitted a Node.js 20 deprecation warning for `actions/checkout@v4`.
+
+### Changes
+- Changed push and pull-request branch filters to `**`, covering nested branch names and stacked PR base branches without maintaining a prefix allowlist.
+- Pinned `actions/checkout` to verified commit `3d3c42e5aac5ba805825da76410c181273ba90b1` (v7.0.1, Node 24).
+- Pinned `chickensoft-games/setup-godot` to verified commit `ac93246ea68518a384c1c280a496e5989341f2f6` (v2.4.3, Node 24).
+- Preserved the existing Godot 4.7.2 import, GDScript parse, physics smoke and boot smoke steps unchanged.
+
+### Acceptance and verification plan
+- A push to this `ci/**` branch must start the workflow.
+- Godot 4.7.2 import, every tracked GDScript parse, physics smoke and boot smoke must pass.
+- Inspect the final job log for the absence of the Node.js 20 deprecation warning.
+- Confirm that the action SHAs resolve to the stated upstream release tags and that no gameplay/runtime files changed.
+
+### Integration limitations
+- This branch is stacked on PR #1's `feature/gameplay-foundation` branch. The default branch still has no validation workflow until the foundation PR is integrated.
+- Existing downstream branches retain older workflow copies until they are synchronized or retired in the dependency chain.
+- No gameplay, scene, asset, project-setting or runtime architecture files changed.
+- Local Godot execution and manual desktop playtesting were not available for this cycle.

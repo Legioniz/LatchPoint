@@ -58,3 +58,31 @@ Checked 2026-11-09. These references establish the first research baseline. Re-c
 ## Decision rule
 
 The references are inspiration and technical evidence, not a feature checklist. Each adopted pattern must be tied to the LatchPoint design pillars, implemented originally, tested and recorded in the improvement log. No external code, art, sound, level or character is copied by this register.
+
+
+## 2026-11-14 — GitHub Actions trigger coverage and Node 24 compatibility
+
+### Official GitHub Actions references
+- Workflow trigger and branch-filter semantics: https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow
+  - `push.branches` filters apply to pushed branch refs; `pull_request.branches` filters apply to the PR's target/base branch.
+  - GitHub's glob syntax supports `**` for matching nested branch names. A catch-all avoids silently excluding new prefixes and stacked PR targets.
+- Secure action usage: https://docs.github.com/en/actions/reference/security/secure-use
+  - GitHub recommends full-length commit-SHA pins for third-party actions when a workflow dependency lockfile is not used.
+- Node.js 20 deprecation/removal notice: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+  - GitHub's changelog records the Node 20 removal date as 2026-09-23. The inspected 2026-11-12 project run still warned that `actions/checkout@v4` was being forced to Node 24.
+
+### Action release verification and licenses
+- `actions/checkout` v7.0.1: https://github.com/actions/checkout/releases/tag/v7.0.1
+  - Release tag resolves to commit `3d3c42e5aac5ba805825da76410c181273ba90b1`; its `action.yml` declares `node24`.
+  - License: MIT (upstream LICENSE at https://github.com/actions/checkout/blob/v7.0.1/LICENSE).
+- `chickensoft-games/setup-godot` v2.4.3: https://github.com/chickensoft-games/setup-godot/releases/tag/v2.4.3
+  - Release tag resolves to commit `ac93246ea68518a384c1c280a496e5989341f2f6`; its `action.yml` declares `node24`.
+  - License: MIT (upstream LICENSE at https://github.com/chickensoft-games/setup-godot/blob/v2.4.3/LICENSE).
+- The two action manifests and license files were inspected directly at the referenced upstream tags. The repository pins the verified full commit SHAs and retains release labels as comments for maintainability.
+
+### Design decision
+- Run the existing Godot validation workflow for all branch pushes and all pull-request target branches using `**` filters.
+- Pin the two external actions to immutable full commit SHAs. This avoids Node 20 compatibility warnings and reduces tag-movement risk.
+- Keep the Godot version and all existing import/parse/physics/boot validation commands unchanged.
+- Do not add dependencies, change gameplay code, or create a second overlapping test workflow.
+- This change updates the root foundation workflow only. Existing downstream branch copies and default-branch integration remain explicit follow-up work.
