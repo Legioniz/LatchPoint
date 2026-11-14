@@ -1,18 +1,19 @@
 # LatchPoint — Bot Task Board
 
-**Last reviewed:** 2026-11-13  
+**Last reviewed:** 2026-11-14  
 **Purpose:** This is the coordination source of truth for agents contributing to LatchPoint. Suggested roles are not confirmed assignments. Check live GitHub issues, branches and PRs before claiming work.
 
 ## Working order
 
-1. Reconcile the foundation PR against the latest `main` before integrating downstream branches.
-2. Recover/review the unrepresented movement-regression parent branch before integrating PR #6 and its descendants.
-3. Correct GitHub Actions trigger coverage for active branch prefixes and stacked PR targets.
-4. Review the dependent PR stacks in their actual base/head order; do not merge automatically.
-5. Keep issue #3 open until the audio shutdown fix is integrated, even though PR #8's branch CI is clean.
-6. Obtain the product-owner decision for the core game loop. A neutral reference comparison is now prepared; no direction has been selected.
-7. Expand physics/collision coverage only against agreed movement and gameplay rules.
-8. Improve art, UX, progression and performance after the design and integration dependencies are ready.
+1. Confirm the repository visibility policy and protect `main`; the repository currently reports public and main is unprotected.
+2. Reconcile PR #1 with current main without rewriting shared history; resolve the independent README additions and preserve the current copyright/license files.
+3. Recover and review the unrepresented `feature/player-movement-regression-tests` parent before integrating PR #6 or descendants.
+4. Preserve PR #11's catch-all CI triggers and pinned actions when reconciling the other feature/docs branches; their current workflow files still have narrower filters.
+5. Integrate the PR #8 audio shutdown fix with the settings/physics stack, then rerun both smoke-test processes and inspect full logs; issue #3 remains open because the PR #11 line still reproduces the warning.
+6. Bring the current `TESTING_GUIDE.md` into the shared documentation line after the feature stack settles.
+7. Keep the core game-loop decision blocked on product-owner direction; do not infer a mechanic from the title.
+8. Expand physics/collision coverage only against agreed movement and gameplay rules.
+9. Improve art, UX, progression and performance after design and integration dependencies are ready.
 
 ## Active work and priorities
 
@@ -29,13 +30,13 @@
 ### LP-QA-001 — Investigate MP3 playback references at shutdown
 
 - **Priority:** P1
-- **Status:** Verified on the PR #8 branch; pending integration. GitHub issue #3 remains open until the dependent change reaches the default branch.
+- **Status:** Open / in review. Clean on PR #8's head, but reproduced on the separate foundation/CI PR #11 line; issue #3 remains open.
 - **Suggested role:** Audio systems + QA engineer.
-- **Evidence:** The earlier [run 42573252526](https://github.com/Legioniz/LatchPoint/actions/runs/42573252526) exposed retained ObjectDB/MP3 references. PR #8 adds cleanup verification to both independent smoke-test processes. Godot 4.7.2 [run 43175060644](https://github.com/Legioniz/LatchPoint/actions/runs/43175060644) completed successfully; the job log contains passing physics and boot smoke-test messages and no matching ObjectDB/MP3 shutdown warning lines.
-- **Goal:** Keep the verified shutdown behavior in the integrated project and ensure future test processes follow the same lifecycle contract.
+- **Evidence:** [Run 43175060644](https://github.com/Legioniz/LatchPoint/actions/runs/43175060644) on `fix/audio-mix-cycle-boot-smoke-shutdown` passed Godot 4.7.2 import/parse/physics/boot checks; the full log shows mix resets after 11 physics frames and 2 boot frames with no retained MP3/ObjectDB warnings. In contrast, Godot 4.7.2 [push run 43570349587](https://github.com/Legioniz/LatchPoint/actions/runs/43570349587) and [PR run 43570448230](https://github.com/Legioniz/LatchPoint/actions/runs/43570448230) on `ci/branch-wide-godot-validation` both complete successfully but report two leaked ObjectDB instances, one resource still in use, retained AudioStreamPlaybackMP3 / AudioStreamMP3 and `res://Project_bullshit.mp3` after each smoke-test process.
+- **Goal:** Keep the clean shutdown behavior in the integrated project and ensure both independent test processes follow the same lifecycle contract.
 - **Likely files:** `AUDIO.gd`, `tests/physics_smoke_test.gd`, `tests/boot_smoke_test.gd`, `.github/workflows/godot-validation.yml`.
 - **Non-goals:** Do not remove music checks, suppress warnings or weaken physics assertions.
-- **Acceptance:** Integrate the dependent PR stack, rerun Godot 4.7.2 CI on the resulting branch, and inspect full process logs for retained playback resources.
+- **Acceptance:** Integrate the PR #8 change with the current settings/physics/CI stack, run Godot 4.7.2 validation on the integrated head, and inspect full logs for both processes. Keep issue [#3](https://github.com/Legioniz/LatchPoint/issues/3) open until clean integrated evidence exists.
 - **Issue:** [#3](https://github.com/Legioniz/LatchPoint/issues/3)
 - **PR:** [#8](https://github.com/Legioniz/LatchPoint/pull/8)
 
@@ -64,23 +65,73 @@
 - **PR:** [#7](https://github.com/Legioniz/LatchPoint/pull/7)
 
 ### LP-INT-001 — Review and settle the dependent foundation PR chain
+
 - **Priority:** P1
-- **Status:** In review; integration is blocked by stale and unrepresented parent branches.
+- **Status:** In review; integration is blocked by stale and unrepresented parent branches and divergent CI workflow changes.
 - **Suggested role:** GitHub integration lead / senior reviewer.
-- **Current repository evidence:** `main` is at `cc7b304d9636353c5de1a056955bd24168a4906c`. PR #1 is open/draft, GitHub reports it as not mergeable, and comparison shows its head 52 commits ahead and 5 behind `main` (merge base `f7bb59d9ef9385a9f62c12c68b32d4ca11328f74`). No merge or branch rewrite was performed.
-- **Unrepresented parent dependency:** PR #6 targets `feature/player-movement-regression-tests`. That branch is 25 commits ahead of `feature/gameplay-foundation`, and no open or closed PR with that branch as its head appeared in the current PR listing. Recover or review its intended integration path before merging PR #6 or its descendants.
+- **Current repository evidence:** `main` is at `097da44e4ad3fb2a3f1e762034855ef46cffdac4`. PR #1 targets main from `feature/gameplay-foundation`; GitHub reports `mergeable=false` / `dirty`, and comparison shows 52 commits ahead and 9 behind. Both main and PR #1 independently add `README.md`; reconcile that add/add conflict. Do not force-push or rewrite the shared branch.
+- **Unrepresented parent dependency:** PR #6 targets `feature/player-movement-regression-tests`. That branch is 25 commits ahead of `feature/gameplay-foundation`, and no PR with it as head appeared in the all-state PR inventory. Recover/review its intended integration path before PR #6 or descendants.
 - **Current PR relationships:**
-  1. [PR #1 — gameplay foundation](https://github.com/Legioniz/LatchPoint/pull/1), base `main`, head `feature/gameplay-foundation`. Reconcile the base and review the complete 40-file diff before integration.
+  1. [PR #1 — gameplay foundation](https://github.com/Legioniz/LatchPoint/pull/1), base `main`, head `feature/gameplay-foundation`; dirty against current main.
   2. [PR #2 — fullscreen/window decoration fix](https://github.com/Legioniz/LatchPoint/pull/2), base `feature/gameplay-foundation`, head `fix/windowed-borderless-toggle`.
   3. [PR #4 — audio shutdown investigation docs](https://github.com/Legioniz/LatchPoint/pull/4), base `fix/windowed-borderless-toggle`, head `docs/audio-shutdown-leak-investigation`.
   4. [PR #5 — daily quality and multi-bot guidance](https://github.com/Legioniz/LatchPoint/pull/5), base `feature/gameplay-foundation`, head `docs/daily-quality-management`.
   5. [PR #6 — settings persistence](https://github.com/Legioniz/LatchPoint/pull/6), base `feature/player-movement-regression-tests`, head `feature/settings-persistence`.
   6. [PR #7 — platform collision-layer regression](https://github.com/Legioniz/LatchPoint/pull/7), base `feature/settings-persistence`, head `feature/physics-layer-mask-regressions`.
   7. [PR #8 — clean audio shutdown in both smoke-test processes](https://github.com/Legioniz/LatchPoint/pull/8), base `feature/physics-layer-mask-regressions`, head `fix/audio-mix-cycle-boot-smoke-shutdown`.
-- **CI trigger gap:** workflow variants are inconsistent. The foundation and docs branches push only on `main` and `feature/**`; the inspected movement/settings/physics/audio descendants also include `fix/**`. None of the inspected versions includes `docs/**`, and all restrict pull-request events to `main`. Therefore docs branches are not push-triggered, and stacked PRs targeting non-main branches do not receive pull-request-triggered checks. PR #8's fix-prefixed head is push-eligible under its own branch's workflow, but run #43175060644's event type was not available in the retrieved job details.
-- **Goal:** Preserve intended dependency order and ensure each PR's base/head SHA, complete diff, review state and checks are current.
-- **Acceptance:** Reconcile PR #1 with current `main` without force-push; recover/review the movement-regression parent; update CI filters and prove checks run on the intended PRs; review each dependent diff and manual-test limitation; merge only with explicit project-owner approval and required evidence.
+  8. [PR #9 — core-loop reference research](https://github.com/Legioniz/LatchPoint/pull/9), base `docs/daily-quality-management`, head `docs/core-loop-reference-research`.
+  9. [PR #10 — daily QA audit](https://github.com/Legioniz/LatchPoint/pull/10), base `docs/core-loop-reference-research`, head `quality/daily-audit-2026-11-13`.
+  10. [PR #11 — branch-wide CI validation](https://github.com/Legioniz/LatchPoint/pull/11), base `feature/gameplay-foundation`, head `ci/branch-wide-godot-validation`.
+- **CI integration conflict:** PR #11 uses catch-all `**` push/PR filters and pins Node 24-compatible action commits. The older workflow on the movement, settings/physics/audio and docs lines still uses `main`, `feature/**`, `fix/**` push filters and PR targets limited to `main`. The new workflow is not propagated to those branches; merging a stale descendant workflow later could restore old filters/action versions.
+- **Goal:** Preserve dependency order and ensure every PR's base/head SHA, complete diff, review state and checks are current.
+- **Acceptance:** Reconcile PR #1 with current main without force-push; recover/review the movement-regression parent; preserve PR #11's workflow policy across descendants; integrate the audio fix with settings/physics; verify all resource paths and full CI logs; merge only with explicit project-owner approval.
 - **Do not:** Retarget or merge downstream PRs before their dependencies are settled.
+- **Branch/PR:** Existing draft stack #1–#11; no new integration branch created.
+
+### LP-SEC-001 — Confirm repository visibility and protect main
+
+- **Priority:** P1
+- **Status:** Blocked on owner confirmation; no GitHub settings changed.
+- **Problem/evidence:** Repository metadata reports `public`; the project request describes it as private. GitHub reports `main` and all listed refs as unprotected.
+- **Goal/value:** Ensure source visibility and integration controls match the intended ownership/access policy.
+- **Scope:** Confirm public/private intent; if private is intended, review collaborators/forks and change repository visibility; enable PR-only protection and required CI checks on main.
+- **Non-goals:** Do not change visibility or protection without owner authorization; do not alter licenses as a substitute for access control.
+- **Likely affected systems:** GitHub repository settings, main branch rules, required CI status checks.
+- **Dependencies/conflicts:** Owner policy decision; choose required check names only after the final workflow is agreed.
+- **Suggested role:** Repository administrator / security reviewer.
+- **Acceptance:** Repository visibility matches the documented intent; main rejects direct pushes and requires approved PRs plus the required checks; evidence is recorded in the task board.
+- **Required proof:** Re-read GitHub repository visibility and branch-protection metadata after the authorized settings change.
+- **Branch/PR/issue:** No issue or PR created; owner decision pending.
+
+### LP-DOC-002 — Synchronize the current testing guide into shared documentation
+
+- **Priority:** P3
+- **Status:** Proposed; defer until the feature/test stack settles.
+- **Problem/evidence:** `TESTING_GUIDE.md` exists on `feature/physics-layer-mask-regressions` and `fix/audio-mix-cycle-boot-smoke-shutdown`, but is absent from the docs PR #10 base `docs/core-loop-reference-research`.
+- **Goal/value:** Give every contributor one current source for import, parse, physics, settings, audio shutdown and manual desktop verification.
+- **Scope:** Bring the latest compatible guide into the shared docs line; verify its commands and descriptions against the integrated tests; link it from README and AGENTS.
+- **Non-goals:** Do not copy a stale guide, add a testing framework, or duplicate test code.
+- **Likely files:** `TESTING_GUIDE.md`, `README.md`, `AGENTS.md`, test scripts.
+- **Dependencies/conflicts:** PR #5/#9 documentation stack and PR #6/#7/#8 test/code stack must be reconciled first.
+- **Suggested role:** QA documentation / technical writer.
+- **Acceptance:** Guide exists on the shared docs base, all commands match the current tree, limitations are explicit, and relative links resolve.
+- **Required tests/proof:** Markdown link/path check plus the documented Godot commands on the integrated branch.
+- **Branch/PR/issue:** No branch or PR created; proposed task.
+
+### LP-REPO-001 — Review copied Git metadata on legacy refs
+
+- **Priority:** P3
+- **Status:** Proposed investigation; no branch or file deleted.
+- **Problem/evidence:** Main retains root `config`, `description` and binary `index`; `automation/playability-baseline` retains tracked `COMMIT_EDITMSG`, `FETCH_HEAD` and `HEAD`. PR #1 already removes the main-branch copies.
+- **Goal/value:** Keep repository history and active branches free of accidental Git internals without destroying historical work.
+- **Scope:** Confirm the old automation branch's purpose and references; preserve PR #1's cleanup; remove metadata only in a reviewed focused change if safe.
+- **Non-goals:** Do not delete the branch, rewrite history or duplicate PR #1 cleanup.
+- **Likely paths:** `config`, `description`, `index`, `COMMIT_EDITMSG`, `FETCH_HEAD`, `HEAD`.
+- **Dependencies/conflicts:** PR #1 cleanup and branch-owner intent.
+- **Suggested role:** Repository steward.
+- **Acceptance:** Each tracked metadata file has an explicit disposition and no active PR/branch dependency is overwritten.
+- **Required proof:** Tree/history/reference review and a focused diff; no Godot test is needed unless project files change.
+- **Branch/PR/issue:** No branch or PR created; proposed task.
 
 ### LP-UI-001 — Verify display behavior on a real desktop
 - **Priority:** P2
