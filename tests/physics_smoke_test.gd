@@ -9,6 +9,13 @@ const REQUIRED_SCENES: Array[String] = [
 	"res://Scene/main.tscn"
 ]
 
+const AUDIO_IMPORT_SOURCES := {
+	"res://Tung.mp3.import": "res://Tung.mp3",
+	"res://maj.mp3.import": "res://maj.mp3",
+	"res://yi.mp3.import": "res://yi.mp3",
+	"res://Project_bullshit.mp3.import": "res://Project_bullshit.mp3"
+}
+
 const PHYSICS_FRAMES_TO_SIMULATE := 120
 const PROBE_FRAMES_TO_SIMULATE := 30
 const PROBE_SIZE := Vector2(20.0, 20.0)
@@ -23,12 +30,13 @@ func _initialize() -> void:
 func _run() -> void:
 	_check_required_scenes()
 	_check_music_asset()
+	_check_audio_import_sources()
 	await _check_gameplay_physics()
 	await _check_solid_collision_directions()
 	await _shutdown_audio_before_exit()
 
 	if failures.is_empty():
-		print("LatchPoint tests passed: scenes loaded; player landed; floor, wall and ceiling collisions held.")
+		print("LatchPoint tests passed: scenes loaded; audio import sources validated; player landed; floor, wall and ceiling collisions held.")
 		quit(0)
 		return
 
@@ -65,6 +73,32 @@ func _check_required_scenes() -> void:
 func _check_music_asset() -> void:
 	if not ResourceLoader.exists("res://Project_bullshit.mp3"):
 		failures.append("Configured music file is missing: res://Project_bullshit.mp3")
+
+
+func _check_audio_import_sources() -> void:
+	for sidecar_path in AUDIO_IMPORT_SOURCES:
+		var config := ConfigFile.new()
+		var load_error := config.load(sidecar_path)
+		if load_error != OK:
+			failures.append(
+				"Could not load audio import sidecar '%s' (error %d)." %
+				[sidecar_path, load_error]
+			)
+			continue
+
+		var expected_source_path: String = AUDIO_IMPORT_SOURCES[sidecar_path]
+		var source_path := str(config.get_value("deps", "source_file", ""))
+		if source_path != expected_source_path:
+			failures.append(
+				"Audio import sidecar '%s' points to '%s'; expected '%s'." %
+				[sidecar_path, source_path, expected_source_path]
+			)
+
+		if not FileAccess.file_exists(expected_source_path):
+			failures.append(
+				"Audio source file referenced by '%s' is missing: '%s'." %
+				[sidecar_path, expected_source_path]
+			)
 
 
 func _check_gameplay_physics() -> void:
