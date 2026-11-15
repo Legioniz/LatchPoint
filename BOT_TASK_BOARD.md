@@ -1,6 +1,6 @@
 # LatchPoint — Bot Task Board
 
-**Last reviewed:** 2026-11-14  
+**Last reviewed:** 2026-11-15  
 **Purpose:** This is the coordination source of truth for agents contributing to LatchPoint. Suggested roles are not confirmed assignments. Check live GitHub issues, branches and PRs before claiming work.
 
 ## Working order
@@ -30,9 +30,10 @@
 ### LP-QA-001 — Investigate MP3 playback references at shutdown
 
 - **Priority:** P1
-- **Status:** Open / in review. Clean on PR #8's head, but reproduced on the separate foundation/CI PR #11 line; issue #3 remains open.
+- **Status:** Open / in review. The warning is reproduced on the current PR #12 sidecar-validation branch and the PR #11 CI branch; the clean PR #8 head remains a separate downstream result. Issue #3 remains open.
 - **Suggested role:** Audio systems + QA engineer.
 - **Evidence:** [Run 43175060644](https://github.com/Legioniz/LatchPoint/actions/runs/43175060644) on `fix/audio-mix-cycle-boot-smoke-shutdown` passed Godot 4.7.2 import/parse/physics/boot checks; the full log shows mix resets after 11 physics frames and 2 boot frames with no retained MP3/ObjectDB warnings. In contrast, Godot 4.7.2 [push run 43570349587](https://github.com/Legioniz/LatchPoint/actions/runs/43570349587) and [PR run 43570448230](https://github.com/Legioniz/LatchPoint/actions/runs/43570448230) on `ci/branch-wide-godot-validation` both complete successfully but report two leaked ObjectDB instances, one resource still in use, retained AudioStreamPlaybackMP3 / AudioStreamMP3 and `res://Project_bullshit.mp3` after each smoke-test process.
+- **Latest evidence (2026-11-15):** Godot 4.7.2 [run 43687899303](https://github.com/Legioniz/LatchPoint/actions/runs/43687899303) on PR #12's feature/audio-import-sidecar-validation branch completed import, parse, physics and boot steps successfully, but the full log reports the same ObjectDB/MP3 resource-retention warnings after both smoke-test processes. The workflow also emits the Node.js 20 deprecation warning for actions/checkout@v4. The sidecar fix does not include PR #8's shutdown diagnostic.
 - **Goal:** Keep the clean shutdown behavior in the integrated project and ensure both independent test processes follow the same lifecycle contract.
 - **Likely files:** `AUDIO.gd`, `tests/physics_smoke_test.gd`, `tests/boot_smoke_test.gd`, `.github/workflows/godot-validation.yml`.
 - **Non-goals:** Do not remove music checks, suppress warnings or weaken physics assertions.
@@ -82,6 +83,7 @@
   8. [PR #9 — core-loop reference research](https://github.com/Legioniz/LatchPoint/pull/9), base `docs/daily-quality-management`, head `docs/core-loop-reference-research`.
   9. [PR #10 — daily QA audit](https://github.com/Legioniz/LatchPoint/pull/10), base `docs/core-loop-reference-research`, head `quality/daily-audit-2026-11-13`.
   10. [PR #11 — branch-wide CI validation](https://github.com/Legioniz/LatchPoint/pull/11), base `feature/gameplay-foundation`, head `ci/branch-wide-godot-validation`.
+  11. [PR #12 — correct retained MP3 import sidecar paths](https://github.com/Legioniz/LatchPoint/pull/12), base `feature/gameplay-foundation`, head `feature/audio-import-sidecar-validation`; seven files changed, including three .import sidecars and the physics smoke test.
 - **CI integration conflict:** PR #11 uses catch-all `**` push/PR filters and pins Node 24-compatible action commits. The older workflow on the movement, settings/physics/audio and docs lines still uses `main`, `feature/**`, `fix/**` push filters and PR targets limited to `main`. The new workflow is not propagated to those branches; merging a stale descendant workflow later could restore old filters/action versions.
 - **Goal:** Preserve dependency order and ensure every PR's base/head SHA, complete diff, review state and checks are current.
 - **Acceptance:** Reconcile PR #1 with current main without force-push; recover/review the movement-regression parent; preserve PR #11's workflow policy across descendants; integrate the audio fix with settings/physics; verify all resource paths and full CI logs; merge only with explicit project-owner approval.
@@ -148,6 +150,21 @@
 - **Suggested role:** Audio integrator / asset librarian.
 - **Goal:** Establish intended use, license and owner of `Tung.mp3`, `maj.mp3` and `yi.mp3`.
 - **Acceptance:** Record references, intended use and license/source. Keep assets unless safely proven redundant and approved for deletion.
+
+### LP-AUD-002 — Validate retained MP3 import sidecar source paths
+
+- **Priority:** P2
+- **Status:** In review on draft [PR #12](https://github.com/Legioniz/LatchPoint/pull/12); not integrated into main.
+- **Problem/evidence:** The foundation-line Tung.mp3.import, maj.mp3.import and yi.mp3.import sidecars pointed to res://MUSIC/... while the source MP3 files are stored at the repository root. PR #12 changes only each deps/source_file value and adds a deterministic check for all four retained MP3 sidecars.
+- **Goal/player or project value:** Keep Godot's committed import metadata consistent with source-file locations and catch stale paths before runtime.
+- **Scope:** Correct the three stale source paths and validate each expected sidecar path plus source-file existence.
+- **Non-goals:** Do not change audio playback/shutdown behavior, imported destination paths, UIDs, import parameters, MP3 binaries or licensing claims.
+- **Likely files:** Tung.mp3.import, maj.mp3.import, yi.mp3.import, tests/physics_smoke_test.gd, and the PR's existing documentation updates.
+- **Dependencies/conflicts:** Based on feature/gameplay-foundation; coordinate with PR #8's separate audio-lifecycle work. Do not edit either active branch from this QA task.
+- **Suggested role:** Godot asset/import QA.
+- **Acceptance criteria:** Each sidecar loads as ConfigFile, its deps/source_file equals the correct root-level res://... path, and the referenced file exists. Preserve all other sidecar fields and binaries.
+- **Required tests/proof:** Godot 4.7.2 headless import, tracked GDScript parse, physics smoke test (including four-sidecar assertions), and complete log inspection. The latest [run 43687899303](https://github.com/Legioniz/LatchPoint/actions/runs/43687899303) passed process steps but still reproduced issue #3.
+- **Branch/PR:** feature/audio-import-sidecar-validation, draft [PR #12](https://github.com/Legioniz/LatchPoint/pull/12).
 
 ### LP-SYS-001 — Persist options across application restart
 - **Priority:** P2

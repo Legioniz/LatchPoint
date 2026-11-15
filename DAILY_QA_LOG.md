@@ -1,6 +1,80 @@
 # Daily QA Log
 
 
+## 2026-11-15 — Repository, branch, Godot integrity and CI audit
+
+**Role:** Project quality manager / repository steward  
+**Repository:** [Legioniz/LatchPoint](https://github.com/Legioniz/LatchPoint)  
+**Engine target:** Godot 4.7.x  
+**Audit scope:** repository metadata; all 17 branch refs; complete current main tree; recursive trees for the foundation, documentation, quality, CI, audio-sidecar and audio-shutdown branches; all 11 open PR summaries; changed-file lists and diffs for PRs #10–#12; selected PR comments/reviews; recent main commits; issue #3 and its comments; Godot project/settings/scenes/scripts/import sidecars; current validation runs #63 and #60, including full job logs.
+
+### Overall project health
+
+**Status: Needs attention.** Main remains an older prototype with confirmed missing resource paths, a broken New Game transition and conflicting horizontal movement calculations. The foundation repairs remain in an open, dirty draft PR rather than main. The latest sidecar-validation workflow passes its process steps but still reports retained MP3/ObjectDB resources after both smoke-test processes. The repository is also reported as public while the project is described as private, and main is unprotected. No risky code, asset, visibility or branch-protection changes were made.
+
+### Repository and branch inventory
+
+- Repository metadata confirms default branch main, visibility **public**, and push/admin permission for the connected repository integration.
+- Current main HEAD is 097da44e4ad3fb2a3f1e762034855ef46cffdac4 (latest commit dated 2026-11-13). Its recursive tree is complete and contains 72 entries; it is not truncated.
+- Enumerated all 17 branch refs. Relevant trees inspected this cycle include:
+  - feature/gameplay-foundation — 58310c34342eed3bbe7b80cf3e2c9fd253acb566
+  - docs/daily-quality-management — 9d4bb00d34956c81f8f44df8c342a54f23ae2367
+  - docs/core-loop-reference-research — 24b7de76a920997f46ad454aae996cd2f1f308f8
+  - quality/daily-audit-2026-11-13 — 55b809efe129e6811e484f833ab00ca6984483e9
+  - ci/branch-wide-godot-validation — 3988d9cf13e5d8912451bbb426e8d4f9a9742f23
+  - feature/audio-import-sidecar-validation — 30ef3341ab20b6e599f5081b0e52cc78160af0ac
+  - fix/audio-mix-cycle-boot-smoke-shutdown — 31ada925876e611b02b6ec2f6830cf5f7b932a27
+- The repository currently has 11 open PRs, all draft: #1, #2, #4, #5, #6, #7, #8, #9, #10, #11 and #12. No PR was merged, closed or retargeted.
+- PR #1 remains the primary integration blocker. GitHub reports it open/draft and mergeable=false / dirty; comparison is **52 commits ahead and 9 behind** current main, with merge base f7bb59d9ef9385a9f62c12c68b32d4ca11328f74. Main and the foundation branch both add README content. No branch update, rebase or merge was attempted.
+- feature/player-movement-regression-tests remains 25 commits ahead of feature/gameplay-foundation and has no PR using it as head. PR #6 depends on it; its intended integration path must be recovered before downstream integration.
+- PR #12 is a new draft against feature/gameplay-foundation, with head feature/audio-import-sidecar-validation. Its seven changed files are IMPROVEMENT_BACKLOG.md, IMPROVEMENT_LOG.md, RESEARCH_REGISTER.md, Tung.mp3.import, maj.mp3.import, yi.mp3.import, and tests/physics_smoke_test.gd. No binary audio asset or UID file is changed.
+- PR #10's existing quality branch is still 9 commits ahead of docs/core-loop-reference-research and 0 behind. It is the correct existing QA branch to update; no duplicate daily-quality branch or PR was created.
+- Comment feeds inspected for PRs #1, #5, #9, #10, #11 and #12 were empty; review lists for #10, #11 and #12 contained no submitted reviews. No other agent identity or confirmed bot assignment was found.
+
+### File structure and Godot integrity
+
+- Main's project.godot declares Godot 4.7 / Forward Plus, main scene UID uid://c8l60tak5vrn8, and an Audio autoload UID. The configured main-scene UID matches the UID in menu.tscn.
+- Main's Scene/main.tscn references res://bg/game_background_4/game_background_4.png, but the complete main tree contains no bg/ directory or referenced image.
+- Main's AUDIO.gd loads res://MUSIC/Project_bullshit.mp3, while the MP3 is at the repository root and no MUSIC/ directory exists.
+- Main's Scene/player.gd computes acceleration/friction velocity and then overwrites velocity.x with a second direct movement/deceleration block in the same physics callback.
+- Main's new_load.gd calls change_scene_to_file() with no scene path. These defects are in main; the foundation PR contains proposed repairs, but they are not integrated.
+- Main still tracks root config, description and binary index files. The fetched config is copied Git configuration pointing at the former Codfyyy/Latchpoint- remote; it contains no credential/token in the inspected text. These are not game files. PR #1 already removes them; no duplicate cleanup was made.
+- Main has no .github/workflows/, tests/ or shared project-management documents. The documentation and test-bearing files are staged on open branches. The tree shows no .godot/ cache, export output, temporary logs, backup files or symlinks.
+- .gitignore excludes .godot/, /android/, common OS metadata and *.log; .gitattributes normalizes text to LF. No export preset was found. Existing Asset/, Scene/ and root-level script placement was preserved; no mass move is justified while the PR stack is unsettled.
+- PR #12 changes only the deps/source_file entries in Tung.mp3.import, maj.mp3.import and yi.mp3.import from stale res://MUSIC/... paths to their actual root-level paths. Its smoke test loads all four retained MP3 sidecars, compares the exact source path and verifies source-file existence. UIDs, import destinations, parameters and MP3 binaries remain unchanged.
+- TESTING_GUIDE.md is present on fix/audio-mix-cycle-boot-smoke-shutdown, but absent from main and the current shared documentation branch. Its test commands and shutdown diagnostics are branch-specific; do not copy it into shared docs until the feature stack and workflow are reconciled.
+
+### Pull requests, workflow and CI evidence
+
+- PR #11's workflow uses catch-all ** push and pull-request branch filters and pins actions/checkout and the Godot setup action to immutable commits. This policy is not propagated to PR #12's branch.
+- The PR #12 workflow still pushes only for main and feature/**, runs pull-request events only for base main, uses actions/checkout@v4 and emits the Node.js 20 deprecation warning. Stacked PRs targeting non-main bases are not covered by that older pull-request filter.
+- [Run 43687899303](https://github.com/Legioniz/LatchPoint/actions/runs/43687899303) was a 2026-11-15 push run on PR #12's head using Godot 4.7.2. Its job 132732135251 completed every step successfully: checkout, engine setup/version, resource import, tracked-GDScript parsing, physics/scene smoke test and boot smoke test. No artifacts were produced.
+- The run log contains the expected success messages: LatchPoint tests passed: scenes loaded; audio import sources validated; player landed; floor, wall and ceiling collisions held. and LatchPoint boot test passed: main menu loaded, controls resolved and frame loop completed.
+- **Despite those pass messages**, after each process the log reports WARNING: 2 ObjectDB instances were leaked at exit, ERROR: 1 resources still in use at exit, retained AudioStreamPlaybackMP3 and AudioStreamMP3, and Resource still in use: res://Project_bullshit.mp3. It also reports an orphan Music StringName. This is a confirmed reproduction, not a root-cause diagnosis.
+- [Run 43570448230](https://github.com/Legioniz/LatchPoint/actions/runs/43570448230), the PR event on the branch-wide CI PR #11 head, also completed successfully. Its retrieved 538-line job log contains the physics and boot pass messages followed by the same ObjectDB/resource/MP3-retention warnings after both processes.
+- The issue #3 discussion was updated with this new run #63 evidence. Keep issue #3 open; PR #12's sidecar-path validation does not contain PR #8's clean shutdown diagnostic.
+- The older workflow still produces the Node.js 20 deprecation warning for actions/checkout@v4; PR #11's pinned action update is a separate integration change and should not be lost during stack reconciliation.
+
+### Access-control and branch-safety finding
+
+- GitHub repository metadata reports **public** visibility, despite the project being described as private.
+- All 17 enumerated branch refs report protected: false, including main. The current copyright notice does not make a public repository private.
+- No visibility or branch-protection settings were changed because this requires explicit owner authorization and may affect access/forks. Confirm whether public visibility is intentional; if private is intended, review collaborators/forks before changing it. Protect main with PR requirements and required CI checks once the workflow/check name is settled.
+
+### Changes in this quality cycle
+
+- Updated BOT_TASK_BOARD.md, ISSUE_REGISTER.md and DAILY_QA_LOG.md on the existing quality/daily-audit-2026-11-13 branch / draft PR #10. No other contributor branch was modified.
+- Added the 2026-11-15 run #63 evidence to [GitHub issue #3](https://github.com/Legioniz/LatchPoint/issues/3).
+- No gameplay code, scenes, assets, UIDs, import sidecars, licensing files, project settings or workflows were modified. No files were moved or deleted.
+- No local Godot executable/editor was available. Runtime/import/parser/physics evidence is from GitHub Actions only; no local test, manual desktop test, export or performance test was run.
+- No bot identities or assignments were confirmed. Suggested specialist roles remain suggestions.
+
+### Next highest-priority objective
+
+**Resolve the access-control mismatch before further integration:** confirm whether LatchPoint is intended to be public or private. If private is intended, review collaborators/forks and change visibility only with owner authorization; then protect main with PR-only requirements and the agreed Godot validation check. This is a higher-risk repository policy decision than routine file cleanup and should be settled before merging the open feature stack.
+
+---
+
 ## 2026-11-14 — Full repository, integration and CI recheck
 
 **Role:** Project quality manager / repository steward  
