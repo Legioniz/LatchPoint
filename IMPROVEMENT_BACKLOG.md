@@ -41,3 +41,11 @@ Items are not promises to implement immediately. Re-score them after inspecting 
 - [x] Replaced a missing gameplay background reference with a temporary built-in color fallback.
 - [x] Removed confirmed copied Git metadata and unreferenced empty prototype scripts/scenes after reference checks.
 
+## P2 — Asset provenance and import hygiene
+
+- [ ] **Confirm source and license of retained audio assets.** The repository history records the upload of `Tung.mp3`, `maj.mp3` and `yi.mp3`, but the upload message does not identify their original source or license. Static code search on the default branch found only their import sidecars; no runtime use was established. Preserve the files until the owner confirms intended use and permission. Their stale import source paths are corrected and covered by the current foundation-branch smoke test.
+
+
+## Resolved in the current foundation PR
+
+- [x] Corrected the remaining retained MP3 `.import` sidecars so each `deps/source_file` points to the MP3 stored at the project root; added a regression assertion for exact source-path and file-existence checks.

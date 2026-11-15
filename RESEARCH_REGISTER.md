@@ -58,3 +58,18 @@ Checked 2026-11-09. These references establish the first research baseline. Re-c
 ## Decision rule
 
 The references are inspiration and technical evidence, not a feature checklist. Each adopted pattern must be tied to the LatchPoint design pillars, implemented originally, tested and recorded in the improvement log. No external code, art, sound, level or character is copied by this register.
+
+## 2026-11-15 — Godot imported-resource metadata and audio asset audit
+
+### Godot 4.7 Import Process
+- Source: https://docs.godotengine.org/en/4.7/tutorials/assets_pipeline/import_process.html
+- Checked: 2026-11-15.
+- Findings: Godot places imported source assets in the project folder, generates a companion `.import` file containing import configuration, and stores generated imported resources under `res://.godot/imported/`. The documentation explicitly says to commit the companion import files because they contain important metadata.
+- Applied decision: preserve the sidecars and their stable UIDs/import settings; correct only the stale `deps/source_file` paths so they point to the actual root-level MP3 source files. Add a test that checks the exact expected source path and source-file existence.
+- No imported binary, audio data, UID, destination path or import parameter was changed.
+
+### Audio provenance and licensing
+- Repository history shows `Tung.mp3`, `maj.mp3` and `yi.mp3` were introduced together by an “Add files via upload” commit dated 2026-08-23. That commit message does not establish the original source, rights holder or license.
+- The current `COPYRIGHT.md` distinguishes owner-controlled materials from third-party materials and says third-party assets remain subject to their respective terms. No per-file license/source attribution was found in the inspected records.
+- Decision: do not delete, redistribute separately, modify or claim ownership of these audio files. Keep the asset-provenance task open until the owner supplies source and permission details. The current change is limited to technical import metadata and regression coverage.
+- No commercial/indie game comparison was relevant to this asset-pipeline correctness task; no external code or assets were reused.

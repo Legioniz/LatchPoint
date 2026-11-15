@@ -7,7 +7,7 @@ path="res://.godot/imported/yi.mp3-fd9b412387d80804cb887f03b3f1cd1a.mp3str"
 
 [deps]
 
-source_file="res://MUSIC/yi.mp3"
+source_file="res://yi.mp3"
 dest_files=["res://.godot/imported/yi.mp3-fd9b412387d80804cb887f03b3f1cd1a.mp3str"]
 
 [params]
