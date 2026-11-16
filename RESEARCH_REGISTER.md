@@ -118,3 +118,28 @@ These are alternative patterns, not a feature checklist. The current LatchPoint 
 - Do not implement collectibles, dash/corner correction, Wonder-style transformations, open-world systems or other reference mechanics until the owner approves a direction and the prototype demonstrates their value.
 
 **Decision status:** research comparison prepared on 2026-11-13; no game direction, mechanic, design pillar or first-playable scope has been approved. No gameplay code or assets changed.
+
+
+## 2026-11-16 — Classifying copied Git metadata on a historical branch
+
+### Official Git references
+- Repository layout: https://git-scm.com/docs/gitrepository-layout
+  - Git documents `HEAD`, `config` and `index` as repository metadata under `$GIT_DIR`; in a standard working tree this is the `.git/` directory.
+- Fetch behavior: https://git-scm.com/docs/git-fetch
+  - Git writes fetched ref/object information to `.git/FETCH_HEAD`.
+- Commit behavior: https://git-scm.com/docs/git-commit
+  - Git documents `$GIT_DIR/COMMIT_EDITMSG` as the message file for a commit in progress.
+- General repository model: https://git-scm.com/docs/git
+  - A normal working tree's `.git` directory contains the object database, index and refs; root-level files with similar names are not automatically the active metadata directory.
+
+### Repository observations
+- `automation/playability-baseline` is at `f7bb59d9ef9385a9f62c12c68b32d4ca11328f74`; comparison with `main` reports zero commits ahead and nine behind. It is the merge base of PR #1 and has no unique commits relative to main.
+- No current PR uses the automation branch as its base or head.
+- Six similarly named files are tracked at the project root on that branch. Text inspection found an old commit message, a former remote URL, a local branch pointer and a generic description. The root `config` contains no credential in the inspected text. The binary `index` was not decoded.
+- Main's previous cleanup commit [9ce61c5](https://github.com/Legioniz/LatchPoint/commit/9ce61c5e014927aa3c90a14a0ea941e98823d42b) removed three of these files from main; PR #1 already proposes removal of the remaining root-level `config`, `description` and `index` copies.
+
+### Design decision and safety
+- Treat the root-level copies as ordinary tracked project files, not active GitHub-hosted repository configuration. Do not execute or use them as a local Git repository.
+- Retain `automation/playability-baseline` unchanged as a historical baseline and PR #1 comparison point. Do not delete the branch, rewrite history, or duplicate the cleanup already proposed in PR #1 without explicit owner direction.
+- No Git commands, code, assets or dependencies were copied into the project. The official documentation was referenced for classification only; no source text or implementation was reused.
+- The binary index remains uninspected beyond confirming its presence and encoded size; no statement is made about its internal paths or entries.
