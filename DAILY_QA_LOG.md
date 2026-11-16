@@ -367,3 +367,57 @@ PR #5 is a documentation-only sibling PR based on the foundation branch. It does
 - Re-fetched and reviewed the updated documentation files after committing.
 - This was a documentation/repository-audit cycle. No Godot import, GDScript parse, scene, physics, audio, desktop, export or performance test was run. No ML or reinforcement learning was used.
 - No branch was created/deleted, no PR was merged/retargeted, and no repository settings were changed.
+
+
+## 2026-11-16 — Repository, PR, CI and Godot integrity revalidation
+
+**Role:** Project quality manager / repository steward  
+**Repository:** [Legioniz/LatchPoint](https://github.com/Legioniz/LatchPoint)  
+**Engine target:** Godot 4.7.x  
+**Scope:** Complete recursive tree for current `main`; all 18 branch refs; all 11 open PRs and their base/head relationships; submitted review lists and PR discussion feeds; issue #3; comparisons for unrepresented branches; current project configuration and key scenes/scripts; latest relevant Godot 4.7.2 workflow jobs, full logs and artifact lists.
+
+### Overall project health
+
+**Status: Needs attention.** The default branch remains an older prototype with confirmed broken resource/scene integrations and no checked-in automated validation workflow. The foundation and downstream repairs remain in an open draft PR stack. The latest sidecar and CI runs exit successfully but retain MP3/ObjectDB shutdown warnings after both smoke-test processes. GitHub currently reports the repository as **public**, despite the project being described as private. No gameplay or repository settings were changed.
+
+### Repository and branch inventory
+
+- Repository metadata reports default branch `main`, visibility `public`, and current main HEAD `097da44e4ad3fb2a3f1e762034855ef46cffdac4` (latest main commit 2026-11-13).
+- The recursive main tree returned 72 entries (68 blobs, 4 trees), with `truncated=false`. It contains no `.github/workflows/`, `tests/`, or shared project-management documents; these exist only on open development/documentation branches.
+- Enumerated all 18 branch refs. All 11 PRs (#1, #2, #4–#12) remain open and draft; none is merged. All 11 submitted-review lists are empty. PR comment feeds are empty except PR #10, which now has three top-level coordination/revalidation comments by Legioniz. No separate bot identity or accepted bot assignment was visible.
+- PR #1 remains non-mergeable/dirty and 52 commits ahead, 9 behind main; main and the foundation branch independently add `README.md`. No rebase, merge or branch update was attempted.
+- PR #10 remains the existing QA branch/PR: head `quality/daily-audit-2026-11-13` at `bb786ccfa4ba4f3b86f699657cf94b1a222e45cf`, base `docs/core-loop-reference-research`, 15 commits ahead and 0 behind, draft and mergeable. This audit updated that existing branch rather than creating a duplicate.
+- PR #6 still depends on `feature/player-movement-regression-tests`, which is 25 commits ahead of `feature/gameplay-foundation` and has no PR using it as head. The branch adds movement-regression tests and `TESTING_GUIDE.md`; recover/review its intended integration path before PR #6 or descendants.
+- `fix/audio-shutdown-grace-experiment` is 4 commits ahead of `fix/windowed-borderless-toggle`, has no PR using it as head, and differs only in `IMPROVEMENT_BACKLOG.md`, `IMPROVEMENT_LOG.md`, `RESEARCH_REGISTER.md` and `TESTING_GUIDE.md`. Its latest commit is dated 2026-11-10. Preserve it as unrepresented historical/experimental work; do not treat it as a verified runtime fix or delete it.
+- Two additional refs are exact aliases at this audit: `feature/audio-shutdown-cleanup` is identical to `feature/gameplay-foundation`; `fix/audio-server-shutdown-grace` is identical to `fix/windowed-borderless-toggle`. No ref was deleted.
+
+### File tree and Godot integrity
+
+- `project.godot` declares Godot 4.7 / Forward Plus, main scene UID `uid://c8l60tak5vrn8`, and Audio autoload UID `uid://e5kx2uvw6r51`. The main-scene UID matches the embedded UID in `menu.tscn`.
+- On main, `Scene/main.tscn` references missing `res://bg/game_background_4/game_background_4.png`; `AUDIO.gd` loads `res://MUSIC/Project_bullshit.mp3` while the MP3 is at the project root; `new_load.gd` calls `change_scene_to_file()` without a scene path; and `Scene/player.gd` computes acceleration/friction velocity before overwriting `velocity.x` with a second movement block. These are already addressed by proposed foundation changes in PR #1; no duplicate fix was made on main.
+- Main still tracks root `config`, `description` and binary `index` copies. PR #1 already proposes removing them; no duplicate cleanup was made. The previous `COMMIT_EDITMSG`, `FETCH_HEAD` and `HEAD` removals remain in main history.
+- `.gitignore` excludes `.godot/`, `/android/`, common OS metadata and `*.log`; `.gitattributes` normalizes text to LF. No generated `.godot/` cache, export output, temporary logs, backup files or symlinks appeared in the inspected main tree. No export preset was present.
+- The quality/docs branch's workflow still uses push filters `main` and `feature/**`, pull-request target `main`, and `actions/checkout@v4`; it does not trigger for the quality branch or PR #10's stacked docs base. PR #11's separate workflow uses catch-all `**` filters and pinned Node 24-compatible action commits. PR #12's branch still uses the older workflow and checkout@v4.
+- `TESTING_GUIDE.md` is absent from the quality/docs branch. It exists on the movement-regression and PR #8 branches; the PR #8 version includes the current movement, settings, collision-layer and clean-shutdown diagnostics. Existing task LP-DOC-002 correctly defers synchronization until the test/feature stack is settled. Do not copy the older guide blindly.
+
+### Pull requests, CI and logs
+
+- PR #1: open/draft, GitHub reports `mergeable=false` / `dirty`; compare is 52 ahead / 9 behind main. No PR comments or submitted reviews.
+- PR #10: open/draft, mergeable, base `docs/core-loop-reference-research`; no submitted reviews. Three top-level comments are coordination/revalidation notes only.
+- All 11 open PRs have no submitted review records. Comment feeds are empty except PR #10. No PR was merged, retargeted or closed.
+- Latest sidecar validation [run 43687899303](https://github.com/Legioniz/LatchPoint/actions/runs/43687899303), job 132732135251, completed all eight validation steps successfully on Godot 4.7.2. I inspected the complete 496-line job log: after both physics and boot success messages it reports `2 ObjectDB instances were leaked at exit`, `1 resources still in use at exit`, retained `AudioStreamPlaybackMP3` / `AudioStreamMP3`, `res://Project_bullshit.mp3`, and orphan `Music` StringName output. The job also emits the Node.js 20 deprecation warning for `actions/checkout@v4`.
+- Branch-wide CI [run 43570448230](https://github.com/Legioniz/LatchPoint/actions/runs/43570448230), job 132373466398, completed all validation steps on Godot 4.7.2. Its complete 538-line log reports the same MP3/ObjectDB/StringName warnings after both smoke-test processes.
+- The downstream PR #8 head [run 43175060644](https://github.com/Legioniz/LatchPoint/actions/runs/43175060644), job 131037182255, completed all validation steps on Godot 4.7.2. Its complete 490-line log contains the physics and boot success messages and no matching ObjectDB/resource/MP3 shutdown warnings. This clean result is on a separate downstream branch and is not integrated into the PR #11/#12 or main line.
+- Artifact lists for runs 43687899303, 43570448230 and 43175060644 are empty. No downloadable CI artifact was available.
+- GitHub's branch-protection endpoint returned HTTP 403 (`Resource not accessible by integration`) in this run. The previous audit reported main and inspected refs as unprotected; this run could not independently re-read current protection rules. No repository settings were changed.
+
+### Changes and verification
+
+- Updated only `BOT_TASK_BOARD.md`, `ISSUE_REGISTER.md` and `DAILY_QA_LOG.md` on the existing `quality/daily-audit-2026-11-13` branch. Added the unrepresented audio-experiment ref and corrected the PR discussion/review inventory; recorded current CI, tree and access-read limitations.
+- No game scripts, scenes, assets, UIDs, import sidecars, project settings, workflows, licenses or binary files changed. No files were moved or deleted; no dependencies were added; no other branch was modified.
+- Re-read the updated documents and verified their branch/PR head after the commit. No local Godot executable/editor was available. No local import, parser, scene, physics, audio, desktop, export or performance test was run. The only runtime evidence is from the cited GitHub Actions logs.
+- Rollback: revert the documentation commit with a normal follow-up commit if any entry is inaccurate. Do not reset or force-push the shared branch.
+
+### Next highest-priority objective
+
+Obtain explicit owner confirmation of the repository's public/private intent and the intended main-branch protection policy. GitHub currently reports the repository public while the project is described as private; the branch-protection state could not be re-read in this run. Resolve the access-control mismatch before further integration work.

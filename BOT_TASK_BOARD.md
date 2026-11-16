@@ -72,6 +72,7 @@
 - **Suggested role:** GitHub integration lead / senior reviewer.
 - **Current repository evidence:** `main` is at `097da44e4ad3fb2a3f1e762034855ef46cffdac4`. PR #1 targets main from `feature/gameplay-foundation`; GitHub reports `mergeable=false` / `dirty`, and comparison shows 52 commits ahead and 9 behind. Both main and PR #1 independently add `README.md`; reconcile that add/add conflict. Do not force-push or rewrite the shared branch.
 - **Unrepresented parent dependency:** PR #6 targets `feature/player-movement-regression-tests`. That branch is 25 commits ahead of `feature/gameplay-foundation`, and no PR with it as head appeared in the all-state PR inventory. Recover/review its intended integration path before PR #6 or descendants.
+- **Unrepresented audio-shutdown experiment ref:** `fix/audio-shutdown-grace-experiment` is 4 commits ahead of `fix/windowed-borderless-toggle` and has no PR using it as head. Its delta is limited to `IMPROVEMENT_BACKLOG.md`, `IMPROVEMENT_LOG.md`, `RESEARCH_REGISTER.md` and `TESTING_GUIDE.md`; its latest commit is [b0a7fca](https://github.com/Legioniz/LatchPoint/commit/b0a7fca59f9515b083cfaae9bbe22e27e6fc701b) (2026-11-10). This is an unrepresented documentation/experiment line, not a verified integrated runtime fix. Preserve it; review its guide against PR #8 before reuse, and do not merge or delete it without an explicit disposition.
 - **Current PR relationships:**
   1. [PR #1 — gameplay foundation](https://github.com/Legioniz/LatchPoint/pull/1), base `main`, head `feature/gameplay-foundation`; dirty against current main.
   2. [PR #2 — fullscreen/window decoration fix](https://github.com/Legioniz/LatchPoint/pull/2), base `feature/gameplay-foundation`, head `fix/windowed-borderless-toggle`.
@@ -94,7 +95,7 @@
 
 - **Priority:** P1
 - **Status:** Blocked on owner confirmation; no GitHub settings changed.
-- **Problem/evidence:** Repository metadata reports `public`; the project request describes it as private. GitHub reports `main` and all listed refs as unprotected.
+- **Problem/evidence:** Repository metadata currently reports `public`, while the project request describes it as private. The previous audit reported `main` and all inspected refs as unprotected; the current branch-protection endpoint returned HTTP 403 (`Resource not accessible by integration`), so this run could not re-verify current rules.
 - **Goal/value:** Ensure source visibility and integration controls match the intended ownership/access policy.
 - **Scope:** Confirm public/private intent; if private is intended, review collaborators/forks and change repository visibility; enable PR-only protection and required CI checks on main.
 - **Non-goals:** Do not change visibility or protection without owner authorization; do not alter licenses as a substitute for access control.
