@@ -1,6 +1,6 @@
 # LatchPoint — Issue Register
 
-**Reviewed:** 2026-11-15  
+**Reviewed:** 2026-11-16  
 This register separates confirmed defects from missing features, design decisions and investigations. Do not report a hypothesis as a root cause. Link to GitHub issues when they exist.
 
 ## P1 — Confirmed investigation
@@ -99,9 +99,13 @@ This register separates confirmed defects from missing features, design decision
 
 ### LP-REPO-001: Copied Git metadata remains on legacy repository refs
 
-- **Status:** Investigation required; no branch or file was deleted.
-- **Evidence:** Main still contains copied Git `config`, `description` and binary `index` files; PR #1 deletes those from its proposed foundation tree. The unassociated `automation/playability-baseline` branch remains at the original baseline commit and contains tracked `COMMIT_EDITMSG`, `FETCH_HEAD` and `HEAD`.
-- **Action:** Preserve the existing PR #1 cleanup on its branch. Separately confirm whether the old automation branch is still needed before removing any tracked metadata or deleting the branch. Do not rewrite or delete the branch as part of routine cleanup.
+- **Status:** Investigated on 2026-11-16; no branch or file was changed. Historical ref retained pending owner direction.
+- **Evidence:** `automation/playability-baseline` points to `f7bb59d9ef9385a9f62c12c68b32d4ca11328f74`. GitHub compare against current `main` reports zero commits ahead and nine behind; its head is the merge base of PR #1. None of the 11 current PRs uses this branch as base or head.
+- **Tracked root-level files inspected on the branch:** `COMMIT_EDITMSG` (contains `Initial commit`), `FETCH_HEAD` (former Codfyyy/Latchpoint- remote URL and fetched commit), `HEAD` (contains `ref: refs/heads/main`), `config` (former remote URL; no credential in the inspected text), `description` (generic placeholder), and binary `index` (present; not decoded).
+- **Main-branch history:** commit [9ce61c5](https://github.com/Legioniz/LatchPoint/commit/9ce61c5e014927aa3c90a14a0ea941e98823d42b) removed `COMMIT_EDITMSG`, `FETCH_HEAD` and `HEAD` from main. Main still tracks `config`, `description` and binary `index`; PR #1 already proposes removing those three files from its foundation branch.
+- **Technical classification:** Git's documented repository layout places active `HEAD`, `config` and `index` under `$GIT_DIR`; `FETCH_HEAD` and `COMMIT_EDITMSG` are likewise documented as `.git/FETCH_HEAD` and `$GIT_DIR/COMMIT_EDITMSG`. These copies are at the project root, so they are tracked project blobs rather than active metadata for the hosted repository. The binary index was not decoded, so no claim is made about its internal entries.
+- **Disposition:** Preserve the stale automation branch as a historical baseline and PR #1 merge-base reference. Do not delete the branch, edit its files, rewrite history, or duplicate PR #1's cleanup without explicit owner direction. No credential was observed in the inspected text files.
+- **Remaining action:** Owner confirmation is required only if the branch should later be archived or deleted. The investigation itself is complete; no runtime defect or Godot test is implicated.
 
 ## Resolved on the foundation branch — pending merge into main
 
