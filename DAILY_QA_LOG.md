@@ -335,3 +335,35 @@ PR #5 is a documentation-only sibling PR based on the foundation branch. It does
 4. Obtain the product owner's decision on the core gameplay loop.
 5. Add broader, deterministic physics coverage.
 6. Verify remaining MP3 asset ownership and licenses before removing or reclassifying them.
+
+
+## 2026-11-16 — Legacy Git metadata disposition audit
+
+**Role:** Repository steward / integration lead  
+**Repository:** [Legioniz/LatchPoint](https://github.com/Legioniz/LatchPoint)  
+**Audit scope:** current main HEAD; all 18 branch refs; all 11 PRs returned by the all-state repository search; ancestry of `automation/playability-baseline`; six root-level metadata-like files on that ref; the prior main cleanup commit; LP-REPO-001 coordination and documentation.
+
+### Repository state
+- Default branch remains `main` at `097da44e4ad3fb2a3f1e762034855ef46cffdac4`.
+- Enumerated 18 refs: `automation/playability-baseline`, `ci/branch-wide-godot-validation`, `docs/audio-shutdown-leak-investigation`, `docs/core-loop-reference-research`, `docs/daily-quality-management`, `feature/audio-import-sidecar-validation`, `feature/audio-shutdown-cleanup`, `feature/gameplay-foundation`, `feature/physics-layer-mask-regressions`, `feature/player-movement-regression-tests`, `feature/settings-persistence`, `fix/audio-mix-cycle-boot-smoke-shutdown`, `fix/audio-mix-cycle-shutdown`, `fix/audio-server-shutdown-grace`, `fix/audio-shutdown-grace-experiment`, `fix/windowed-borderless-toggle`, `main`, and `quality/daily-audit-2026-11-13`.
+- Eleven PRs remain open/draft: #1, #2, #4, #5, #6, #7, #8, #9, #10, #11 and #12. All PR base/head refs were inspected; none uses `automation/playability-baseline` as base or head.
+- PR #1 remains open/draft and GitHub reports it non-mergeable. The automation branch's commit is its merge base; no branch update, merge, rebase or force-push was attempted.
+
+### Legacy branch and metadata evidence
+- `automation/playability-baseline` points to `f7bb59d9ef9385a9f62c12c68b32d4ca11328f74`.
+- Compare `main...automation/playability-baseline`: status `behind`, zero commits ahead, nine behind, merge base `f7bb59d9...`. It contains no unique commits relative to main and appears to be a preserved original baseline; its exact owner-intended purpose is not independently confirmed.
+- The branch has root-level tracked copies of `COMMIT_EDITMSG`, `FETCH_HEAD`, `HEAD`, `config`, `description` and binary `index`. Text contents were inspected. The `config` points to the former Codfyyy/Latchpoint- remote and contains no credential in the fetched text. The binary index was confirmed present but not decoded.
+- Main's root-level `COMMIT_EDITMSG`, `FETCH_HEAD` and `HEAD` were removed by commit [9ce61c5](https://github.com/Legioniz/LatchPoint/commit/9ce61c5e014927aa3c90a14a0ea941e98823d42b). Main still tracks `config`, `description` and binary `index`; PR #1 already proposes their removal. No duplicate cleanup was made.
+- Official Git documentation places active repository metadata inside `$GIT_DIR` (or `.git/` in the standard working-tree layout). The root-level copies are ordinary tracked blobs; they do not alter GitHub's server-side repository configuration. The exact binary index entries remain unverified.
+
+### Decision and changes
+- LP-REPO-001 investigation is complete. Preserve `automation/playability-baseline` unchanged as a historical baseline and PR #1 merge-base reference.
+- Do not delete/archive the branch or mutate its files without owner direction. Preserve PR #1's cleanup proposal; do not rewrite shared history.
+- Posted a coordination/ownership comment on PR #10 before editing documentation (comment ID 6909994355).
+- Updated only the existing `quality/daily-audit-2026-11-13` documentation branch: task board, issue register, daily QA log, research register and improvement log. No game scripts, scenes, assets, import sidecars, project settings, workflows or contributor branches changed.
+
+### Research and verification
+- Reviewed official Git documentation for repository layout, `git-fetch` and `git-commit`; findings and design decision are in `RESEARCH_REGISTER.md`.
+- Re-fetched and reviewed the updated documentation files after committing.
+- This was a documentation/repository-audit cycle. No Godot import, GDScript parse, scene, physics, audio, desktop, export or performance test was run. No ML or reinforcement learning was used.
+- No branch was created/deleted, no PR was merged/retargeted, and no repository settings were changed.
