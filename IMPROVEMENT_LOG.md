@@ -74,3 +74,29 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - No performance profiling or ML was performed.
 
 **Branch:** `docs/core-loop-reference-research` (based on `docs/daily-quality-management`). **Draft PR:** [#9](https://github.com/Legioniz/LatchPoint/pull/9), open and mergeable at last inspection; review/integration pending.
+
+
+## 2026-11-16 — Legacy Git metadata disposition audit
+
+**Objective:** complete LP-REPO-001 by determining whether the unassociated `automation/playability-baseline` ref can be safely cleaned up without destroying historical or contributor work.
+
+### Findings
+- The ref points to `f7bb59d9ef9385a9f62c12c68b32d4ca11328f74`; comparison with current `main` reports zero commits ahead and nine behind. It is the merge base of PR #1 and has no unique commits relative to main.
+- None of the 11 current PRs uses this branch as base or head.
+- Its root tree contains tracked `COMMIT_EDITMSG`, `FETCH_HEAD`, `HEAD`, `config`, `description` and binary `index` files. The text config contains the former repository URL but no credential in the inspected content. The binary index was not decoded.
+- Main's commit [9ce61c5](https://github.com/Legioniz/LatchPoint/commit/9ce61c5e014927aa3c90a14a0ea941e98823d42b) already removed `COMMIT_EDITMSG`, `FETCH_HEAD` and `HEAD`; PR #1 proposes removing `config`, `description` and `index` from the foundation tree.
+- Git's official layout documentation confirms that active metadata lives under `$GIT_DIR`; the root-level copies are tracked project blobs and do not configure the hosted repository.
+
+### Decision
+- Preserve the automation branch unchanged as a historical baseline and PR #1 merge-base reference.
+- Do not delete the branch, edit its metadata, or duplicate PR #1 cleanup without owner direction.
+- Recorded the disposition in the task board, issue register, research register and daily QA log. Posted a coordination comment on PR #10 before editing the existing quality branch.
+
+### Verification and limitations
+- Documentation-only; no Godot import/parser/scene/physics/audio/desktop/export test was relevant or run.
+- Re-fetched and reviewed the five updated Markdown files after committing.
+- No runtime code, scenes, assets, project settings, workflows, UIDs, import sidecars or other contributor branches changed. No branch was created/deleted and no PR was merged.
+- No performance measurements or ML experiments were performed.
+
+**Branch:** `quality/daily-audit-2026-11-13`  
+**PR:** [#10](https://github.com/Legioniz/LatchPoint/pull/10), existing draft PR extended with this audit.
