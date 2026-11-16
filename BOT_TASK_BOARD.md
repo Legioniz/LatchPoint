@@ -1,6 +1,6 @@
 # LatchPoint — Bot Task Board
 
-**Last reviewed:** 2026-11-15  
+**Last reviewed:** 2026-11-16  
 **Purpose:** This is the coordination source of truth for agents contributing to LatchPoint. Suggested roles are not confirmed assignments. Check live GitHub issues, branches and PRs before claiming work.
 
 ## Working order
@@ -123,17 +123,20 @@
 ### LP-REPO-001 — Review copied Git metadata on legacy refs
 
 - **Priority:** P3
-- **Status:** Proposed investigation; no branch or file deleted.
-- **Problem/evidence:** Main retains root `config`, `description` and binary `index`; `automation/playability-baseline` retains tracked `COMMIT_EDITMSG`, `FETCH_HEAD` and `HEAD`. PR #1 already removes the main-branch copies.
-- **Goal/value:** Keep repository history and active branches free of accidental Git internals without destroying historical work.
-- **Scope:** Confirm the old automation branch's purpose and references; preserve PR #1's cleanup; remove metadata only in a reviewed focused change if safe.
-- **Non-goals:** Do not delete the branch, rewrite history or duplicate PR #1 cleanup.
-- **Likely paths:** `config`, `description`, `index`, `COMMIT_EDITMSG`, `FETCH_HEAD`, `HEAD`.
-- **Dependencies/conflicts:** PR #1 cleanup and branch-owner intent.
-- **Suggested role:** Repository steward.
-- **Acceptance:** Each tracked metadata file has an explicit disposition and no active PR/branch dependency is overwritten.
-- **Required proof:** Tree/history/reference review and a focused diff; no Godot test is needed unless project files change.
-- **Branch/PR/issue:** No branch or PR created; proposed task.
+- **Status:** Investigation complete; disposition recorded. No branch or file was changed. Owner confirmation is still required before archiving or deleting the historical ref.
+- **Suggested role:** Repository steward / integration lead.
+- **Evidence (2026-11-16):**
+  - The repository has 18 branch refs. `automation/playability-baseline` points to `f7bb59d9ef9385a9f62c12c68b32d4ca11328f74`.
+  - GitHub compare `main...automation/playability-baseline` reports `status=behind`, `ahead_by=0`, `behind_by=9`, with the same `f7bb59d9...` merge base. The automation ref has no unique commits relative to current main and is a historical ancestor.
+  - All 11 PRs returned by the repository-wide all-state inventory were inspected. None uses `automation/playability-baseline` as its base or head. The commit is, however, the merge base of PR #1; preserve it as a comparison point while that PR remains unresolved.
+  - The branch contains six root-level tracked Git-metadata-like files: `COMMIT_EDITMSG`, `FETCH_HEAD`, `HEAD`, `config`, `description` and binary `index`. The fetched text says: `COMMIT_EDITMSG` = `Initial commit`; `FETCH_HEAD` names the former Codfyyy/Latchpoint- remote; `HEAD` = `ref: refs/heads/main`; `config` points to that former remote and contains no credential in the inspected text; `description` is the generic placeholder. The binary index was confirmed present (200 base64 characters) but was not decoded.
+  - Current main still tracks root `config`, `description` and binary `index`. Commit [9ce61c5](https://github.com/Legioniz/LatchPoint/commit/9ce61c5e014927aa3c90a14a0ea941e98823d42b) removed `COMMIT_EDITMSG`, `FETCH_HEAD` and `HEAD` from main on 2026-11-11. PR #1 already proposes removing the remaining three root-level copies; do not duplicate that cleanup.
+  - Official Git documentation locates active `HEAD`, `config` and `index` under `$GIT_DIR`; `git-fetch` writes `.git/FETCH_HEAD`, and `git-commit` uses `$GIT_DIR/COMMIT_EDITMSG`. The files at the project root are ordinary tracked blobs, not the GitHub-hosted repository's active metadata.
+- **Disposition:** Retain `automation/playability-baseline` unchanged as a historical baseline/merge-base reference. Do not edit its tree, delete the branch, or decode/remove the binary index without owner direction. Preserve PR #1's existing cleanup proposal on its own branch.
+- **Acceptance:** Every path has a documented disposition; no contributor branch, history or PR dependency is overwritten. **Met for this investigation.**
+- **Remaining action:** Owner may explicitly authorize archiving/deleting the stale baseline ref later. No runtime change or cleanup commit is needed now.
+- **Coordination:** Scope and file ownership were announced in a comment on [PR #10](https://github.com/Legioniz/LatchPoint/pull/10); this audit updates only the existing quality branch.
+- **Branch/PR:** `quality/daily-audit-2026-11-13`, PR [#10](https://github.com/Legioniz/LatchPoint/pull/10).
 
 ### LP-UI-001 — Verify display behavior on a real desktop
 - **Priority:** P2
