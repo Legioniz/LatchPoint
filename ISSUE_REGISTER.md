@@ -54,6 +54,16 @@ This register separates confirmed defects from missing features, design decision
 
 ## P2 — Incomplete coverage or manual verification
 
+### LP-IMP-001: MP3 import sidecars reference a missing MUSIC directory on main
+
+- **Priority:** P2
+- **Status:** In review on the foundation/sidecar draft PRs; not integrated into main.
+- **Evidence:** The complete main tree has four MP3 source files at the repository root and no `MUSIC/` directory. Direct inspection of `Tung.mp3.import`, `maj.mp3.import`, `yi.mp3.import` and `Project_bullshit.mp3.import` on main shows `source_file="res://MUSIC/<filename>.mp3"` for all four. The corresponding source files exist at `res://<filename>.mp3`.
+- **Affected files:** The four MP3 `.import` sidecars and their source MP3 files; `tests/physics_smoke_test.gd` on the sidecar branch.
+- **Current proposed repair:** PR #1 corrects the `Project_bullshit.mp3.import` source path. PR #12 corrects the other three source paths and adds a ConfigFile/source-existence assertion for all four sidecars. On `feature/audio-import-sidecar-validation`, direct inspection confirms the four `source_file` values now point to their root-level sources.
+- **Acceptance:** Integrate both path corrections without changing MP3 binaries, UIDs, import destinations or import parameters; run Godot 4.7.2 import, tracked-script parsing and the four-sidecar regression check on the integrated branch; inspect the full logs. Keep the task open until the corrected paths reach main.
+- **Related task/PRs:** [LP-AUD-002](https://github.com/Legioniz/LatchPoint/pull/12) / [PR #1](https://github.com/Legioniz/LatchPoint/pull/1) / [PR #12](https://github.com/Legioniz/LatchPoint/pull/12).
+
 ### LP-QA-002: Physics test coverage is still limited
 
 - **Status:** Open backlog item; PR #7 adds a current-scene static-platform layer/player-mask assertion but broader coverage remains incomplete.
@@ -69,7 +79,7 @@ This register separates confirmed defects from missing features, design decision
 ### LP-AUD-001: Additional audio files need purpose and license confirmation
 
 - **Status:** Investigation required; do not delete.
-- **Evidence:** The tree contains `Tung.mp3`, `maj.mp3` and `yi.mp3` with import sidecars. PR #12 corrects their stale deps/source_file paths, but this does not establish the tracks' source, owner, permission or intended runtime use. No purpose or license record for the other tracks was found in the inspected documentation.
+- **Evidence:** The tree contains `Tung.mp3`, `maj.mp3` and `yi.mp3` with import sidecars. Their import-path repair is tracked separately by LP-IMP-001 and PR #12; correcting `source_file` does not establish the tracks' source, owner, permission or intended runtime use. No purpose or license record for the other tracks was found in the inspected documentation.
 - **Action:** Search all branches, scenes, scripts, dynamic loaders and commit history; ask the asset owner where necessary; record license/source and intended use. Remove only after usage and ownership are verified.
 
 ### LP-SET-001: Persist audio and fullscreen settings

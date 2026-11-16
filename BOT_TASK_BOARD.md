@@ -159,7 +159,7 @@
 
 - **Priority:** P2
 - **Status:** In review on draft [PR #12](https://github.com/Legioniz/LatchPoint/pull/12); not integrated into main.
-- **Problem/evidence:** The foundation-line Tung.mp3.import, maj.mp3.import and yi.mp3.import sidecars pointed to res://MUSIC/... while the source MP3 files are stored at the repository root. PR #12 changes only each deps/source_file value and adds a deterministic check for all four retained MP3 sidecars.
+- **Problem/evidence:** On main, all four MP3 `.import` sidecars set `source_file` to `res://MUSIC/<filename>.mp3`, but the complete main tree has no `MUSIC/` directory and the four MP3 source files are at the repository root. PR #1 corrects `Project_bullshit.mp3.import`; PR #12 corrects `Tung.mp3.import`, `maj.mp3.import` and `yi.mp3.import`, and adds a deterministic check for all four retained sidecars.
 - **Goal/player or project value:** Keep Godot's committed import metadata consistent with source-file locations and catch stale paths before runtime.
 - **Scope:** Correct the three stale source paths and validate each expected sidecar path plus source-file existence.
 - **Non-goals:** Do not change audio playback/shutdown behavior, imported destination paths, UIDs, import parameters, MP3 binaries or licensing claims.
@@ -169,6 +169,7 @@
 - **Acceptance criteria:** Each sidecar loads as ConfigFile, its deps/source_file equals the correct root-level res://... path, and the referenced file exists. Preserve all other sidecar fields and binaries.
 - **Required tests/proof:** Godot 4.7.2 headless import, tracked GDScript parse, physics smoke test (including four-sidecar assertions), and complete log inspection. The latest [run 43687899303](https://github.com/Legioniz/LatchPoint/actions/runs/43687899303) passed process steps but still reproduced issue #3.
 - **Branch/PR:** feature/audio-import-sidecar-validation, draft [PR #12](https://github.com/Legioniz/LatchPoint/pull/12).
+- **Issue register:** LP-IMP-001.
 
 ### LP-SYS-001 — Persist options across application restart
 - **Priority:** P2
