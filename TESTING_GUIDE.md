@@ -43,7 +43,9 @@ The physics smoke test checks required scene loading, gameplay player landing, a
 - Gravity increasing vertical velocity after the jump.
 - A second jump press does not reset vertical velocity while the player is airborne.
 
-These are regression checks for the current controller, not a final movement-feel approval. They do not yet cover slopes, one-way platforms, moving platforms, hazards, high-speed gameplay movement, corners, collision masks, or respawn overlap.
+The same smoke test also runs separate floor, wall and ceiling probes at a controlled displacement of 100 pixels per physics tick (6,000 pixels/second at the project's 60 Hz default). Each probe crosses a 20-pixel-thick test surface in one tick if collision resolution fails, then asserts the expected surface classification and that the body did not pass through. This is a deterministic engine-regression check, not a claim that every possible speed, shape or target platform has been validated.
+
+These are regression checks for the current controller, not a final movement-feel approval. They do not yet cover slopes, one-way platforms, moving platforms, hazards, corners, collision masks, or respawn overlap.
 
 ## Audio shutdown diagnostics
 
