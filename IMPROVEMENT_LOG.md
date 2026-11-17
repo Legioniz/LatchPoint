@@ -49,7 +49,9 @@ Each completed cycle records its purpose, affected files, sources, verification 
 **Verification**
 - Baseline before change: Godot 4.7.2 run [42772655494](https://github.com/Legioniz/LatchPoint/actions/runs/42772655494) passed all existing steps. Its verbose physics and boot process logs still showed the known MP3/ObjectDB/StringName shutdown warnings tracked by issue #3.
 - Local Godot execution: not available in this environment.
-- Post-change GitHub Actions validation: pending.
+- Post-change Godot 4.7.2 GitHub Actions run [44034665292](https://github.com/Legioniz/LatchPoint/actions/runs/44034665292) completed successfully: resource import, all tracked GDScript parsing, physics smoke test (including the three new high-speed cases) and boot smoke test passed.
+- The verbose physics-test process still reports two ObjectDB instances, one retained AudioStreamMP3 / AudioStreamPlaybackMP3 and an orphan Music StringName at exit. This is the pre-existing issue #3 and remains unresolved. The boot-test process completed without those shutdown warnings in this run.
+- The inherited workflow still emits the actions/checkout@v4 Node.js 20 deprecation warning; CI workflow modernization is tracked separately in PR #11.
 - Manual in-game collision visualization: not performed.
 - Performance profiling: not performed; this is test-only code.
 - ML: not used; the probes are deterministic scripted physics tests, not machine learning.

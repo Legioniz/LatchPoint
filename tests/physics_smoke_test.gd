@@ -57,7 +57,7 @@ func _run() -> void:
 	if failures.is_empty():
 		print(
 			"LatchPoint tests passed: scenes loaded; player landed; acceleration, friction, " +
-			"grounded jump and airborne jump rejection held; floor, wall and ceiling collisions held."
+			"grounded jump and airborne jump rejection held; normal-speed and high-speed floor, wall and ceiling collisions held."
 		)
 		quit(0)
 		return
