@@ -143,3 +143,24 @@ These are alternative patterns, not a feature checklist. The current LatchPoint 
 - Retain `automation/playability-baseline` unchanged as a historical baseline and PR #1 comparison point. Do not delete the branch, rewrite history, or duplicate the cleanup already proposed in PR #1 without explicit owner direction.
 - No Git commands, code, assets or dependencies were copied into the project. The official documentation was referenced for classification only; no source text or implementation was reused.
 - The binary index remains uninspected beyond confirming its presence and encoded size; no statement is made about its internal paths or entries.
+
+
+## 2026-11-17 — Audio asset provenance audit (research-lite)
+
+**Objective:** establish what can be verified about the four retained MP3 files without deleting, relabeling or redistributing material whose rights are unknown.
+
+### Technical reference
+- Godot 4.7 Import Process: https://docs.godotengine.org/en/4.7/tutorials/assets_pipeline/import_process.html
+- Godot documents that each imported source asset has a companion `.import` file containing important import configuration and that these sidecars should be committed. The generated `.godot/imported/` cache is separate and should not be committed. This supports preserving the source files and sidecars while correcting their paths; it does not establish copyright or permission.
+
+### Repository evidence (checked 2026-11-17)
+- The default-branch tree contains `Project_bullshit.mp3`, `Tung.mp3`, `maj.mp3` and `yi.mp3` at the repository root, each with a companion `.import` file.
+- Default-branch GitHub code search found `Project_bullshit.mp3` in `AUDIO.gd`. Searches for the other three names returned only their own `.import` sidecars. This search covers the default branch only and is not a complete audit of every branch, dynamic path construction or runtime-generated resource path.
+- All four MP3s were introduced together in commit https://github.com/Legioniz/LatchPoint/commit/8e586c1eb3c52f11b5c5167355e663587363d245 (2026-08-23, author account `Codfyyy`, message “Add files via upload”). The commit metadata contains no source URL, license, attribution or intended-use statement.
+- The current root `LICENSE` and `COPYRIGHT.md` distinguish owner-controlled materials from third-party audio and state that third-party materials retain their own terms. Repository presence and commit authorship do not prove the project owner owns or may redistribute these MP3s.
+- On `main`, all four sidecars use `res://MUSIC/<filename>.mp3` even though the source files are at the project root. PR #1 corrects the Project track sidecar; PR #12 corrects the other three. Those path changes are technical import repairs only and do not settle provenance.
+
+### Decision and limits
+- Keep all four binaries and their UIDs/import metadata unchanged. Do not delete the three currently unreferenced-by-default-code-search tracks, because the search is not exhaustive and ownership is unknown.
+- Do not treat the current proprietary notice as a license for third-party audio. Obtain source, rights-holder, permission/license and intended-use confirmation from the asset owner before release or redistribution.
+- This is research-lite: the task is repository provenance, not a gameplay feature. No commercial/indie game mechanic comparison was relevant; no external audio, code or assets were copied or reused. The binary audio contents were not downloaded, played or identified.

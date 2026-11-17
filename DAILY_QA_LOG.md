@@ -422,3 +422,42 @@ PR #5 is a documentation-only sibling PR based on the foundation branch. It does
 ### Next highest-priority objective
 
 Obtain explicit owner confirmation of the repository's public/private intent and the intended main-branch protection policy. GitHub currently reports the repository public while the project is described as private; the branch-protection state could not be re-read in this run. Resolve the access-control mismatch before further integration work.
+
+
+## 2026-11-17 — Audio provenance and integration revalidation
+
+**Repository:** [Legioniz/LatchPoint](https://github.com/Legioniz/LatchPoint)  
+**Default branch HEAD:** `097da44e4ad3fb2a3f1e762034855ef46cffdac4`  
+**Scope:** bounded MP3 provenance audit plus revalidation of the active integration/CI blockers. No gameplay direction was inferred.
+
+### Repository and PR state
+- Main remains at `097da44e4ad3fb2a3f1e762034855ef46cffdac4`; its recursive tree contains 72 entries. The branch inventory contains 18 refs.
+- The current main README still describes an early 2D prototype. Main's player script applies a second horizontal velocity assignment after its acceleration/friction calculation; `new_load.gd` calls `change_scene_to_file()` without a path and leaves Load as `pass`; `Scene/main.tscn` references the absent `res://bg/game_background_4/game_background_4.png`; and `AUDIO.gd` references `res://MUSIC/Project_bullshit.mp3` while the file is at the project root. These are already addressed on the foundation PR line; do not duplicate those changes on another branch.
+- PR #1 remains open/draft, base `main`, head `feature/gameplay-foundation`, `mergeable=false`. A fresh compare reports 52 commits ahead and 9 behind, with independent README additions among the conflicts. Do not force-push or merge.
+- PR #6 remains based on `feature/player-movement-regression-tests`; that unrepresented parent branch is 25 commits ahead of `feature/gameplay-foundation`. PR #7 and #8 are downstream of the settings/physics line. PR #8 remains open/draft and mergeable, but its clean result is not integrated into PR #11 or PR #12.
+- PR #9 contains the neutral core-loop comparison; no genre, signature mechanic, win/fail states or first-playable scope has been approved. LP-DES-001 remains blocked on product-owner direction.
+- PR #10 remains the existing quality documentation PR, based on `docs/core-loop-reference-research`. PR #11 remains the branch-wide CI proposal. PR #12 remains the MP3 sidecar path correction. No branch was retargeted and no PR was merged.
+- Main has no `.github/workflows/godot-validation.yml`. The foundation and PR #12 branches retain the narrower `main`/`feature/**` push filters, PR target `main` only and `actions/checkout@v4`; PR #11's separate workflow uses catch-all branch filters and pinned Node 24-compatible action commits. Do not overwrite one workflow variant with another during integration.
+- Repository metadata still reports public visibility. The branch-protection endpoint returned HTTP 403 (`Resource not accessible by integration`); current protection rules could not be independently verified. No settings were changed.
+
+### CI log review
+- Godot 4.7.2 [run 43687899303](https://github.com/Legioniz/LatchPoint/actions/runs/43687899303) on PR #12 completed import, GDScript parse, physics smoke and boot smoke steps successfully. The full log still reports two leaked ObjectDB instances, one resource in use, retained `AudioStreamPlaybackMP3`/`AudioStreamMP3` for `res://Project_bullshit.mp3` after **both** processes, plus the Node.js 20 deprecation warning for `actions/checkout@v4`.
+- Godot 4.7.2 [run 43570448230](https://github.com/Legioniz/LatchPoint/actions/runs/43570448230) on PR #11 also completed the validation steps successfully but retains the same MP3/ObjectDB shutdown warnings after both processes.
+- Godot 4.7.2 [run 43175060644](https://github.com/Legioniz/LatchPoint/actions/runs/43175060644) on PR #8 completed import, parse, physics and boot checks. Its complete job log contains no matching ObjectDB/MP3 shutdown warning lines. PR #8 records Dummy-driver mix resets after 11 physics frames and 2 boot frames. This is a separate downstream branch result, not proof that the warning is resolved on main or the PR #11/#12 lines.
+- No downloadable artifacts were returned for the reviewed runs.
+
+### MP3 asset provenance findings
+- Main contains four root-level MP3s with companion sidecars. Default-branch code search found `Project_bullshit.mp3` in `AUDIO.gd`; searches for `Tung.mp3`, `maj.mp3` and `yi.mp3` returned only their sidecars. This is not an exhaustive search of all branches or dynamic path construction.
+- All four files were added together by account `Codfyyy` in [commit 8e586c1](https://github.com/Legioniz/LatchPoint/commit/8e586c1eb3c52f11b5c5167355e663587363d245), dated 2026-08-23, with message “Add files via upload”. No source, license or attribution is recorded there.
+- The current proprietary LICENSE leaves third-party audio subject to its own terms and does not prove ownership. Keep the files and metadata unchanged pending owner confirmation; do not treat the sidecar fix as a rights clearance.
+
+### Verification, scope and limitations
+- Reviewed the 72-entry main tree, 18 branch refs, open PRs/issues, recent commits, branch comparisons, main project configuration/player/menu/audio references, all four main MP3 sidecars, PR #12 sidecars, LICENSE/COPYRIGHT, relevant PR bodies and full logs for runs 43687899303, 43570448230 and 43175060644.
+- No local Godot/Godot 4 executable was available; no local import, parser, scene, physics, playback, desktop or export test was run. Runtime evidence is limited to the cited CI logs.
+- No code, scenes, assets, UIDs, import sidecars, project settings or workflows were changed. No files were moved or removed; no dependencies were added; no contributor branch was overwritten.
+- No ML/agent evaluation was justified because no approved measurable game objective/state-action interface exists. No performance profiling or measurements were available.
+- No commercial/indie game comparison was repeated: this was a small provenance/maintenance task. The existing core-loop comparison remains in `RESEARCH_REGISTER.md`; the current technical research is the Godot 4.7 import-process reference.
+- Rollback: revert the documentation commit with a normal follow-up commit if any audit entry is inaccurate. Do not reset or force-push the shared branch.
+
+### Next recommended objective
+Obtain owner confirmation for the MP3 assets' source/license and the intended public/private repository policy. In parallel, resolve PR #1's README conflict and recover the unrepresented movement-regression parent before integrating the dependent code/CI PRs. Do not add new gameplay systems until LP-DES-001 receives product-owner direction.

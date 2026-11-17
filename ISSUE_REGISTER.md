@@ -78,9 +78,9 @@ This register separates confirmed defects from missing features, design decision
 
 ### LP-AUD-001: Additional audio files need purpose and license confirmation
 
-- **Status:** Investigation required; do not delete.
-- **Evidence:** The tree contains `Tung.mp3`, `maj.mp3` and `yi.mp3` with import sidecars. Their import-path repair is tracked separately by LP-IMP-001 and PR #12; correcting `source_file` does not establish the tracks' source, owner, permission or intended runtime use. No purpose or license record for the other tracks was found in the inspected documentation.
-- **Action:** Search all branches, scenes, scripts, dynamic loaders and commit history; ask the asset owner where necessary; record license/source and intended use. Remove only after usage and ownership are verified.
+- **Status:** Partial repository audit completed 2026-11-17; source, rights holder, permission and intended use remain unverified. Do not delete or claim ownership.
+- **Evidence:** Main contains `Tung.mp3`, `maj.mp3` and `yi.mp3` with import sidecars. Default-branch code search found only the sidecars for those three tracks; `AUDIO.gd` references `Project_bullshit.mp3`. This does not prove absence of dynamic references or references on every branch. All four MP3s were added in commit [8e586c1](https://github.com/Legioniz/LatchPoint/commit/8e586c1eb3c52f11b5c5167355e663587363d245) on 2026-08-23 by `Codfyyy` with the generic message “Add files via upload”; no source, license or attribution is recorded in that commit. The current proprietary `LICENSE` says third-party audio remains governed by its own terms; it does not establish rights in these files. The separate import-path repair is tracked by LP-IMP-001 / PR #12 and does not resolve licensing.
+- **Action:** Ask the asset owner to identify the source, rights holder, intended use and applicable license/permission for each file. Complete a branch-wide scene/script/dynamic-loader search before classifying the other three as unused. Keep the files unchanged until usage and rights are confirmed; do not redistribute them on an assumption of ownership.
 
 ### LP-SET-001: Persist audio and fullscreen settings
 

@@ -1,6 +1,6 @@
 # LatchPoint — Bot Task Board
 
-**Last reviewed:** 2026-11-16  
+**Last reviewed:** 2026-11-17  
 **Purpose:** This is the coordination source of truth for agents contributing to LatchPoint. Suggested roles are not confirmed assignments. Check live GitHub issues, branches and PRs before claiming work.
 
 ## Working order
@@ -150,10 +150,12 @@
 
 ### LP-AUD-001 — Classify remaining audio assets
 - **Priority:** P2
-- **Status:** Investigation required.
+- **Status:** Partial repository audit completed 2026-11-17; source/license confirmation remains owner-blocked.
 - **Suggested role:** Audio integrator / asset librarian.
 - **Goal:** Establish intended use, license and owner of `Tung.mp3`, `maj.mp3` and `yi.mp3`.
-- **Acceptance:** Record references, intended use and license/source. Keep assets unless safely proven redundant and approved for deletion.
+- **Evidence (2026-11-17):** The default-branch tree contains four root-level MP3 files. GitHub code search on `main` found `Project_bullshit.mp3` in `AUDIO.gd`; searches for `Tung.mp3`, `maj.mp3` and `yi.mp3` returned only their own `.import` sidecars. This is a default-branch search, not proof that no dynamic or branch-specific reference exists. All four files were added together in commit [8e586c1](https://github.com/Legioniz/LatchPoint/commit/8e586c1eb3c52f11b5c5167355e663587363d245) on 2026-08-23 by `Codfyyy` with the generic message “Add files via upload”; the commit provides no source, license or attribution. The current `LICENSE` expressly leaves third-party audio under its own terms and does not establish ownership of these files.
+- **Related but separate:** Main's four `.import` sidecars point to `res://MUSIC/` although the files are at the project root. PR #1 and PR #12 correct those paths on unmerged branches; path repair does not resolve provenance or permission.
+- **Acceptance:** Record references, intended use and license/source. Keep assets unless safely proven redundant and approved for deletion. Obtain owner/source confirmation before treating the files as redistributable project assets.
 
 ### LP-AUD-002 — Validate retained MP3 import sidecar source paths
 
