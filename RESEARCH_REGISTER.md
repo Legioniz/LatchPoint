@@ -100,6 +100,24 @@ Checked 2026-11-10. These references establish the first research baseline. Re-c
 - Relevant points: installs Godot 4.x on GitHub Actions Linux/macOS/Windows runners and supports standard builds without .NET.
 - Project application: install Godot 4.7.2 in the repository validation workflow.
 
+## High-speed CharacterBody2D collision regression
+
+### Godot 4.7 — CharacterBody2D movement and collision
+- Source: https://docs.godotengine.org/en/4.7/tutorials/physics/using_character_body_2d.html
+- Relevant behavior: CharacterBody2D is code-driven and should move in _physics_process(). move_and_slide() moves along the body's velocity, resolves collisions and adjusts velocity when contact changes the movement.
+- Test decision: extend the existing test-only CharacterBody2D probe rather than changing the shipping player controller. At the configured 60 Hz physics rate, the probe travels 100 pixels per tick (6,000 pixels/second) toward a 20-pixel-thick surface. The test repeats the check against floor, wall and ceiling geometry and asserts both the surface classification and non-penetration.
+- Interpretation: this is a regression measurement for the project's Godot 4.7.2 configuration and these fixture shapes. It is not a universal guarantee for arbitrary velocities, shapes, collision layers or platforms.
+
+### Godot Demo Projects — Kinematic Character 2D
+- Source: https://github.com/godotengine/godot-demo-projects/tree/master/2d/kinematic_character
+- License: the Godot demo-project repository declares MIT. It is used only as an official implementation/architecture comparison; no source code, scenes, art or assets are copied.
+- Relevance: its CharacterBody2D example keeps movement in the physics callback and uses Godot's collision APIs. The current regression harness follows that engine-level separation by placing the high-speed velocity on a test-only probe.
+
+### Design decision
+- This task does not select or alter a LatchPoint gameplay mechanic. Commercial/indie game comparisons are not applicable to this engine-level test-only change.
+- No runtime movement values, collision shapes, physics settings or dependencies were changed.
+- No external code, art, sound or level content was reused.
+
 ## Decision rule
 
 The references are inspiration and technical evidence, not a feature checklist. Each adopted pattern must be tied to the LatchPoint design pillars, implemented originally, tested and recorded in the improvement log. No external code, art, sound, level or character is copied by this register.

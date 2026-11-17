@@ -12,6 +12,7 @@ const REQUIRED_SCENES: Array[String] = [
 const PHYSICS_FRAMES_TO_SIMULATE := 120
 const PROBE_FRAMES_TO_SIMULATE := 30
 const PROBE_SIZE := Vector2(20.0, 20.0)
+const HIGH_SPEED_DISPLACEMENT_PER_TICK := 100.0
 const MOVEMENT_TEST_FLOOR_Y := 160.0
 const MOVEMENT_TEST_FLOOR_WIDTH := 1200.0
 const ACCELERATION_TEST_FRAMES := 5
@@ -56,7 +57,7 @@ func _run() -> void:
 	if failures.is_empty():
 		print(
 			"LatchPoint tests passed: scenes loaded; player landed; acceleration, friction, " +
-			"grounded jump and airborne jump rejection held; floor, wall and ceiling collisions held."
+			"grounded jump and airborne jump rejection held; normal-speed and high-speed floor, wall and ceiling collisions held."
 		)
 		quit(0)
 		return
@@ -351,14 +352,42 @@ func _check_solid_collision_directions() -> void:
 		Vector2(200.0, 20.0)
 	)
 
+	var high_speed := float(_get_physics_ticks_per_second()) * HIGH_SPEED_DISPLACEMENT_PER_TICK
+	await _check_collision_case(
+		"floor",
+		Vector2(0.0, 0.0),
+		Vector2(0.0, high_speed),
+		Vector2(0.0, 100.0),
+		Vector2(200.0, 20.0),
+		"high-speed floor"
+	)
+	await _check_collision_case(
+		"wall",
+		Vector2(0.0, 0.0),
+		Vector2(high_speed, 0.0),
+		Vector2(100.0, 0.0),
+		Vector2(20.0, 200.0),
+		"high-speed wall"
+	)
+	await _check_collision_case(
+		"ceiling",
+		Vector2(0.0, 100.0),
+		Vector2(0.0, -high_speed),
+		Vector2(0.0, 0.0),
+		Vector2(200.0, 20.0),
+		"high-speed ceiling"
+	)
+
 
 func _check_collision_case(
 	collision_side: String,
 	spawn_position: Vector2,
 	commanded_velocity: Vector2,
 	obstacle_position: Vector2,
-	obstacle_size: Vector2
+	obstacle_size: Vector2,
+	case_label: String = ""
 ) -> void:
+	var display_name := case_label if not case_label.is_empty() else collision_side
 	var fixture := Node2D.new()
 	root.add_child(fixture)
 
@@ -413,9 +442,9 @@ func _check_collision_case(
 			did_not_pass_through = player_top >= ceiling_bottom - 1.0
 
 	if not collision_detected:
-		failures.append("Physics probe did not register the expected %s collision." % collision_side)
+		failures.append("Physics probe did not register the expected %s collision." % display_name)
 	if not did_not_pass_through:
-		failures.append("Physics probe passed through the %s collision surface." % collision_side)
+		failures.append("Physics probe passed through the %s collision surface." % display_name)
 
 	fixture.free()
 	await process_frame
