@@ -172,7 +172,7 @@ These are alternative patterns, not a feature checklist. The current LatchPoint 
 - Godot 4.7 CharacterBody2D movement and collision: https://docs.godotengine.org/en/4.7/tutorials/physics/using_character_body_2d.html
   - The official guide describes code-driven CharacterBody2D movement in the physics callback and collision resolution through move_and_slide().
 - Godot Demo Projects — Kinematic Character 2D: https://github.com/godotengine/godot-demo-projects/tree/master/2d/kinematic_character
-  - The official demo-project repository declares the MIT license. It was reviewed as a technical implementation comparison only; no code, scenes or assets were copied.
+  - The repository README states that its demos are distributed under the MIT license and points to LICENSE.md: https://github.com/godotengine/godot-demo-projects/blob/master/LICENSE.md. The Godot Asset Library listing for Kinematic Character 2D also labels the Godot Foundation sample MIT, lists Godot 4.7 as its minimum version, and records a 2026-07-08 update: https://store.godotengine.org/asset/godot-foundation/kinematic-character-2d-demo/. It was reviewed as a technical implementation comparison only; no code, scenes or assets were copied.
 
 ### Test interpretation and decision
 - PR #13 adds test-only floor, wall and ceiling probes with a 20×20 CharacterBody2D shape and 20-pixel-thick fixtures. The commanded speed is derived from the configured physics tick rate to produce 100 pixels of requested displacement per tick (6,000 pixels/second at the 60 Hz default).
