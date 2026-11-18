@@ -164,3 +164,18 @@ These are alternative patterns, not a feature checklist. The current LatchPoint 
 - Keep all four binaries and their UIDs/import metadata unchanged. Do not delete the three currently unreferenced-by-default-code-search tracks, because the search is not exhaustive and ownership is unknown.
 - Do not treat the current proprietary notice as a license for third-party audio. Obtain source, rights-holder, permission/license and intended-use confirmation from the asset owner before release or redistribution.
 - This is research-lite: the task is repository provenance, not a gameplay feature. No commercial/indie game mechanic comparison was relevant; no external audio, code or assets were copied or reused. The binary audio contents were not downloaded, played or identified.
+
+
+## 2026-11-18 — High-speed CharacterBody2D regression review (research-lite)
+
+### Technical references
+- Godot 4.7 CharacterBody2D movement and collision: https://docs.godotengine.org/en/4.7/tutorials/physics/using_character_body_2d.html
+  - The official guide describes code-driven CharacterBody2D movement in the physics callback and collision resolution through move_and_slide().
+- Godot Demo Projects — Kinematic Character 2D: https://github.com/godotengine/godot-demo-projects/tree/master/2d/kinematic_character
+  - The official demo-project repository declares the MIT license. It was reviewed as a technical implementation comparison only; no code, scenes or assets were copied.
+
+### Test interpretation and decision
+- PR #13 adds test-only floor, wall and ceiling probes with a 20×20 CharacterBody2D shape and 20-pixel-thick fixtures. The commanded speed is derived from the configured physics tick rate to produce 100 pixels of requested displacement per tick (6,000 pixels/second at the 60 Hz default).
+- The test asserts the expected floor/wall/ceiling classification and that the body did not pass through the fixture. The passing Godot 4.7.2 run [44035218467](https://github.com/Legioniz/LatchPoint/actions/runs/44035218467) verifies this specific headless fixture/configuration; it does not establish a universal collision guarantee or test high-speed movement of the shipping player.
+- This is an engine-level regression test, not a gameplay mechanic. A commercial/indie game comparison is not relevant to this narrow objective; the existing 2026-11-13 game-design comparison remains the decision-support reference for LP-DES-001.
+- No third-party code, art, audio, levels or other assets were reused. No new dependency or license obligation was introduced by this review.
