@@ -66,6 +66,10 @@ The runtime settings file is `user://settings.cfg`; it is separate from gameplay
 - Both processes must stop and clear their AudioStreamPlayer, assert that no playback or stream remains, observe a reset in `AudioServer.get_time_since_last_mix()` (maximum 120 process frames), and allow two more process frames for main-thread cleanup. Each process has an independent AudioServer lifecycle.
 - Godot headless mode selects the Dummy audio driver. A missing mix-age reset is a test failure.
 - In final Godot 4.7.2 run [43174879566](https://github.com/Legioniz/LatchPoint/actions/runs/43174879566), the physics process observed a mix reset after 10 frames and the boot process after 2 frames (Dummy driver, 44,100 Hz). The complete verbose job log contains no retained MP3/ObjectDB warnings, `ERROR` or `WARNING` lines after either process. Issue [#3](https://github.com/Legioniz/LatchPoint/issues/3) is resolved on this branch; leave it open until the stacked change is integrated.
+- After consolidating the shared verifier, run [44255209541](https://github.com/Legioniz/LatchPoint/actions/runs/44255209541) passed both independent processes: physics observed the Dummy-driver mix reset after 9 frames and boot after 13 frames (44,100 Hz). The complete process output contains no retained MP3/ObjectDB/StringName diagnostics or Godot errors. The inherited checkout action still emits a Node.js 20 deprecation warning; see PR #11.
+
+
+The shutdown contract is implemented once in `tests/audio_shutdown_verifier.gd`. Each smoke-test process invokes it independently: the physics test requires background playback to have started, while the boot test verifies cleanup without imposing that extra precondition. Keep the per-process calls; one process cannot clean up another process's AudioServer state.
 
 ## Manual display and audio-settings check
 
