@@ -142,3 +142,30 @@ Each completed cycle records its purpose, affected files, sources, verification 
 **Status:** both smoke-test shutdown paths are verified clean on the branch; issue #3 remains open until integration.
 
 **Branch:** `fix/audio-mix-cycle-boot-smoke-shutdown`, based on `fix/audio-mix-cycle-shutdown` at `8226be2bf3b2fdef2412a8e3207a4e90889db4d7`. **Implementation commit:** `96f36a9f0e6c9ca905d20120668276cd5b322bc9`.
+
+
+## 2026-11-18 — Consolidate smoke-test audio shutdown verification
+
+**Objective:** remove duplicated audio shutdown test logic while preserving the clean per-process shutdown behavior established by the audio regression fix.
+
+- Inspected PR #8 and its current head `31ada925876e611b02b6ec2f6830cf5f7b932a27`, both smoke-test scripts, the testing guide, and the complete verbose Godot 4.7.2 run [43175060644](https://github.com/Legioniz/LatchPoint/actions/runs/43175060644).
+- The run completed all validation steps successfully. The physics process observed the Dummy driver's mix reset after 11 process frames (44,100 Hz; initial next-mix estimate 0.0691 s); the boot process observed it after 2 process frames (44,100 Hz; initial estimate 0.0073 s). No retained MP3/ObjectDB warnings, `ERROR` or `WARNING` lines followed either smoke-test process.
+- The two scripts duplicated the same shutdown contract and mix-cycle loop. Added `tests/audio_shutdown_verifier.gd` as a test-only RefCounted helper and routed both entrypoints through it.
+- Preserved separate process-level calls and the existing distinction that the physics test requires active background playback before shutdown, while the boot test does not.
+- No production audio script, scene, asset, bus, project setting, gameplay behavior or dependency changed.
+
+**Acceptance criteria**
+- Both smoke-test scripts use one shared shutdown implementation.
+- Physics retains its active-playback precondition; boot retains its existing cleanup-only precondition.
+- Missing Audio autoload/player, a retained stream/playback, or a mix-cycle timeout remains a test failure.
+- Both verbose smoke-test processes complete without retained MP3/ObjectDB warnings.
+
+**Verification**
+- Research completed against Godot 4.7 AudioServer, SceneTree and GDScript coroutine documentation; see `RESEARCH_REGISTER.md`.
+- Implementation CI: pending.
+- Local Godot execution and desktop audio verification: not available/performed.
+- Performance profiling: not performed; no runtime code changed.
+- Physics/collision behavior: unchanged.
+- ML: not used.
+
+**Branch:** `feature/shared-audio-shutdown-verifier`, based on PR #8 head `fix/audio-mix-cycle-boot-smoke-shutdown`.

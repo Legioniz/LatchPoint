@@ -185,3 +185,29 @@ The references are inspiration and technical evidence, not a feature checklist. 
 - Finding: each CI smoke-test command is a separate Godot process with its own Audio autoload and AudioServer playback lifecycle. Cleanup performed in one process cannot satisfy the next process's shutdown contract.
 - Project decision: apply the same player stopped/empty assertions, bounded observed mix-age reset and deferred main-thread cleanup wait in `tests/boot_smoke_test.gd`. Verify cleanup on early failure paths as well as successful completion. Keep the production Audio autoload unchanged.
 - Verification: Godot 4.7.2 run [43174879566](https://github.com/Legioniz/LatchPoint/actions/runs/43174879566) observed the physics-test mix reset after 10 process frames and the boot-test reset after 2 process frames, both using the Dummy driver at 44,100 Hz. No retained MP3/ObjectDB warnings or errors followed either smoke-test process.
+
+
+## 2026-11-18 — Shared smoke-test audio shutdown verifier
+
+### Godot 4.7 — AudioServer
+- Source: https://docs.godotengine.org/en/4.7/classes/class_audioserver.html
+- Relevant behavior: `get_time_since_last_mix()` reports the relative time since the last mix, and `get_time_to_next_mix()` reports the relative time until the next mix. These are AudioServer timing observations, not process-frame counters.
+- Design decision: retain the existing bounded 120-process-frame observation of a mix-age reset and preserve the two additional process frames for deferred main-thread cleanup.
+
+### Godot 4.7 — SceneTree
+- Source: https://docs.godotengine.org/en/4.7/classes/class_scenetree.html
+- Relevant behavior: `process_frame` is emitted immediately before Node `_process()` callbacks. Awaiting this signal advances the smoke-test coroutine by one process frame.
+- Design decision: pass the active SceneTree into a shared test helper so both standalone SceneTree scripts use the same wait implementation without creating a node or changing runtime scene ownership.
+
+### Godot 4.7 — GDScript coroutines
+- Source: https://docs.godotengine.org/en/4.7/tutorials/scripting/gdscript/gdscript_basics.html#awaiting-signals-or-coroutines
+- Relevant behavior: `await` can suspend a function on a signal or another coroutine and resume when it completes.
+- Design decision: keep the verifier as a test-only RefCounted helper and await its result from each smoke-test entrypoint. Do not make the helper an autoload or production audio dependency.
+
+### Project-specific decision and scope
+- Both smoke tests previously duplicated the player shutdown assertions, 120-frame mix-reset loop, diagnostic fields and two-frame deferred cleanup.
+- Consolidate that shared lifecycle contract in `tests/audio_shutdown_verifier.gd`; keep each smoke-test invocation independent because each CI command launches a separate Godot process.
+- Preserve the existing difference in preconditions: the physics smoke test requires that background music actually started; the boot smoke test only requires that the Audio autoload can be shut down cleanly.
+- The helper returns structured errors and diagnostic data; callers continue to report failures using their existing failure/exit paths.
+- No production audio behavior, scenes, assets, bus configuration, project settings, gameplay behavior or third-party dependencies are changed.
+- Official Godot documentation is used as a technical reference; no source code or assets are copied. No commercial/indie gameplay mechanic is applicable to this test-infrastructure refactor.
