@@ -30,10 +30,11 @@
 ### LP-QA-001 — Investigate MP3 playback references at shutdown
 
 - **Priority:** P1
-- **Status:** Open / in review. The warning is reproduced on the current PR #12 sidecar-validation branch and the PR #11 CI branch; the clean PR #8 head remains a separate downstream result. Issue #3 remains open.
+- **Status:** Open / in review. PR #8 has a clean branch-head shutdown result, but PR #11, PR #12 and the PR #13 movement-parent line still reproduce shutdown warnings in their own logs. Issue #3 remains open until the fix is integrated and verified on the resulting shared head.
 - **Suggested role:** Audio systems + QA engineer.
 - **Evidence:** [Run 43175060644](https://github.com/Legioniz/LatchPoint/actions/runs/43175060644) on `fix/audio-mix-cycle-boot-smoke-shutdown` passed Godot 4.7.2 import/parse/physics/boot checks; the full log shows mix resets after 11 physics frames and 2 boot frames with no retained MP3/ObjectDB warnings. In contrast, Godot 4.7.2 [push run 43570349587](https://github.com/Legioniz/LatchPoint/actions/runs/43570349587) and [PR run 43570448230](https://github.com/Legioniz/LatchPoint/actions/runs/43570448230) on `ci/branch-wide-godot-validation` both complete successfully but report two leaked ObjectDB instances, one resource still in use, retained AudioStreamPlaybackMP3 / AudioStreamMP3 and `res://Project_bullshit.mp3` after each smoke-test process.
 - **Latest evidence (2026-11-15):** Godot 4.7.2 [run 43687899303](https://github.com/Legioniz/LatchPoint/actions/runs/43687899303) on PR #12's feature/audio-import-sidecar-validation branch completed import, parse, physics and boot steps successfully, but the full log reports the same ObjectDB/MP3 resource-retention warnings after both smoke-test processes. The workflow also emits the Node.js 20 deprecation warning for actions/checkout@v4. The sidecar fix does not include PR #8's shutdown diagnostic.
+- **Latest evidence (2026-11-18):** Godot 4.7.2 [branch-head run 44035218467](https://github.com/Legioniz/LatchPoint/actions/runs/44035218467) on feature/high-speed-collision-regressions passes import, all tracked-GDScript parsing, physics smoke and boot smoke. Its physics process still reports two ObjectDB instances, one retained AudioStreamMP3/AudioStreamPlaybackMP3 for res://Project_bullshit.mp3, and an orphan Music StringName; the boot process passes without matching shutdown warnings. The log also emits the Node.js 20 deprecation warning for actions/checkout@v4.
 - **Goal:** Keep the clean shutdown behavior in the integrated project and ensure both independent test processes follow the same lifecycle contract.
 - **Likely files:** `AUDIO.gd`, `tests/physics_smoke_test.gd`, `tests/boot_smoke_test.gd`, `.github/workflows/godot-validation.yml`.
 - **Non-goals:** Do not remove music checks, suppress warnings or weaken physics assertions.
@@ -54,42 +55,45 @@
 - **Branch/PR:** `docs/core-loop-reference-research`, draft [PR #9](https://github.com/Legioniz/LatchPoint/pull/9) targeting `docs/daily-quality-management`.
 
 ### LP-QA-002 — Expand deterministic physics and collision tests
+
 - **Priority:** P1
-- **Status:** In review (partial layer/mask slice in PR #7); broader coverage remains open.
+- **Status:** In review on PR #7 and PR #13; broader coverage remains open.
 - **Suggested role:** Gameplay QA / physics engineer.
-- **Goal:** Increase physics regression coverage beyond the current floor, wall and ceiling probes.
-- **Evidence:** PR #7 checks that each enabled static platform in the current gameplay scene has a collision layer overlapping the real player's collision mask.
-- **Likely files:** `tests/physics_smoke_test.gd`, `tests/physics_probe.gd`, possible test-only scenes.
-- **Required scenarios:** corners, slopes, one-way platforms, moving platforms, high-speed movement/tunneling, spawn overlap, layers/masks, frame-rate consistency. Add item/pickup, hazard/projectile and power-up interactions when those systems exist.
-- **Acceptance:** Each scenario has a reproducible setup, deterministic result and clear failure message; tests must validate real game objects where applicable, not only generic test probes.
+- **Goal:** Increase deterministic regression coverage without treating generic probes as proof of every shipping-player interaction.
+- **Evidence:** PR #7 checks that each enabled static platform in the current gameplay scene has a collision layer overlapping the real player's collision mask. PR #13 adds three test-only CharacterBody2D probes at 100 pixels per physics tick (6,000 pixels/second at the 60 Hz default) against 20-pixel-thick floor, wall and ceiling fixtures. The probes assert the expected collision classification and non-penetration; they do not exercise high-speed movement by the shipping player.
+- **Likely files:** tests/physics_smoke_test.gd, tests/physics_probe.gd, possible test-only scenes.
+- **Required remaining scenarios:** corners, slopes, one-way platforms, moving platforms, real-player high-speed movement, spawn/respawn overlap and frame-rate consistency. Add pickup, hazard, projectile and power-up interaction tests only when those mechanics exist.
+- **Acceptance:** Each scenario has a reproducible setup, deterministic result and clear failure message; validate actual game objects where applicable, not only generic test probes.
 - **Dependencies:** Confirm intended movement/collision rules before setting expected behavior.
-- **PR:** [#7](https://github.com/Legioniz/LatchPoint/pull/7)
+- **PRs:** [#7](https://github.com/Legioniz/LatchPoint/pull/7) and [#13](https://github.com/Legioniz/LatchPoint/pull/13). PR #13 is based on feature/player-movement-regression-tests, not main.
 
 ### LP-INT-001 — Review and settle the dependent foundation PR chain
 
 - **Priority:** P1
-- **Status:** In review; integration is blocked by stale and unrepresented parent branches and divergent CI workflow changes.
+- **Status:** In review; integration is blocked by the stale foundation PR base, an unrepresented movement-regression parent and divergent CI workflow copies.
 - **Suggested role:** GitHub integration lead / senior reviewer.
-- **Current repository evidence:** `main` is at `097da44e4ad3fb2a3f1e762034855ef46cffdac4`. PR #1 targets main from `feature/gameplay-foundation`; GitHub reports `mergeable=false` / `dirty`, and comparison shows 52 commits ahead and 9 behind. Both main and PR #1 independently add `README.md`; reconcile that add/add conflict. Do not force-push or rewrite the shared branch.
-- **Unrepresented parent dependency:** PR #6 targets `feature/player-movement-regression-tests`. That branch is 25 commits ahead of `feature/gameplay-foundation`, and no PR with it as head appeared in the all-state PR inventory. Recover/review its intended integration path before PR #6 or descendants.
-- **Unrepresented audio-shutdown experiment ref:** `fix/audio-shutdown-grace-experiment` is 4 commits ahead of `fix/windowed-borderless-toggle` and has no PR using it as head. Its delta is limited to `IMPROVEMENT_BACKLOG.md`, `IMPROVEMENT_LOG.md`, `RESEARCH_REGISTER.md` and `TESTING_GUIDE.md`; its latest commit is [b0a7fca](https://github.com/Legioniz/LatchPoint/commit/b0a7fca59f9515b083cfaae9bbe22e27e6fc701b) (2026-11-10). This is an unrepresented documentation/experiment line, not a verified integrated runtime fix. Preserve it; review its guide against PR #8 before reuse, and do not merge or delete it without an explicit disposition.
+- **Current repository evidence:** main remains at 097da44e4ad3fb2a3f1e762034855ef46cffdac4; its recursive tree has 72 entries and still contains no .github/workflows/, tests/ or shared project-management documents. The repository currently has 19 branch refs and 12 open draft PRs. Do not force-push or rewrite shared history.
+- **Foundation blocker:** PR #1 targets main from feature/gameplay-foundation; GitHub reports mergeable=false / dirty, with 52 commits ahead and 9 behind. Main and PR #1 independently add README.md; reconcile that add/add conflict through a reviewed plan.
+- **Unrepresented parent dependency:** PR #6 and PR #13 both target feature/player-movement-regression-tests. That branch is 25 commits ahead of feature/gameplay-foundation and has no PR using it as head. PR #13's feature/high-speed-collision-regressions head is 5 commits ahead of that parent; comparison with main reports 82 ahead and 9 behind. Recover/review the parent branch before advancing either dependent PR.
+- **Unrepresented audio-shutdown experiment ref:** fix/audio-shutdown-grace-experiment remains four commits ahead of fix/windowed-borderless-toggle with no PR head. Preserve it as unreviewed historical/experimental work; do not treat it as a verified runtime fix or merge/delete it without explicit disposition.
 - **Current PR relationships:**
-  1. [PR #1 — gameplay foundation](https://github.com/Legioniz/LatchPoint/pull/1), base `main`, head `feature/gameplay-foundation`; dirty against current main.
-  2. [PR #2 — fullscreen/window decoration fix](https://github.com/Legioniz/LatchPoint/pull/2), base `feature/gameplay-foundation`, head `fix/windowed-borderless-toggle`.
-  3. [PR #4 — audio shutdown investigation docs](https://github.com/Legioniz/LatchPoint/pull/4), base `fix/windowed-borderless-toggle`, head `docs/audio-shutdown-leak-investigation`.
-  4. [PR #5 — daily quality and multi-bot guidance](https://github.com/Legioniz/LatchPoint/pull/5), base `feature/gameplay-foundation`, head `docs/daily-quality-management`.
-  5. [PR #6 — settings persistence](https://github.com/Legioniz/LatchPoint/pull/6), base `feature/player-movement-regression-tests`, head `feature/settings-persistence`.
-  6. [PR #7 — platform collision-layer regression](https://github.com/Legioniz/LatchPoint/pull/7), base `feature/settings-persistence`, head `feature/physics-layer-mask-regressions`.
-  7. [PR #8 — clean audio shutdown in both smoke-test processes](https://github.com/Legioniz/LatchPoint/pull/8), base `feature/physics-layer-mask-regressions`, head `fix/audio-mix-cycle-boot-smoke-shutdown`.
-  8. [PR #9 — core-loop reference research](https://github.com/Legioniz/LatchPoint/pull/9), base `docs/daily-quality-management`, head `docs/core-loop-reference-research`.
-  9. [PR #10 — daily QA audit](https://github.com/Legioniz/LatchPoint/pull/10), base `docs/core-loop-reference-research`, head `quality/daily-audit-2026-11-13`.
-  10. [PR #11 — branch-wide CI validation](https://github.com/Legioniz/LatchPoint/pull/11), base `feature/gameplay-foundation`, head `ci/branch-wide-godot-validation`.
-  11. [PR #12 — correct retained MP3 import sidecar paths](https://github.com/Legioniz/LatchPoint/pull/12), base `feature/gameplay-foundation`, head `feature/audio-import-sidecar-validation`; seven files changed, including three .import sidecars and the physics smoke test.
-- **CI integration conflict:** PR #11 uses catch-all `**` push/PR filters and pins Node 24-compatible action commits. The older workflow on the movement, settings/physics/audio and docs lines still uses `main`, `feature/**`, `fix/**` push filters and PR targets limited to `main`. The new workflow is not propagated to those branches; merging a stale descendant workflow later could restore old filters/action versions.
+  1. [PR #1 — gameplay foundation](https://github.com/Legioniz/LatchPoint/pull/1), base main, head feature/gameplay-foundation; dirty against current main.
+  2. [PR #2 — fullscreen/window decoration fix](https://github.com/Legioniz/LatchPoint/pull/2), base feature/gameplay-foundation, head fix/windowed-borderless-toggle.
+  3. [PR #4 — audio shutdown investigation docs](https://github.com/Legioniz/LatchPoint/pull/4), base fix/windowed-borderless-toggle, head docs/audio-shutdown-leak-investigation.
+  4. [PR #5 — daily quality and multi-bot guidance](https://github.com/Legioniz/LatchPoint/pull/5), base feature/gameplay-foundation, head docs/daily-quality-management.
+  5. [PR #6 — settings persistence](https://github.com/Legioniz/LatchPoint/pull/6), base feature/player-movement-regression-tests, head feature/settings-persistence.
+  6. [PR #7 — platform collision-layer regression](https://github.com/Legioniz/LatchPoint/pull/7), base feature/settings-persistence, head feature/physics-layer-mask-regressions.
+  7. [PR #8 — clean audio shutdown in both smoke-test processes](https://github.com/Legioniz/LatchPoint/pull/8), base feature/physics-layer-mask-regressions, head fix/audio-mix-cycle-boot-smoke-shutdown.
+  8. [PR #9 — core-loop reference research](https://github.com/Legioniz/LatchPoint/pull/9), base docs/daily-quality-management, head docs/core-loop-reference-research.
+  9. [PR #10 — daily QA audit](https://github.com/Legioniz/LatchPoint/pull/10), base docs/core-loop-reference-research, head quality/daily-audit-2026-11-13.
+  10. [PR #11 — branch-wide CI validation](https://github.com/Legioniz/LatchPoint/pull/11), base feature/gameplay-foundation, head ci/branch-wide-godot-validation.
+  11. [PR #12 — retained MP3 import-sidecar corrections](https://github.com/Legioniz/LatchPoint/pull/12), base feature/gameplay-foundation, head feature/audio-import-sidecar-validation.
+  12. [PR #13 — high-speed collision regressions](https://github.com/Legioniz/LatchPoint/pull/13), base feature/player-movement-regression-tests, head feature/high-speed-collision-regressions; five files changed, 88 additions and 6 deletions.
+- **CI integration conflict:** PR #11 uses catch-all ** push/PR filters and pinned Node 24-compatible action commits on its own branch. The movement/physics/docs branch used by PR #13 still runs actions/checkout@v4 and emits the Node.js 20 deprecation warning; its workflow copy is not the PR #11 version. Main still has no validation workflow.
 - **Goal:** Preserve dependency order and ensure every PR's base/head SHA, complete diff, review state and checks are current.
-- **Acceptance:** Reconcile PR #1 with current main without force-push; recover/review the movement-regression parent; preserve PR #11's workflow policy across descendants; integrate the audio fix with settings/physics; verify all resource paths and full CI logs; merge only with explicit project-owner approval.
+- **Acceptance:** Reconcile PR #1 with current main without force-push; recover/review the movement-regression parent; preserve PR #11's workflow policy across descendants; integrate the audio fix with settings/physics; verify resource paths and full CI logs; merge only with explicit project-owner approval.
 - **Do not:** Retarget or merge downstream PRs before their dependencies are settled.
-- **Branch/PR:** Existing draft stack #1–#11; no new integration branch created.
+- **Branch/PR:** Existing open draft PRs #1, #2 and #4–#13; this QA work continues on the existing quality branch / PR #10.
 
 ### LP-SEC-001 — Confirm repository visibility and protect main
 
