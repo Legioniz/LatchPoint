@@ -179,3 +179,23 @@ These are alternative patterns, not a feature checklist. The current LatchPoint 
 - The test asserts the expected floor/wall/ceiling classification and that the body did not pass through the fixture. The passing Godot 4.7.2 run [44035218467](https://github.com/Legioniz/LatchPoint/actions/runs/44035218467) verifies this specific headless fixture/configuration; it does not establish a universal collision guarantee or test high-speed movement of the shipping player.
 - This is an engine-level regression test, not a gameplay mechanic. A commercial/indie game comparison is not relevant to this narrow objective; the existing 2026-11-13 game-design comparison remains the decision-support reference for LP-DES-001.
 - No third-party code, art, audio, levels or other assets were reused. No new dependency or license obligation was introduced by this review.
+
+
+## 2026-11-19 — Shared audio shutdown verifier (research-lite)
+
+**Objective:** review the test-only helper introduced in PR #14 and verify that its asynchronous wait/cleanup sequence uses documented Godot 4.7 APIs.
+
+### Official Godot 4.7 references (checked 2026-11-19)
+- AudioServer class: https://docs.godotengine.org/en/4.7/classes/class_audioserver.html
+  - Documents get_time_since_last_mix() and get_time_to_next_mix() as AudioServer timing queries. The helper uses the former to observe a reset after shutdown; its returned frame count is a process-frame observation, not an audio-server frame count.
+- SceneTree class: https://docs.godotengine.org/en/4.7/classes/class_scenetree.html
+  - Documents process_frame as emitted immediately before Node _process() callbacks. Awaiting it advances the helper through a process-frame boundary.
+- GDScript reference: https://docs.godotengine.org/en/4.7/tutorials/scripting/gdscript/gdscript_basics.html
+  - Documents await for suspending on signals or coroutines. The helper returns its diagnostic dictionary to each independent SceneTree smoke-test script.
+
+### Project-specific decision and limitations
+- Keep the shared helper test-only and pass the current SceneTree and Audio autoload explicitly; do not add an autoload or change production audio ownership.
+- Retain the bounded 120-process-frame mix-reset wait and two additional process frames for deferred cleanup. Preserve the different preconditions: physics requires active playback, while boot verifies shutdown without requiring that music started.
+- A mix-age reset is a timing observation, not a direct reference-count assertion. Inspect complete process logs for ObjectDB/resource/MP3/StringName warnings as a separate acceptance check; do not infer clean shutdown from exit code alone.
+- PR #14 changes no production audio script, scene, asset, audio bus, project setting or third-party dependency. No code or assets were copied.
+- Research-lite is appropriate: this is a test-helper refactor, not a gameplay mechanic. A commercial/indie game comparison would not inform the helper API/lifecycle design. The existing 2026-11-13 game-design comparison remains the decision-support reference for LP-DES-001.

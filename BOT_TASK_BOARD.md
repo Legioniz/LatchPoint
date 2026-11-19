@@ -1,6 +1,6 @@
 # LatchPoint — Bot Task Board
 
-**Last reviewed:** 2026-11-17  
+**Last reviewed:** 2026-11-19  
 **Purpose:** This is the coordination source of truth for agents contributing to LatchPoint. Suggested roles are not confirmed assignments. Check live GitHub issues, branches and PRs before claiming work.
 
 ## Working order
@@ -9,7 +9,7 @@
 2. Reconcile PR #1 with current main without rewriting shared history; resolve the independent README additions and preserve the current copyright/license files.
 3. Recover and review the unrepresented `feature/player-movement-regression-tests` parent before integrating PR #6 or descendants.
 4. Preserve PR #11's catch-all CI triggers and pinned actions when reconciling the other feature/docs branches; their current workflow files still have narrower filters.
-5. Integrate the PR #8 audio shutdown fix with the settings/physics stack, then rerun both smoke-test processes and inspect full logs; issue #3 remains open because the PR #11 line still reproduces the warning.
+5. Review PR #14's shared test-only audio shutdown verifier and clean branch-head logs; integrate it with the settings/physics/sidecar/CI stack in dependency order, then rerun both smoke-test processes on the resulting shared head. Keep issue #3 open until that integrated run is clean.
 6. Bring the current `TESTING_GUIDE.md` into the shared documentation line after the feature stack settles.
 7. Keep the core game-loop decision blocked on product-owner direction; do not infer a mechanic from the title.
 8. Expand physics/collision coverage only against agreed movement and gameplay rules.
@@ -30,11 +30,12 @@
 ### LP-QA-001 — Investigate MP3 playback references at shutdown
 
 - **Priority:** P1
-- **Status:** Open / in review. PR #8 has a clean branch-head shutdown result, but PR #11, PR #12 and the PR #13 movement-parent line still reproduce shutdown warnings in their own logs. Issue #3 remains open until the fix is integrated and verified on the resulting shared head.
+- **Status:** Open / in review. PR #8 and the newer PR #14 shared-verifier head have clean branch-head shutdown logs, but PR #11, PR #12 and the PR #13 movement-parent line still reproduce shutdown warnings in their own logs. PR #14 remains stacked on PR #8 and does not include the separate PR #11/#12/#13 changes. Issue #3 remains open until the fix is integrated and verified on the resulting shared head.
 - **Suggested role:** Audio systems + QA engineer.
 - **Evidence:** [Run 43175060644](https://github.com/Legioniz/LatchPoint/actions/runs/43175060644) on `fix/audio-mix-cycle-boot-smoke-shutdown` passed Godot 4.7.2 import/parse/physics/boot checks; the full log shows mix resets after 11 physics frames and 2 boot frames with no retained MP3/ObjectDB warnings. In contrast, Godot 4.7.2 [push run 43570349587](https://github.com/Legioniz/LatchPoint/actions/runs/43570349587) and [PR run 43570448230](https://github.com/Legioniz/LatchPoint/actions/runs/43570448230) on `ci/branch-wide-godot-validation` both complete successfully but report two leaked ObjectDB instances, one resource still in use, retained AudioStreamPlaybackMP3 / AudioStreamMP3 and `res://Project_bullshit.mp3` after each smoke-test process.
 - **Latest evidence (2026-11-15):** Godot 4.7.2 [run 43687899303](https://github.com/Legioniz/LatchPoint/actions/runs/43687899303) on PR #12's feature/audio-import-sidecar-validation branch completed import, parse, physics and boot steps successfully, but the full log reports the same ObjectDB/MP3 resource-retention warnings after both smoke-test processes. The workflow also emits the Node.js 20 deprecation warning for actions/checkout@v4. The sidecar fix does not include PR #8's shutdown diagnostic.
 - **Latest evidence (2026-11-18):** Godot 4.7.2 [branch-head run 44035218467](https://github.com/Legioniz/LatchPoint/actions/runs/44035218467) on feature/high-speed-collision-regressions passes import, all tracked-GDScript parsing, physics smoke and boot smoke. Its physics process still reports two ObjectDB instances, one retained AudioStreamMP3/AudioStreamPlaybackMP3 for res://Project_bullshit.mp3, and an orphan Music StringName; the boot process passes without matching shutdown warnings. The log also emits the Node.js 20 deprecation warning for actions/checkout@v4.
+- **Latest evidence (2026-11-19 review):** PR #14 [shared audio shutdown verifier](https://github.com/Legioniz/LatchPoint/pull/14), head 78f8097326607beaab4ad08dbc2a93ac0fb0fe14, is open/draft on top of PR #8's fix/audio-mix-cycle-boot-smoke-shutdown branch. Godot 4.7.2 push run [44255399262](https://github.com/Legioniz/LatchPoint/actions/runs/44255399262) passed import, tracked-GDScript parsing, physics smoke and boot smoke. The complete 494-line log records the Dummy-driver mix reset after 12 physics process frames and 3 boot process frames at 44,100 Hz, with no ObjectDB/resource/MP3/StringName diagnostics or Godot ERROR/WARNING lines after either process. The only warning is the inherited Node.js 20 deprecation for actions/checkout@v4. This is clean downstream evidence, not an integrated main/PR #11/#12/#13 result; keep issue #3 open until the dependent stack is reconciled and retested.
 - **Goal:** Keep the clean shutdown behavior in the integrated project and ensure both independent test processes follow the same lifecycle contract.
 - **Likely files:** `AUDIO.gd`, `tests/physics_smoke_test.gd`, `tests/boot_smoke_test.gd`, `.github/workflows/godot-validation.yml`.
 - **Non-goals:** Do not remove music checks, suppress warnings or weaken physics assertions.
@@ -72,7 +73,7 @@
 - **Priority:** P1
 - **Status:** In review; integration is blocked by the stale foundation PR base, an unrepresented movement-regression parent and divergent CI workflow copies.
 - **Suggested role:** GitHub integration lead / senior reviewer.
-- **Current repository evidence:** main remains at 097da44e4ad3fb2a3f1e762034855ef46cffdac4; its recursive tree has 72 entries and still contains no .github/workflows/, tests/ or shared project-management documents. The repository currently has 19 branch refs and 12 open draft PRs. Do not force-push or rewrite shared history.
+- **Current repository evidence:** main remains at 097da44e4ad3fb2a3f1e762034855ef46cffdac4; its recursive tree has 72 entries and still contains no .github/workflows/, tests/ or shared project-management documents. The repository currently has 20 branch refs and 13 open draft PRs. Do not force-push or rewrite shared history.
 - **Foundation blocker:** PR #1 targets main from feature/gameplay-foundation; GitHub reports mergeable=false / dirty, with 52 commits ahead and 9 behind. Main and PR #1 independently add README.md; reconcile that add/add conflict through a reviewed plan.
 - **Unrepresented parent dependency:** PR #6 and PR #13 both target feature/player-movement-regression-tests. That branch is 25 commits ahead of feature/gameplay-foundation and has no PR using it as head. PR #13's feature/high-speed-collision-regressions head is 5 commits ahead of that parent; comparison with main reports 82 ahead and 9 behind. Recover/review the parent branch before advancing either dependent PR.
 - **Unrepresented audio-shutdown experiment ref:** fix/audio-shutdown-grace-experiment remains four commits ahead of fix/windowed-borderless-toggle with no PR head. Preserve it as unreviewed historical/experimental work; do not treat it as a verified runtime fix or merge/delete it without explicit disposition.
@@ -89,7 +90,8 @@
   10. [PR #11 — branch-wide CI validation](https://github.com/Legioniz/LatchPoint/pull/11), base feature/gameplay-foundation, head ci/branch-wide-godot-validation.
   11. [PR #12 — retained MP3 import-sidecar corrections](https://github.com/Legioniz/LatchPoint/pull/12), base feature/gameplay-foundation, head feature/audio-import-sidecar-validation.
   12. [PR #13 — high-speed collision regressions](https://github.com/Legioniz/LatchPoint/pull/13), base feature/player-movement-regression-tests, head feature/high-speed-collision-regressions; five files changed, 88 additions and 6 deletions.
-- **CI integration conflict:** PR #11 uses catch-all ** push/PR filters and pinned Node 24-compatible action commits on its own branch. The movement/physics/docs branch used by PR #13 still runs actions/checkout@v4 and emits the Node.js 20 deprecation warning; its workflow copy is not the PR #11 version. Main still has no validation workflow.
+  13. [PR #14 — shared audio shutdown verifier](https://github.com/Legioniz/LatchPoint/pull/14), base fix/audio-mix-cycle-boot-smoke-shutdown, head feature/shared-audio-shutdown-verifier; seven files changed, 170 additions and 93 deletions.
+- **CI integration conflict:** PR #11 uses catch-all ** push/PR filters and pinned Node 24-compatible action commits on its own branch. The movement/physics/docs branches used by PR #13 and PR #14 still run actions/checkout@v4 and emit the Node.js 20 deprecation warning; their workflow copy is not the PR #11 version. Main still has no validation workflow.
 - **Goal:** Preserve dependency order and ensure every PR's base/head SHA, complete diff, review state and checks are current.
 - **Acceptance:** Reconcile PR #1 with current main without force-push; recover/review the movement-regression parent; preserve PR #11's workflow policy across descendants; integrate the audio fix with settings/physics; verify resource paths and full CI logs; merge only with explicit project-owner approval.
 - **Do not:** Retarget or merge downstream PRs before their dependencies are settled.

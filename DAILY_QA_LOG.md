@@ -516,3 +516,45 @@ Obtain owner confirmation for the MP3 assets' source/license and the intended pu
 
 ### Next recommended objective
 Recover and review the unrepresented feature/player-movement-regression-tests parent before integrating PR #6 or PR #13. In parallel, prepare a reviewed reconciliation for PR #1's README add/add conflict and carry PR #11's catch-all/pinned CI workflow into the dependent branch stack. Keep LP-DES-001 blocked until the product owner approves the player promise, core loop, win/fail states and design pillars.
+
+
+## 2026-11-19 — Shared audio shutdown verifier and repository integration recheck
+
+**Role:** Project quality manager / integration reviewer  
+**Repository:** [Legioniz/LatchPoint](https://github.com/Legioniz/LatchPoint)  
+**Default branch HEAD:** 097da44e4ad3fb2a3f1e762034855ef46cffdac4  
+**Objective:** inspect the latest repository state, review PR #14's shared test helper and full CI logs, update existing quality records, and preserve the dependent PR stack.
+
+### Repository and project state
+- GitHub metadata confirms main is the default branch and the repository is public. The recursive main tree returned 72 entries with truncated=false; main still contains no .github/workflows/, tests/ or shared improvement/research/testing/architecture documents.
+- Enumerated 20 branch refs, 13 open draft PRs (#1, #2, #4–#14), and one open issue (#3). Main's latest commit remains 097da44e4ad3fb2a3f1e762034855ef46cffdac4.
+- Main project.godot declares Godot 4.7 / Forward Plus and the Audio autoload. On PR #14's branch, project.godot additionally includes the Settings autoload; its production AUDIO.gd shutdown method stops the music player and clears its stream.
+- The branch-protection read for main again returned HTTP 403 (Resource not accessible by integration). Current protection rules could not be verified; no visibility/protection settings were changed.
+
+### PR #14 review
+- [PR #14](https://github.com/Legioniz/LatchPoint/pull/14) is open/draft and GitHub reports it mergeable. Base: fix/audio-mix-cycle-boot-smoke-shutdown at 31ada925876e611b02b6ec2f6830cf5f7b932a27. Head: feature/shared-audio-shutdown-verifier at 78f8097326607beaab4ad08dbc2a93ac0fb0fe14.
+- Its seven changed files are IMPROVEMENT_BACKLOG.md, IMPROVEMENT_LOG.md, RESEARCH_REGISTER.md, TESTING_GUIDE.md, tests/audio_shutdown_verifier.gd, tests/boot_smoke_test.gd and tests/physics_smoke_test.gd (170 additions, 93 deletions).
+- The new RefCounted helper validates the Audio autoload and player, calls the existing shutdown method, checks playback/stream state, observes a mix-age reset within 120 process frames, then allows two extra process frames. Physics still requires active playback; boot does not.
+- The helper is test-only. Production audio script, scenes, resources, project settings, buses, gameplay code, UIDs, assets and dependencies are unchanged by PR #14. No blocking defect was identified in this narrow refactor.
+- The inherited workflow on this branch uses actions/checkout@v4, pushes on main and feature/**, and targets PR events against main; it does not include PR #11's pinned Node 24-compatible action changes. Main itself still has no validation workflow.
+
+### Research and licensing
+- Rechecked Godot 4.7 AudioServer, SceneTree and GDScript documentation for mix-time queries, the process_frame signal and await; details are recorded in RESEARCH_REGISTER.md.
+- This test-infrastructure refactor does not benefit from a commercial/indie game comparison. No external code, audio, art, scenes or other assets were copied, and no new dependency or license obligation was introduced.
+
+### CI and test outcomes
+- Latest Godot 4.7.2 [run 44255399262](https://github.com/Legioniz/LatchPoint/actions/runs/44255399262), job 134635783821, ran on PR #14 head 78f8097326607beaab4ad08dbc2a93ac0fb0fe14 and completed all steps successfully: checkout, engine install/version, resource import, every tracked-GDScript parse, physics smoke and boot smoke.
+- The complete 494-line log reports Dummy audio at 44,100 Hz. Physics observed a mix reset after 12 process frames (initial next-mix estimate 0.0793 s); boot observed one after 3 process frames (initial estimate 0.0168 s). No ObjectDB/resource/MP3/StringName retention diagnostics or Godot ERROR/WARNING lines follow either process. The only warning is the Node.js 20 deprecation notice for actions/checkout@v4.
+- Earlier push run [44255209541](https://github.com/Legioniz/LatchPoint/actions/runs/44255209541) also passed all validation steps; the physics process observed its mix reset after 9 process frames.
+- Latest physics output confirms the current player landed, movement regression checks held, platform collision layers matched the player mask, and floor/wall/ceiling checks held on this branch. PR #13 synthetic high-speed probes are on a sibling branch and were not part of this run.
+- Local Godot was unavailable. No local import, parser, scene load, physics execution, visible-collision playtest, native desktop audio, export or manual gameplay test was performed.
+- Corners, slopes, one-way/moving platforms, actual-player high-speed movement, spawn/respawn overlap and frame-rate variation remain unverified. ML/agents were not justified or performed. No performance profiling or measurements were available.
+
+### Integration and delivery
+- Updated six existing project-management documents on the existing quality branch; no code or runtime files were changed, and no files were created or deleted.
+- PR #14 remains stacked on PR #8. Its clean run does not include the separate PR #11 CI workflow, PR #12 sidecar corrections or PR #13 high-speed test branch. Keep issue #3 open until the dependent changes are reconciled and a fresh integrated run is clean.
+- PR #10 remains the existing draft documentation PR with base docs/core-loop-reference-research; no new main-target PR was opened because doing so would duplicate or pull in the unresolved upstream documentation/foundation stack.
+- No contributor branch was modified, no PR was merged/retargeted/closed, and main was not changed. The quality branch's workflow does not trigger for its docs/** push path, so this documentation commit is not expected to produce a new Godot run.
+
+### Next recommended objective
+Reconcile PR #1's README add/add conflict and recover/review the unrepresented feature/player-movement-regression-tests parent. Then coordinate PR #8/#14 with PR #11/#12/#13 in dependency order. Keep LP-DES-001 blocked until the product owner approves the player promise, core loop, win/fail states and design pillars.

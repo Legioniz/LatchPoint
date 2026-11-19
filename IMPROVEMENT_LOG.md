@@ -151,3 +151,38 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - Updated IMPROVEMENT_BACKLOG.md, BOT_TASK_BOARD.md, ISSUE_REGISTER.md, RESEARCH_REGISTER.md, IMPROVEMENT_LOG.md and DAILY_QA_LOG.md on the existing quality branch. No GDScript, scene, asset, UID, import sidecar, project setting, workflow or architecture file was changed. No files were created or deleted.
 - No branch was created/deleted, no PR was merged or retargeted, and no repository settings were changed. The existing PR #10 stack was preserved; its base remains docs/core-loop-reference-research.
 - Next: recover/review the unrepresented movement-regression parent, reconcile PR #1's README add/add conflict, then integrate the settings/physics/audio/high-speed test stack in dependency order while preserving PR #11's catch-all CI workflow. Do not add gameplay systems until LP-DES-001 is approved.
+
+
+## 2026-11-19 — Shared audio shutdown verifier and integration QA
+
+**Objective:** review the latest shared audio-shutdown test refactor, verify its Godot 4.7.2 evidence, and synchronize integration records. This is a test-infrastructure/documentation cycle; no gameplay direction was inferred and no production audio behavior was changed.
+
+### Repository and branch review
+- Main remains at 097da44e4ad3fb2a3f1e762034855ef46cffdac4, with 72 tree entries and no .github/workflows/, tests/, or shared improvement/architecture documents.
+- Current GitHub inventory: 20 branch refs, 13 open draft PRs, and open issue #3. PR #14 is open/draft and mergeable; base fix/audio-mix-cycle-boot-smoke-shutdown at 31ada925876e611b02b6ec2f6830cf5f7b932a27, head feature/shared-audio-shutdown-verifier at 78f8097326607beaab4ad08dbc2a93ac0fb0fe14.
+- The main-branch protection endpoint again returned HTTP 403 (Resource not accessible by integration). Protection rules could not be verified; no repository settings were changed.
+
+### PR #14 implementation review
+- Reviewed all seven changed files and the helper, both smoke-test entrypoints, AUDIO.gd, Settings.gd, project.godot, default_bus_layout.tres and the inherited validation workflow.
+- PR #14 adds a test-only RefCounted helper. It validates the Audio autoload/player, calls the existing shutdown_audio(), checks the player is stopped and its stream is cleared, observes an AudioServer mix-age reset within 120 process frames, then waits two additional process frames for deferred cleanup.
+- The physics smoke test still requires active background playback before shutdown; the boot test intentionally does not. Each CI command remains a separate Godot process and invokes the helper independently.
+- Production AUDIO.gd, scenes, assets, project settings, audio buses, gameplay scripts and dependencies are unchanged by PR #14. The helper timing diagnostic is not by itself proof that all engine references are released; complete process logs remain part of acceptance. No blocking defect was identified.
+
+### Research and licensing
+- Rechecked Godot 4.7 AudioServer, SceneTree and GDScript documentation for mix-time queries, the process_frame signal and await; details are recorded in RESEARCH_REGISTER.md.
+- This test-infrastructure refactor does not benefit from a commercial/indie game comparison. No external code, audio, art, scenes or other assets were copied, and no new dependency or license obligation was introduced.
+
+### Verification
+- Godot 4.7.2 run 44255399262, job 134635783821, completed checkout, engine install/version, resource import, every tracked-GDScript parse, physics smoke and main-scene boot.
+- The complete 494-line log reports Dummy audio at 44,100 Hz. Physics observed a mix reset after 12 process frames (initial next-mix estimate 0.0793 s); boot observed one after 3 process frames (initial estimate 0.0168 s). No ObjectDB/resource/MP3/StringName retention diagnostics or Godot ERROR/WARNING lines follow either process. The only warning is the Node.js 20 deprecation notice for actions/checkout@v4.
+- Earlier push run 44255209541 also passed all validation steps; the physics process observed its mix reset after 9 process frames.
+- Local Godot 4.7.2 execution was unavailable. No local import, parser, scene-load, physics, visible-collision, native desktop audio, export or manual gameplay test was performed.
+- Latest physics output confirms the current player landed, movement regression checks held, platform collision layers matched the player mask, and floor/wall/ceiling checks held on this branch. PR #13 synthetic high-speed probes are on a sibling branch and are not included in this run. Corners, slopes, one-way/moving platforms, actual-player high-speed movement, spawn/respawn overlap and frame-rate variation remain unverified.
+- ML/agents: none justified or performed. Performance: no profiler or target-hardware measurements were available; no optimization was attempted.
+
+### Scope, changes and handoff
+- Updated six existing project-management documents on the existing quality branch. No files were created or deleted; no GDScript, scene, resource, asset, UID, import sidecar, project setting, workflow, autoload or architecture file was changed.
+- No contributor feature branch was modified, no PR was merged or retargeted, and main was not changed. Existing PR #10's stacked base was preserved; a new main-target PR would duplicate or pull in unresolved documentation/foundation dependencies.
+- Rollback is a single revert of this documentation-only commit; no runtime state or project behavior is affected.
+- Issue #3 remains open until the clean helper is integrated with the sidecar and CI changes and a fresh integrated Godot 4.7.2 run confirms both complete process logs.
+- Next: reconcile PR #1's README add/add conflict and recover/review the unrepresented movement-regression parent; then coordinate PR #8/#14 with PR #11/#12/#13 in dependency order. Keep LP-DES-001 blocked until the product owner confirms the player promise, loop, win/fail states and design pillars.
