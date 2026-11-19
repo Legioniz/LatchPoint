@@ -91,3 +91,17 @@ Record the operating system, display setup, Godot version, and observed result i
 No reinforcement-learning agent is currently part of the project. Use deterministic or seeded scripted input tests where a measurable objective exists; do not label those tests as machine learning.
 
 Do not claim performance improvements without recording comparable before/after measurements on the same target hardware and project state.
+
+
+## Settings persistence lifecycle regression
+
+The boot smoke test covers both the settings data rules and the real debounce/teardown path:
+
+- Missing file uses safe defaults.
+- Valid audio/display values survive a ConfigFile save/reload round trip.
+- Invalid value types and out-of-range audio values recover to validated defaults.
+- Music bus changes synchronize with the Settings autoload.
+- An in-tree Settings fixture starts its 0.5-second debounce Timer; the test verifies the file is still absent before the timer can process.
+- Freeing that fixture invokes the exit-tree callback. The test reloads the isolated file and verifies the latest preference was flushed.
+
+The temporary file is user://latchpoint_settings_smoke_test.cfg and is removed after the test. This is an in-process lifecycle test, not a separate-process application restart test. Keep manual desktop fullscreen/restart verification separate from headless CI.

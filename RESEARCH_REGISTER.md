@@ -126,3 +126,26 @@ Checked 2026-11-10. These references establish the first research baseline. Re-c
 ## Decision rule
 
 The references are inspiration and technical evidence, not a feature checklist. Each adopted pattern must be tied to the LatchPoint design pillars, implemented originally, tested and recorded in the improvement log. No external code, art, sound, level or character is copied by this register.
+
+
+## 2026-11-19 — Debounced settings persistence and exit-tree flush
+
+### Godot 4.7 — Timer
+- Source: https://docs.godotengine.org/en/4.7/classes/class_timer.html
+- Relevant behavior: a Timer starts only after entering the SceneTree, emits timeout after its wait time, and is affected by Engine.time_scale.
+- Design decision: attach the isolated Settings fixture to the active SceneTree so its ready callback creates and starts the actual debounce Timer. Assert the Timer is pending and the settings file is absent before allowing another frame to process.
+
+### Godot 4.7 — Node lifecycle
+- Source: https://docs.godotengine.org/en/4.7/classes/class_node.html
+- Relevant behavior: the exit-tree callback is called when a node is about to leave the SceneTree, including when it is freed; a parent exits after its children.
+- Design decision: free the in-tree test fixture immediately after changing a preference. This exercises the production exit-tree callback while the debounce Timer is still pending, without waiting for wall-clock time.
+
+### Godot 4.7 — ConfigFile
+- Source: https://docs.godotengine.org/en/4.7/classes/class_configfile.html
+- Relevant behavior: ConfigFile stores Variant values and changes remain in memory until save() writes them to the selected path.
+- Design decision: reload the isolated user://latchpoint_settings_smoke_test.cfg after fixture teardown and assert that the last debounced value survived the exit-tree flush.
+
+### Scope and licensing
+- Official Godot documentation is used as API/lifecycle reference only.
+- No external source code, commercial game code, art, audio, levels or assets were copied.
+- This is test-infrastructure coverage; production settings behavior and architecture are unchanged.

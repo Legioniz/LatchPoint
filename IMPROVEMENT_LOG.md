@@ -51,3 +51,27 @@ Each completed cycle records its purpose, affected files, sources, verification 
 **Research:** Godot 4.7 CharacterBody2D, Input, and SceneTree documentation; Godot demo-project platformer and Celeste developer notes. See `RESEARCH_REGISTER.md`.
 
 **Branch:** `feature/player-movement-regression-tests` (dependent on the open foundation/window/audio documentation PR chain).
+
+
+## 2026-11-19 — Verify debounced settings flush on tree exit
+
+**Objective:** cover the actual Timer-backed save path and the Settings autoload's exit-tree flush, which the earlier persistence smoke test did not exercise because it used detached Settings instances and called save_now() directly.
+
+- Extended the boot smoke test to add an isolated Settings instance to the active SceneTree, change a preference, and assert that the 0.5-second debounce timer is pending while the file is still absent.
+- Free the in-tree fixture before the timer can process, exercising the real exit-tree callback; reload the isolated ConfigFile and verify the latest value was written.
+- Capture and restore the root window's mode and borderless flag because a Settings instance applies its display preference during ready initialization.
+- Keep the test file isolated under user://latchpoint_settings_smoke_test.cfg and remove it after verification.
+- No production settings, audio, display, scene or gameplay code changed.
+
+**Acceptance criteria**
+- The Timer-backed save is pending after a preference change.
+- No file is written before the debounce timeout.
+- Leaving the SceneTree flushes the pending value.
+- Reloading the isolated file returns the changed value.
+- Existing defaults, round-trip, invalid-value recovery, audio integration and display-decoration assertions remain intact.
+
+**Verification**
+- Godot 4.7.2 CI validation is required after the branch push; results are recorded below only after the run completes.
+- Local Godot execution and manual desktop/restart verification are not available in this cycle.
+- This test exercises the exit-tree callback in the same process; it does not replace a separate-process application restart test.
+- No runtime performance optimization or ML test was performed.
