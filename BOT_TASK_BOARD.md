@@ -229,3 +229,11 @@ Do not create a task for a role unless there is actual work to perform. These ar
 For each task, retain: ID, priority, status, evidence, objective, player/project value, scope, non-goals, affected paths, dependencies/conflicts, suggested role, acceptance criteria, test proof, branch/PR/issue links, and next handoff.
 
 Use statuses: proposed, ready, assigned, in progress, blocked, in review, completed. Only mark assigned when an actual contributor accepted or was assigned.
+
+## 2026-11-20 — LP-INT-001 / LP-QA-001 handoff
+
+- **PR #14:** `feature/shared-audio-shutdown-verifier` at `78f8097326607beaab4ad08dbc2a93ac0fb0fe14`, based on `fix/audio-mix-cycle-boot-smoke-shutdown`. Full Godot 4.7.2 run [44255399262](https://github.com/Legioniz/LatchPoint/actions/runs/44255399262) shows the shared verifier observing the mix reset after 12 process frames and no matching shutdown diagnostics in either smoke process.
+- **PR #15:** `feature/settings-exit-flush-regression` at `6a028594205c408f0e885e81bca26bb035cc7d46`, based on `feature/settings-persistence`. The new debounce/exit-tree persistence assertions pass in run [44478777582](https://github.com/Legioniz/LatchPoint/actions/runs/44478777582), but its physics smoke test still uses a fixed two-frame audio shutdown wait and reproduces issue #3 diagnostics.
+- Both PR heads have identical production `AUDIO.gd` blob SHA `bbfc914556569a979a71c3a313cb4fbb97829509`. GitHub compare reports PR #15 is 2 ahead / 9 behind PR #14 from merge base `43eee75ba3d912142b1eccbdd7629a8448f180c4`.
+- **Decision:** do not retarget or rewrite either contributor branch. After dependency review, coordinate the settings test changes with the shared verifier on a single integration head and re-run the complete Godot workflow. Keep issue #3 open until that combined run is clean.
+- No runtime implementation, branch mutation or merge was performed in this audit. The project-owner core-loop decision remains P0 and unresolved.
