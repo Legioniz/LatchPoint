@@ -133,3 +133,13 @@ The following defects are addressed in the open foundation PR work, but should n
 - Player horizontal velocity calculations consolidated into one acceleration/friction model.
 
 Verify current branch state and PR review before closing any related issue.
+
+## 2026-11-20 — LP-ISSUE-001 / GitHub issue #3 cross-branch evidence
+
+- PR #14 shared-verifier head and PR #15 settings-lifecycle head use the same `AUDIO.gd` blob SHA: `bbfc914556569a979a71c3a313cb4fbb97829509`.
+- PR #14 physics test waits for an observable AudioServer mix-age reset (12 process frames in run [44255399262](https://github.com/Legioniz/LatchPoint/actions/runs/44255399262)) and then two cleanup frames. Both smoke-process logs have no matching ObjectDB/resource/MP3/StringName shutdown diagnostics.
+- PR #15 physics test waits only two process frames after `shutdown_audio()`; run [44478777582](https://github.com/Legioniz/LatchPoint/actions/runs/44478777582) reports 2 leaked ObjectDB instances, one retained MP3 playback/stream resource at `res://Project_bullshit.mp3`, and an unclaimed `Music` StringName after physics. The boot process runs 120 frames before shutdown and has no matching diagnostics.
+- Current interpretation: insufficient test-harness mix/deferred-cleanup synchronization is the strongest immediate explanation. Production ownership and the exact engine-internal cause remain unproven.
+- PR #14 and PR #15 heads diverge by 2 ahead / 9 behind from merge base `43eee75ba3d912142b1eccbdd7629a8448f180c4`; do not resolve by force-push or silent retargeting.
+- Evidence comment: https://github.com/Legioniz/LatchPoint/issues/3#issuecomment-7027119636
+- **Status:** investigation narrowed, not resolved. Keep issue #3 open until both test changes run together on one reviewed integrated head with clean full logs.
