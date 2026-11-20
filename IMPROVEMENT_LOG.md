@@ -186,3 +186,38 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - Rollback is a single revert of this documentation-only commit; no runtime state or project behavior is affected.
 - Issue #3 remains open until the clean helper is integrated with the sidecar and CI changes and a fresh integrated Godot 4.7.2 run confirms both complete process logs.
 - Next: reconcile PR #1's README add/add conflict and recover/review the unrepresented movement-regression parent; then coordinate PR #8/#14 with PR #11/#12/#13 in dependency order. Keep LP-DES-001 blocked until the product owner confirms the player promise, loop, win/fail states and design pillars.
+
+## 2026-11-20 — Cross-branch audio shutdown regression comparison (LP-QA-001 / issue #3)
+
+**Objective:** determine why the settings-lifecycle branch still reports retained MP3 resources while the shared audio-shutdown verifier branch has clean process logs. Avoid changing production audio code until the difference is isolated.
+
+### Repository and branch evidence
+- Default branch remains `main` at `097da44e4ad3fb2a3f1e762034855ef46cffdac4`; it has not advanced since 2026-11-13. Main still lacks the downstream test suite and validation workflow.
+- PR #14 head: `feature/shared-audio-shutdown-verifier` at `78f8097326607beaab4ad08dbc2a93ac0fb0fe14`; base: `fix/audio-mix-cycle-boot-smoke-shutdown`.
+- PR #15 head: `feature/settings-exit-flush-regression` at `6a028594205c408f0e885e81bca26bb035cc7d46`; base: `feature/settings-persistence`.
+- GitHub compare reports the two heads diverged: PR #15 head is 2 commits ahead and 9 behind PR #14, with merge base `43eee75ba3d912142b1eccbdd7629a8448f180c4`.
+
+### Controlled source comparison
+- `AUDIO.gd` has the exact same blob SHA on both branches: `bbfc914556569a979a71c3a313cb4fbb97829509`. No production audio-script difference explains the different shutdown output.
+- PR #14's `tests/physics_smoke_test.gd` uses `tests/audio_shutdown_verifier.gd`: stop/clear the player, wait for an observable AudioServer mix-age reset (bounded at 120 process frames), then wait two deferred-cleanup frames.
+- PR #15's physics smoke test calls `shutdown_audio()` directly and waits only two `process_frame` signals. Its boot test runs 120 frames before shutdown, so the two-frame wait occurs after a much longer playback/mix interval.
+
+### Full CI log evidence
+- PR #14 run [44255399262](https://github.com/Legioniz/LatchPoint/actions/runs/44255399262), job 134635783821: 494-line Godot 4.7.2 log. The helper reports Dummy driver, 44,100 Hz and a mix reset after 12 process frames. No matching ObjectDB/resource/MP3/StringName shutdown diagnostics appear in either smoke process.
+- PR #15 run [44478777582](https://github.com/Legioniz/LatchPoint/actions/runs/44478777582), job 135405652408: 498-line Godot 4.7.2 log. The physics process reports 2 leaked ObjectDB instances, 1 resource still in use, retained AudioStreamPlaybackMP3 and AudioStreamMP3 for `res://Project_bullshit.mp3`, and an unclaimed `Music` StringName. The boot process has no matching retained-resource diagnostics.
+- All workflow steps in both runs completed successfully. A successful exit code is not treated as proof of clean shutdown.
+
+### Interpretation and decision
+- Evidence strongly supports insufficient mix/deferred-cleanup waiting in the PR #15 physics test harness as the immediate differentiator. The same production `AUDIO.gd` with the shared mix-cycle verifier has a clean log; the two-frame-only physics path reproduces the warnings.
+- This does not prove the precise engine-internal lifecycle cause, establish an upstream Godot defect, or prove the settings change caused the warning.
+- Keep issue #3 open until the settings-lifecycle regression and shared verifier are exercised together on one reviewed integrated head. Do not suppress diagnostics or change production audio ownership based on the current evidence.
+- Posted a detailed evidence/handoff comment on [issue #3](https://github.com/Legioniz/LatchPoint/issues/3#issuecomment-7027119636).
+
+### Scope, tests and limitations
+- Read-only inspection of repository metadata, branches, PRs, file blobs, branch comparison and full GitHub Actions job logs; no source or asset changes.
+- Local Godot import/parser/scene/physics/audio tests were not run because Godot is unavailable in the editing environment. No manual desktop audio test was performed.
+- No gameplay physics changed; slopes, one-way/moving platforms, corners and real-player high-speed movement were not newly tested.
+- No ML/agent evaluation was justified or performed. No performance measurements were available; no optimization was attempted.
+- No files were created or removed. No contributor branch was rewritten, retargeted, force-pushed or merged; main remains untouched.
+
+**Next:** coordinate PR #15's boot test with the shared verifier from PR #14 after dependency review, then run both smoke processes and inspect the complete logs on the combined head.
