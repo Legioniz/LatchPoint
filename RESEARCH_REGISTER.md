@@ -199,3 +199,25 @@ These are alternative patterns, not a feature checklist. The current LatchPoint 
 - A mix-age reset is a timing observation, not a direct reference-count assertion. Inspect complete process logs for ObjectDB/resource/MP3/StringName warnings as a separate acceptance check; do not infer clean shutdown from exit code alone.
 - PR #14 changes no production audio script, scene, asset, audio bus, project setting or third-party dependency. No code or assets were copied.
 - Research-lite is appropriate: this is a test-helper refactor, not a gameplay mechanic. A commercial/indie game comparison would not inform the helper API/lifecycle design. The existing 2026-11-13 game-design comparison remains the decision-support reference for LP-DES-001.
+
+## 2026-11-20 — Audio shutdown mix-cycle synchronization (research-lite)
+
+### Official Godot 4.7 API references
+- AudioServer: https://docs.godotengine.org/en/4.7/classes/class_audioserver.html
+  - Relevant APIs used by the existing test helper: `get_time_since_last_mix()`, `get_time_to_next_mix()`, `get_mix_rate()` and `get_driver_name()`.
+  - Decision: use an observable mix-age reset as a bounded synchronization condition instead of assuming that a fixed number of SceneTree process frames always covers audio-server cleanup.
+- SceneTree: https://docs.godotengine.org/en/4.7/classes/class_scenetree.html
+  - `process_frame` is a process-frame boundary; awaiting two such signals is not equivalent to observing an audio mix cycle.
+- AudioStreamPlayer: https://docs.godotengine.org/en/4.7/classes/class_audiostreamplayer.html
+  - The project shutdown method stops the player and clears its stream. The test must still allow asynchronous audio-server work to advance before process exit.
+
+### Project-specific comparison and decision
+- Compared PR #14's shared `tests/audio_shutdown_verifier.gd` with PR #15's physics-test shutdown path. The production `AUDIO.gd` blob is identical on both heads (`bbfc914556569a979a71c3a313cb4fbb97829509`).
+- PR #14 observes a mix-age reset after 12 process frames in Godot 4.7.2 CI run [44255399262](https://github.com/Legioniz/LatchPoint/actions/runs/44255399262); both smoke-process logs are free of matching retained-resource diagnostics.
+- PR #15's physics test waits only two process frames after stopping audio. CI run [44478777582](https://github.com/Legioniz/LatchPoint/actions/runs/44478777582) reproduces ObjectDB, AudioStreamPlaybackMP3, AudioStreamMP3 and StringName diagnostics after that physics process. Its boot test waits 120 frames before shutdown and has no matching diagnostics.
+- Interpretation: test-harness synchronization is the strongest current explanation for the immediate difference. This is a branch comparison, not a minimal engine reproduction; the exact engine-internal cleanup mechanism remains unproven.
+- Keep the shared verifier test-only. Do not change production audio ownership, suppress warnings, or claim an engine bug. Integrate the verifier with the settings-lifecycle test and re-run before closing issue #3.
+
+### Scope and licensing
+- Research-lite is appropriate: this is a focused lifecycle/debugging investigation, not a new gameplay feature. Commercial/indie game comparisons do not inform AudioServer synchronization.
+- Official Godot documentation is API reference only. No third-party code, assets, audio or other material was copied; no new dependency or attribution obligation was introduced.
