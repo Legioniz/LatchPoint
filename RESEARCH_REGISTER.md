@@ -211,3 +211,54 @@ The references are inspiration and technical evidence, not a feature checklist. 
 - The helper returns structured errors and diagnostic data; callers continue to report failures using their existing failure/exit paths.
 - No production audio behavior, scenes, assets, bus configuration, project settings, gameplay behavior or third-party dependencies are changed.
 - Official Godot documentation is used as a technical reference; no source code or assets are copied. No commercial/indie gameplay mechanic is applicable to this test-infrastructure refactor.
+
+## 2026-11-19 — Debounced settings persistence and exit-tree flush
+
+### Godot 4.7 — Timer
+- Source: https://docs.godotengine.org/en/4.7/classes/class_timer.html
+- Relevant behavior: a Timer starts only after entering the SceneTree, emits timeout after its wait time, and is affected by Engine.time_scale.
+- Design decision: attach the isolated Settings fixture to the active SceneTree so its ready callback creates and starts the actual debounce Timer. Assert the Timer is pending and the settings file is absent before allowing another frame to process.
+
+### Godot 4.7 — Node lifecycle
+- Source: https://docs.godotengine.org/en/4.7/classes/class_node.html
+- Relevant behavior: the exit-tree callback is called when a node is about to leave the SceneTree, including when it is freed; a parent exits after its children.
+- Design decision: free the in-tree test fixture immediately after changing a preference. This exercises the production exit-tree callback while the debounce Timer is still pending, without waiting for wall-clock time.
+
+### Godot 4.7 — ConfigFile
+- Source: https://docs.godotengine.org/en/4.7/classes/class_configfile.html
+- Relevant behavior: ConfigFile stores Variant values and changes remain in memory until save() writes them to the selected path.
+- Design decision: reload the isolated user://latchpoint_settings_smoke_test.cfg after fixture teardown and assert that the last debounced value survived the exit-tree flush.
+
+### Scope and licensing
+- Official Godot documentation is used as API/lifecycle reference only.
+- No external source code, commercial game code, art, audio, levels or assets were copied.
+- This is test-infrastructure coverage; production settings behavior and architecture are unchanged.
+
+
+## 2026-11-20 — Reconcile settings lifecycle and audio shutdown test branches
+
+### Official Godot 4.7 — AudioServer
+- Source: https://docs.godotengine.org/en/4.7/classes/class_audioserver.html
+- Relevant behavior: `get_time_since_last_mix()` reports the relative time since the last audio mix; `get_time_to_next_mix()` reports the relative time until the next mix. `get_driver_name()` identifies the active driver, and headless mode uses the Dummy driver.
+- Design decision: after stopping and clearing the player, wait for an observed mix-age reset rather than assuming a fixed number of SceneTree frames is sufficient.
+
+### Official Godot 4.7 — SceneTree
+- Source: https://docs.godotengine.org/en/4.7/classes/class_scenetree.html
+- Relevant behavior: `process_frame` is emitted immediately before Node `_process()` callbacks.
+- Design decision: retain the existing bounded 120-process-frame observation and two additional process frames for deferred cleanup. Keep each smoke-test process independent.
+
+### Cross-branch evidence and decision
+- PR #15's Godot 4.7.2 run [44478777582](https://github.com/Legioniz/LatchPoint/actions/runs/44478777582) completed, but its physics process emitted ObjectDB, MP3 playback/resource and StringName retention diagnostics after using only a fixed two-frame wait. Its boot process did not emit the same diagnostics.
+- PR #14's Godot 4.7.2 run [44255399262](https://github.com/Legioniz/LatchPoint/actions/runs/44255399262) observed a mix-age reset in both processes and emitted no matching retention diagnostics.
+- Both branches use the same production `AUDIO.gd` blob (`bbfc914556569a979a71c3a313cb4fbb97829509`). This points toward a test-harness synchronization difference, but does not by itself prove the complete root cause.
+- Integration decision: combine PR #14's shared verifier with PR #15's settings lifecycle test. Keep production audio/settings scripts unchanged and verify the combined tree in one fresh Godot 4.7.2 run.
+
+### Scope and licensing
+- Official Godot 4.7 documentation is used as API reference. Existing project-owned test code is being integrated; no external source code, audio, art, levels or characters are copied.
+- Commercial/indie gameplay comparisons are not applicable to this engine-lifecycle and test-integration objective.
+
+
+### Combined integration verification — 2026-11-20
+- Godot 4.7.2 run [44689407205](https://github.com/Legioniz/LatchPoint/actions/runs/44689407205) passed on the combined branch. Physics observed the Dummy-driver mix reset after 7 process frames (44,100 Hz; initial next-mix estimate 0.0432 s); boot observed it after 9 frames (44,100 Hz; initial estimate 0.0612 s).
+- The complete verbose job log contained no retained ObjectDB, MP3 playback/resource, or StringName diagnostics after either process. This supports the test-harness synchronization hypothesis but does not establish every internal ownership detail.
+- The Node.js 20 deprecation notice from actions/checkout@v4 is a separate CI maintenance warning tracked by PR #11.

@@ -170,3 +170,48 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - ML: not used.
 
 **Branch:** `feature/shared-audio-shutdown-verifier`, based on PR #8 head `fix/audio-mix-cycle-boot-smoke-shutdown`.
+
+## 2026-11-19 — Verify debounced settings flush on tree exit
+
+**Objective:** cover the actual Timer-backed save path and the Settings autoload's exit-tree flush, which the earlier persistence smoke test did not exercise because it used detached Settings instances and called save_now() directly.
+
+- Extended the boot smoke test to add an isolated Settings instance to the active SceneTree, change a preference, and assert that the 0.5-second debounce timer is pending while the file is still absent.
+- Free the in-tree fixture before the timer can process, exercising the real exit-tree callback; reload the isolated ConfigFile and verify the latest value was written.
+- Capture and restore the root window's mode and borderless flag because a Settings instance applies its display preference during ready initialization.
+- Keep the test file isolated under user://latchpoint_settings_smoke_test.cfg and remove it after verification.
+- No production settings, audio, display, scene or gameplay code changed.
+
+**Acceptance criteria**
+- The Timer-backed save is pending after a preference change.
+- No file is written before the debounce timeout.
+- Leaving the SceneTree flushes the pending value.
+- Reloading the isolated file returns the changed value.
+- Existing defaults, round-trip, invalid-value recovery, audio integration and display-decoration assertions remain intact.
+
+**Verification**
+- Godot 4.7.2 GitHub Actions run [44478483715](https://github.com/Legioniz/LatchPoint/actions/runs/44478483715) completed successfully on implementation commit `9c34ea5299bc18e8db8d0d32517947a0c4f69d2e`: resource import, every tracked GDScript parse, physics/scene smoke test and boot/settings/display smoke test all passed, including the new debounce and exit-tree flush assertions.
+- Full verbose output still reports two ObjectDB instances and one retained resource after both smoke-test processes. The audio path is the pre-existing issue #3 on this parent branch; this test-only change does not claim to resolve it.
+- Local Godot execution and manual desktop/restart verification are not available in this cycle.
+- This test exercises the exit-tree callback in the same process; it does not replace a separate-process application restart test.
+- No runtime performance optimization or ML test was performed.
+
+
+## 2026-11-20 — Integrate settings lifecycle with shared audio shutdown verification
+
+**Objective:** combine the settings exit-tree regression from PR #15 with the shared audio shutdown verifier from PR #14 on one reviewable integration branch.
+
+- Preserved PR #15's in-tree Settings fixture, pending debounce assertion, exit-tree flush assertion, and isolated-file cleanup.
+- Preserved PR #14's shared `tests/audio_shutdown_verifier.gd` and physics-test integration.
+- Updated the boot smoke test to use the same verifier, while retaining the settings lifecycle assertions and the boot test's cleanup-only playback precondition.
+- Kept the two smoke-test commands as separate Godot processes; each process verifies its own AudioServer lifecycle.
+- No production Settings.gd or AUDIO.gd code changed.
+
+**Acceptance criteria**
+- The physics test requires background playback to have started, stops and clears the player, observes a bounded AudioServer mix-age reset, and allows deferred cleanup frames.
+- The boot test runs its settings lifecycle and display checks, then uses the same shutdown verifier and fails if verification fails.
+- The settings debounce/exit-tree regression remains intact.
+- The full verbose Godot 4.7.2 workflow passes and neither process emits retained MP3/ObjectDB/StringName diagnostics.
+
+**Verification:** Godot 4.7.2 run [44689407205](https://github.com/Legioniz/LatchPoint/actions/runs/44689407205) passed on merge commit [6ece137](https://github.com/Legioniz/LatchPoint/commit/6ece1373b01cf40c37182895f6cf5c7ca0e18e88): resource import, every tracked GDScript parse check, physics/scene smoke test, and boot/settings smoke test all passed. The physics process used the Dummy driver at 44,100 Hz, initial next-mix estimate 0.0432 s, and observed a mix reset after 7 process frames; boot observed a reset after 9 frames (initial estimate 0.0612 s). The complete verbose log contained no retained ObjectDB, MP3 playback/resource, or StringName diagnostics and no Godot errors after either process. The inherited actions/checkout@v4 Node.js 20 deprecation notice remains tracked separately in PR #11.
+
+**Branch:** `fix/settings-audio-shutdown-integration`, a child of PR #14 with PR #15 preserved as the second merge parent. A post-CI review restored audio shutdown attempts on the boot test's earliest menu-load and menu-instantiation failure paths.

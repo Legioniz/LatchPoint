@@ -97,3 +97,29 @@ Record the operating system, display setup, Godot version, and observed result i
 No reinforcement-learning agent is currently part of the project. Use deterministic or seeded scripted input tests where a measurable objective exists; do not label those tests as machine learning.
 
 Do not claim performance improvements without recording comparable before/after measurements on the same target hardware and project state.
+
+## Settings persistence lifecycle regression
+
+The boot smoke test covers both the settings data rules and the real debounce/teardown path:
+
+- Missing file uses safe defaults.
+- Valid audio/display values survive a ConfigFile save/reload round trip.
+- Invalid value types and out-of-range audio values recover to validated defaults.
+- Music bus changes synchronize with the Settings autoload.
+- An in-tree Settings fixture starts its 0.5-second debounce Timer; the test verifies the file is still absent before the timer can process.
+- Freeing that fixture invokes the exit-tree callback. The test reloads the isolated file and verifies the latest preference was flushed.
+
+The temporary file is user://latchpoint_settings_smoke_test.cfg and is removed after the test. This is an in-process lifecycle test, not a separate-process application restart test. Keep manual desktop fullscreen/restart verification separate from headless CI.
+
+
+## Combined settings/audio lifecycle integration
+
+The integration branch combines the settings lifecycle regression with the shared audio shutdown verifier:
+
+- The physics smoke test requires that background playback started before shutdown.
+- The boot smoke test retains its settings debounce/exit-tree, audio-settings synchronization, and display-decoration checks.
+- Both tests stop and clear the AudioStreamPlayer, verify no stream/playback remains, observe a mix-age reset within 120 process frames, and wait two additional process frames.
+- Each smoke-test command is a separate Godot process. Inspect the complete verbose log after each process; a successful exit code alone is not sufficient evidence of clean shutdown.
+- The settings test continues to use and remove only its isolated `user://latchpoint_settings_smoke_test.cfg` file.
+
+Godot 4.7.2 run [44689407205](https://github.com/Legioniz/LatchPoint/actions/runs/44689407205) verified the combined branch: physics observed a Dummy-driver mix reset after 7 process frames and boot after 9 frames, both at 44,100 Hz. The full verbose log contained no retained ObjectDB/MP3/StringName diagnostics after either process. Issue [#3](https://github.com/Legioniz/LatchPoint/issues/3) remains open until the dependent stack reaches the default branch. Do not suppress retention diagnostics.
