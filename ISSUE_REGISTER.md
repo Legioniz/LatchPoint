@@ -143,3 +143,10 @@ Verify current branch state and PR review before closing any related issue.
 - PR #14 and PR #15 heads diverge by 2 ahead / 9 behind from merge base `43eee75ba3d912142b1eccbdd7629a8448f180c4`; do not resolve by force-push or silent retargeting.
 - Evidence comment: https://github.com/Legioniz/LatchPoint/issues/3#issuecomment-7027119636
 - **Status:** investigation narrowed, not resolved. Keep issue #3 open until both test changes run together on one reviewed integrated head with clean full logs.
+
+## 2026-11-20 — LP-SEC-001 branch-protection metadata recheck
+
+- Repository metadata reports visibility `public` and the connected GitHub identity has admin/push permissions.
+- The GitHub branch-list response for `main` reports `protected: false`. This is stronger current evidence that the default branch is not protected; the earlier branch-protection/ruleset detail endpoint remained inaccessible to the connected integration.
+- No visibility, protection, ruleset, collaborator or permission settings were changed. Do not infer that public visibility is intended merely because it is the current setting.
+- **Required owner action:** confirm whether the repository should be public/private and authorize PR-only protection with the final agreed Godot validation checks. Do not configure required status checks until the workflow is integrated and its check names are stable.
