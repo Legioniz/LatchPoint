@@ -558,3 +558,16 @@ Recover and review the unrepresented feature/player-movement-regression-tests pa
 
 ### Next recommended objective
 Reconcile PR #1's README add/add conflict and recover/review the unrepresented feature/player-movement-regression-tests parent. Then coordinate PR #8/#14 with PR #11/#12/#13 in dependency order. Keep LP-DES-001 blocked until the product owner approves the player promise, core loop, win/fail states and design pillars.
+
+## 2026-11-20 — Audio shutdown cross-branch regression audit
+
+- Repository: public `Legioniz/LatchPoint`; default branch `main` remains at `097da44e4ad3fb2a3f1e762034855ef46cffdac4`. The branch inventory contains 20 refs and the open-PR inventory contains 13 draft PRs (#1–#15, excluding #3 which is an issue).
+- Reviewed PR #15's full diff, PR #14's shared helper, the current project/audio/test scripts on both heads, recent commits, workflow runs and full job logs.
+- Confirmed the production `AUDIO.gd` blob is identical on PR #14 and PR #15. The physics-test shutdown path differs: PR #14 awaits an observable mix-age reset plus two cleanup frames; PR #15 awaits only two process frames.
+- Full run [44255399262](https://github.com/Legioniz/LatchPoint/actions/runs/44255399262): Godot 4.7.2, 494-line log, Dummy driver 44,100 Hz, mix reset after 12 process frames; no matching retained-resource diagnostics in physics or boot.
+- Full run [44478777582](https://github.com/Legioniz/LatchPoint/actions/runs/44478777582): Godot 4.7.2, 498-line log, all workflow steps passed, but physics shutdown reports 2 ObjectDB instances, one retained resource, AudioStreamPlaybackMP3/AudioStreamMP3 at `res://Project_bullshit.mp3`, and orphan `Music` StringName. Boot shutdown has no matching diagnostics after its 120-frame run.
+- Branch comparison: PR #15 is 2 commits ahead and 9 behind PR #14; merge base `43eee75ba3d912142b1eccbdd7629a8448f180c4`. The branches remain separate; no rebase, retarget or merge was attempted.
+- Posted issue #3 evidence comment [7027119636](https://github.com/Legioniz/LatchPoint/issues/3#issuecomment-7027119636).
+- Documentation-only update on the existing quality branch. No GDScript, scene, asset, import metadata, UID, project setting, workflow or architecture changes; no files created or removed.
+- Local Godot import, parsing, scene loading, physics, audio and desktop tests were not run. No new physics cases were tested. No ML/agents or performance profiling was justified/performed; no measurements available.
+- Next: coordinate PR #15's settings lifecycle test with PR #14's shared verifier on one reviewed head, then inspect complete CI logs. Keep the core-loop owner decision pending; do not add unrelated gameplay systems.
