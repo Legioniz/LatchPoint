@@ -561,7 +561,7 @@ Reconcile PR #1's README add/add conflict and recover/review the unrepresented f
 
 ## 2026-11-20 — Audio shutdown cross-branch regression audit
 
-- Repository: public `Legioniz/LatchPoint`; default branch `main` remains at `097da44e4ad3fb2a3f1e762034855ef46cffdac4`. The branch inventory contains 20 refs and the open-PR inventory contains 13 draft PRs (#1–#15, excluding #3 which is an issue).
+- Repository: public `Legioniz/LatchPoint`; default branch `main` remains at `097da44e4ad3fb2a3f1e762034855ef46cffdac4`. The branch inventory contains 20 refs and 14 open draft PRs (#1–#15, excluding #3 which is an issue).
 - Reviewed PR #15's full diff, PR #14's shared helper, the current project/audio/test scripts on both heads, recent commits, workflow runs and full job logs.
 - Confirmed the production `AUDIO.gd` blob is identical on PR #14 and PR #15. The physics-test shutdown path differs: PR #14 awaits an observable mix-age reset plus two cleanup frames; PR #15 awaits only two process frames.
 - Full run [44255399262](https://github.com/Legioniz/LatchPoint/actions/runs/44255399262): Godot 4.7.2, 494-line log, Dummy driver 44,100 Hz, mix reset after 12 process frames; no matching retained-resource diagnostics in physics or boot.
