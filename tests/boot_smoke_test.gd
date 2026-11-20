@@ -15,14 +15,12 @@ func _run() -> void:
 	var packed_scene := load(MAIN_MENU_PATH) as PackedScene
 	if packed_scene == null:
 		push_error("Could not load the configured LatchPoint main menu.")
-		await _shutdown_audio()
 		quit(1)
 		return
 
 	var main_menu := packed_scene.instantiate()
 	if main_menu == null:
 		push_error("Could not instantiate the configured LatchPoint main menu.")
-		await _shutdown_audio()
 		quit(1)
 		return
 
@@ -38,7 +36,8 @@ func _run() -> void:
 			quit(1)
 			return
 
-	if not _check_settings_persistence():
+	var settings_persistence_passed: bool = await _check_settings_persistence()
+	if not settings_persistence_passed:
 		main_menu.queue_free()
 		await process_frame
 		await _shutdown_audio()
@@ -144,7 +143,60 @@ func _check_settings_persistence() -> bool:
 	reloaded.free()
 	defaults.free()
 	var cleanup_passed := _remove_test_settings_file()
-	return round_trip_passed and invalid_values_recovered and cleanup_passed
+	if not round_trip_passed or not invalid_values_recovered or not cleanup_passed:
+		return false
+	return await _check_debounced_save_flush_on_exit(settings_script)
+
+
+func _check_debounced_save_flush_on_exit(settings_script: Script) -> bool:
+	if not _remove_test_settings_file():
+		return false
+
+	var main_window := root
+	var previous_window_mode: int = main_window.mode
+	var previous_borderless: bool = main_window.borderless
+
+	var pending_settings := settings_script.new() as Node
+	pending_settings.set("settings_file_path", SETTINGS_TEST_PATH)
+	root.add_child(pending_settings)
+	pending_settings.call("set_bus_volume_linear", "Music", 0.28)
+
+	var save_timer := pending_settings.get("_save_timer") as Timer
+	var timer_is_pending := save_timer != null and not save_timer.is_stopped()
+	var write_is_deferred := not FileAccess.file_exists(SETTINGS_TEST_PATH)
+
+	# Freeing the in-tree node invokes the Settings exit-tree flush before reload.
+	pending_settings.free()
+	var exit_flush_created_file := FileAccess.file_exists(SETTINGS_TEST_PATH)
+
+	var reloaded := settings_script.new() as Node
+	reloaded.set("settings_file_path", SETTINGS_TEST_PATH)
+	reloaded.call("load_settings")
+	var exit_flush_preserved_value := is_equal_approx(
+		float(reloaded.call("get_bus_volume_linear", "Music")),
+		0.28
+	)
+	reloaded.free()
+
+	main_window.mode = previous_window_mode
+	main_window.borderless = previous_borderless
+	var cleanup_passed := _remove_test_settings_file()
+
+	if not timer_is_pending:
+		push_error("Settings smoke test did not start the debounced save timer.")
+	if not write_is_deferred:
+		push_error("Settings smoke test wrote preferences before the debounce timer elapsed.")
+	if not exit_flush_created_file:
+		push_error("Settings autoload did not flush pending preferences when leaving the scene tree.")
+	if not exit_flush_preserved_value:
+		push_error("Settings exit-tree flush did not preserve the latest preference.")
+	return (
+		timer_is_pending
+		and write_is_deferred
+		and exit_flush_created_file
+		and exit_flush_preserved_value
+		and cleanup_passed
+	)
 
 
 func _check_audio_settings_integration() -> bool:
