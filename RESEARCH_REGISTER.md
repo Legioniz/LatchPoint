@@ -256,3 +256,9 @@ The references are inspiration and technical evidence, not a feature checklist. 
 ### Scope and licensing
 - Official Godot 4.7 documentation is used as API reference. Existing project-owned test code is being integrated; no external source code, audio, art, levels or characters are copied.
 - Commercial/indie gameplay comparisons are not applicable to this engine-lifecycle and test-integration objective.
+
+
+### Combined integration verification — 2026-11-20
+- Godot 4.7.2 run [44689407205](https://github.com/Legioniz/LatchPoint/actions/runs/44689407205) passed on the combined branch. Physics observed the Dummy-driver mix reset after 7 process frames (44,100 Hz; initial next-mix estimate 0.0432 s); boot observed it after 9 frames (44,100 Hz; initial estimate 0.0612 s).
+- The complete verbose job log contained no retained ObjectDB, MP3 playback/resource, or StringName diagnostics after either process. This supports the test-harness synchronization hypothesis but does not establish every internal ownership detail.
+- The Node.js 20 deprecation notice from actions/checkout@v4 is a separate CI maintenance warning tracked by PR #11.

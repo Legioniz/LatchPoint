@@ -15,12 +15,14 @@ func _run() -> void:
 	var packed_scene := load(MAIN_MENU_PATH) as PackedScene
 	if packed_scene == null:
 		push_error("Could not load the configured LatchPoint main menu.")
+		await _shutdown_audio()
 		quit(1)
 		return
 
 	var main_menu := packed_scene.instantiate()
 	if main_menu == null:
 		push_error("Could not instantiate the configured LatchPoint main menu.")
+		await _shutdown_audio()
 		quit(1)
 		return
 

@@ -212,6 +212,6 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - The settings debounce/exit-tree regression remains intact.
 - The full verbose Godot 4.7.2 workflow passes and neither process emits retained MP3/ObjectDB/StringName diagnostics.
 
-**Verification:** pending the integration-branch Godot 4.7.2 workflow. The prior PR #15 run reproduced the physics-process retention warning; PR #14's separate branch run was clean. See the cross-branch evidence and the new CI result in this entry after validation.
+**Verification:** Godot 4.7.2 run [44689407205](https://github.com/Legioniz/LatchPoint/actions/runs/44689407205) passed on merge commit [6ece137](https://github.com/Legioniz/LatchPoint/commit/6ece1373b01cf40c37182895f6cf5c7ca0e18e88): resource import, every tracked GDScript parse check, physics/scene smoke test, and boot/settings smoke test all passed. The physics process used the Dummy driver at 44,100 Hz, initial next-mix estimate 0.0432 s, and observed a mix reset after 7 process frames; boot observed a reset after 9 frames (initial estimate 0.0612 s). The complete verbose log contained no retained ObjectDB, MP3 playback/resource, or StringName diagnostics and no Godot errors after either process. The inherited actions/checkout@v4 Node.js 20 deprecation notice remains tracked separately in PR #11.
 
-**Branch:** `fix/settings-audio-shutdown-integration`, proposed as a child of PR #14 with PR #15 preserved as the second merge parent.
+**Branch:** `fix/settings-audio-shutdown-integration`, a child of PR #14 with PR #15 preserved as the second merge parent. A post-CI review restored audio shutdown attempts on the boot test's earliest menu-load and menu-instantiation failure paths.

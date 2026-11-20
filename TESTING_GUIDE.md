@@ -122,4 +122,4 @@ The integration branch combines the settings lifecycle regression with the share
 - Each smoke-test command is a separate Godot process. Inspect the complete verbose log after each process; a successful exit code alone is not sufficient evidence of clean shutdown.
 - The settings test continues to use and remove only its isolated `user://latchpoint_settings_smoke_test.cfg` file.
 
-Issue [#3](https://github.com/Legioniz/LatchPoint/issues/3) remains open until the combined shutdown behavior is verified on the integrated branch and the dependent changes reach the default branch. Do not suppress retention diagnostics.
+Godot 4.7.2 run [44689407205](https://github.com/Legioniz/LatchPoint/actions/runs/44689407205) verified the combined branch: physics observed a Dummy-driver mix reset after 7 process frames and boot after 9 frames, both at 44,100 Hz. The full verbose log contained no retained ObjectDB/MP3/StringName diagnostics after either process. Issue [#3](https://github.com/Legioniz/LatchPoint/issues/3) remains open until the dependent stack reaches the default branch. Do not suppress retention diagnostics.
