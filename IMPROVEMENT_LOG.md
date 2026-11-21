@@ -215,3 +215,36 @@ Each completed cycle records its purpose, affected files, sources, verification 
 **Verification:** Godot 4.7.2 run [44689407205](https://github.com/Legioniz/LatchPoint/actions/runs/44689407205) passed on merge commit [6ece137](https://github.com/Legioniz/LatchPoint/commit/6ece1373b01cf40c37182895f6cf5c7ca0e18e88): resource import, every tracked GDScript parse check, physics/scene smoke test, and boot/settings smoke test all passed. The physics process used the Dummy driver at 44,100 Hz, initial next-mix estimate 0.0432 s, and observed a mix reset after 7 process frames; boot observed a reset after 9 frames (initial estimate 0.0612 s). The complete verbose log contained no retained ObjectDB, MP3 playback/resource, or StringName diagnostics and no Godot errors after either process. The inherited actions/checkout@v4 Node.js 20 deprecation notice remains tracked separately in PR #11.
 
 **Branch:** `fix/settings-audio-shutdown-integration`, a child of PR #14 with PR #15 preserved as the second merge parent. A post-CI review restored audio shutdown attempts on the boot test's earliest menu-load and menu-instantiation failure paths.
+
+
+## 2026-11-21 — Restore keyboard/controller focus across menus
+
+**Objective:** complete a bounded part of the existing pause/menu UX backlog: make the existing menu flow usable without a mouse by establishing initial focus and deterministic vertical navigation.
+
+- Added deferred initial focus to the main menu's Play button, the new/load menu's New Game button, and the options menu's Music slider.
+- Added explicit vertical focus neighbors for the main menu, options menu and pause menu so arrow-key/D-pad movement follows the visible control order.
+- Changed the pause menu's three buttons from `FOCUS_NONE` to `FOCUS_ALL`; the previous explicit setting made them impossible to focus by keyboard or controller.
+- Focuses Resume whenever the pause menu opens and releases pause-menu focus when it closes. The existing Escape pause/resume behavior and scene transitions remain unchanged.
+- Kept Load Game disabled and explicitly non-focusable.
+- Extended the existing boot smoke test to send actual InputEventKey events through the viewport and assert initial focus, up/down navigation, disabled Load exclusion, Escape pause opening, and Space activation of Resume across all four menus.
+- No new input actions, autoloads, dependencies, assets, gameplay mechanics or save data were introduced.
+
+**Acceptance criteria**
+- Each menu establishes a usable initial focus after entering the SceneTree.
+- Visible interactive controls have focus enabled.
+- Vertical keyboard navigation follows the intended visual order.
+- The disabled Load Game control cannot receive focus.
+- Escape opens the pause menu, focuses Resume, and Space activates Resume to restore gameplay.
+- Existing settings, audio shutdown, physics and boot assertions remain enabled.
+
+**Verification**
+- Godot local execution: not available in this environment; validation is delegated to the existing Godot 4.7.2 GitHub Actions workflow after the branch push.
+- Automated UI focus assertions: added to the boot smoke test; result pending CI.
+- Manual keyboard/gamepad and mouse verification: not performed.
+- Physics/collision behavior: unchanged; no physics tests were altered.
+- Performance: no runtime profiling performed; this is a small UI-focus change and no optimization is claimed.
+- ML: not used; keyboard events are deterministic scripted tests, not machine learning.
+
+**Research:** Godot 4.7 Keyboard/Controller Navigation and Focus tutorial and Control class reference; the official Godot demo-project UI Accessibility sample (MIT license) was inspected as an open-source UI reference. No external code or assets were copied. See `RESEARCH_REGISTER.md`.
+
+**Branch:** `feature/menu-keyboard-focus`, based on PR #16's combined settings/audio integration head. PR and final CI details will be recorded after validation.

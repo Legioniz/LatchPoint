@@ -262,3 +262,28 @@ The references are inspiration and technical evidence, not a feature checklist. 
 - Godot 4.7.2 run [44689407205](https://github.com/Legioniz/LatchPoint/actions/runs/44689407205) passed on the combined branch. Physics observed the Dummy-driver mix reset after 7 process frames (44,100 Hz; initial next-mix estimate 0.0432 s); boot observed it after 9 frames (44,100 Hz; initial estimate 0.0612 s).
 - The complete verbose job log contained no retained ObjectDB, MP3 playback/resource, or StringName diagnostics after either process. This supports the test-harness synchronization hypothesis but does not establish every internal ownership detail.
 - The Node.js 20 deprecation notice from actions/checkout@v4 is a separate CI maintenance warning tracked by PR #11.
+
+
+## 2026-11-21 — Keyboard/controller focus and menu navigation
+
+### Official Godot 4.7 — Keyboard/Controller Navigation and Focus
+- Source: https://docs.godotengine.org/en/4.7/tutorials/ui/gui_navigation.html
+- Relevant findings: built-in `ui_up`, `ui_down`, `ui_focus_next` and related actions drive Control focus navigation; focus neighbors define directional navigation; a control can lose focus when hidden; initial focus should be assigned with `Control.grab_focus()`, deferred until the scene is ready.
+- Design decisions: assign initial focus with `grab_focus.call_deferred()`; define explicit vertical neighbors for the current vertically arranged controls; do not repurpose UI navigation actions for gameplay input.
+
+### Official Godot 4.7 — Control
+- Source: https://docs.godotengine.org/en/4.7/classes/class_control.html
+- Relevant findings: only one Control owns GUI focus at a time; `grab_focus()` transfers focus; `FOCUS_ALL` permits keyboard/controller navigation while `FOCUS_NONE` prevents focusing; focus neighbors can be configured through NodePaths.
+- Design decisions: change the pause menu's three buttons from explicit `FOCUS_NONE` to `FOCUS_ALL`; focus Resume whenever the pause overlay opens; release pause-menu focus when it closes; keep the unavailable Load button disabled and non-focusable.
+
+### Open-source reference — Godot Demo Projects UI Accessibility
+- Source: https://github.com/godotengine/godot-demo-projects/tree/master/gui/accessibility
+- License: repository `LICENSE.md` declares MIT; the sample is an official GDScript UI-accessibility demonstration.
+- Finding: the project provides a maintained Godot 4.7 reference for accessible UI controls and focus-aware interfaces.
+- Use: architectural/reference inspection only. No source code, scenes, text, icons, fonts or other assets were copied.
+
+### Scope and design decision
+- The current task is a bounded usability fix for the existing menu flow, not a new gameplay mechanic. Commercial/indie game comparisons are not applicable to this generic engine UI-focus correction.
+- Keep the existing scene composition and visual layout. Add initial focus and explicit vertical focus neighbors only; defer responsive-layout redesign and native gamepad testing.
+- Add deterministic boot-smoke assertions by dispatching keyboard events through the viewport. Headless input simulation does not replace physical keyboard/gamepad or native desktop visual verification.
+- No new dependencies, input actions, runtime autoloads, gameplay behavior, assets or third-party code are introduced.

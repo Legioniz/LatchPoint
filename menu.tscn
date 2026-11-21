@@ -10,6 +10,10 @@ script/source = "extends Control
 @onready var quit_button: Button = $QuitButton
 
 
+func _ready() -> void:
+	start_button.grab_focus.call_deferred()
+
+
 func _on_start_button_pressed() -> void:
 	get_tree().change_scene_to_file(\"res://new_load.tscn\")
 
@@ -46,6 +50,8 @@ vertical_alignment = 1
 
 [node name="StartButton" type="Button" parent="." unique_id=413149182]
 layout_mode = 0
+focus_mode = 2
+focus_neighbor_bottom = NodePath("../OptionsButton")
 offset_left = 72.0
 offset_top = 354.0
 offset_right = 322.0
@@ -54,6 +60,9 @@ text = "Play"
 
 [node name="OptionsButton" type="Button" parent="." unique_id=1950728367]
 layout_mode = 0
+focus_mode = 2
+focus_neighbor_top = NodePath("../StartButton")
+focus_neighbor_bottom = NodePath("../QuitButton")
 offset_left = 74.0
 offset_top = 449.0
 offset_right = 348.0
@@ -62,6 +71,8 @@ text = "Settings"
 
 [node name="QuitButton" type="Button" parent="." unique_id=1824642754]
 layout_mode = 0
+focus_mode = 2
+focus_neighbor_top = NodePath("../OptionsButton")
 offset_left = 72.0
 offset_top = 545.0
 offset_right = 374.0

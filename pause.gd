@@ -1,5 +1,7 @@
 extends Control
 
+@onready var resume_button: Button = $resume
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -19,17 +21,26 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func toggle_menu() -> void:
-	get_tree().paused = not get_tree().paused
-	visible = get_tree().paused
+	var should_pause := not get_tree().paused
+	get_tree().paused = should_pause
+	visible = should_pause
 
+	if should_pause:
+		resume_button.grab_focus.call_deferred()
+	else:
+		_release_pause_focus()
+
+
+func _release_pause_focus() -> void:
 	var focused_control := get_viewport().gui_get_focus_owner()
-	if focused_control != null:
+	if focused_control != null and is_ancestor_of(focused_control):
 		focused_control.release_focus()
 
 
 func _on_resume_pressed() -> void:
 	get_tree().paused = false
 	hide()
+	_release_pause_focus()
 	get_viewport().set_input_as_handled()
 
 
