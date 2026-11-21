@@ -144,4 +144,6 @@ Run with the existing boot smoke command:
 godot --headless --path . --verbose --script res://tests/boot_smoke_test.gd
 ```
 
+Godot 4.7.2 run [44880365084](https://github.com/Legioniz/LatchPoint/actions/runs/44880365084) passed the resource import, tracked-GDScript parse, physics and boot smoke-test workflow with these focus assertions enabled.
+
 Headless CI verifies focus ownership and navigation logic, not the visible focus style, mouse usability, native desktop window behavior, or physical gamepad hardware. Perform those checks manually on supported targets before marking the full menu UX backlog item complete.
