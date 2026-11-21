@@ -55,6 +55,8 @@ vertical_alignment = 1
 
 [node name="HSlider" type="HSlider" parent="." unique_id=1826981797]
 layout_mode = 1
+focus_mode = 2
+focus_neighbor_bottom = NodePath("../Resolution")
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -76,6 +78,8 @@ script = ExtResource("2_t1lix")
 
 [node name="Button" type="Button" parent="." unique_id=1987841845]
 layout_mode = 0
+focus_mode = 2
+focus_neighbor_top = NodePath("../Resolution")
 offset_left = 391.0
 offset_top = 437.0
 offset_right = 781.0
@@ -84,6 +88,9 @@ text = "Return"
 
 [node name="Resolution" type="CheckButton" parent="." unique_id=1921789388]
 layout_mode = 0
+focus_mode = 2
+focus_neighbor_top = NodePath("../HSlider")
+focus_neighbor_bottom = NodePath("../Button")
 offset_left = 391.0
 offset_top = 322.0
 offset_right = 735.0

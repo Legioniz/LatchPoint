@@ -1,6 +1,9 @@
 extends SceneTree
 
 const MAIN_MENU_PATH := "res://menu.tscn"
+const NEW_LOAD_MENU_PATH := "res://new_load.tscn"
+const OPTIONS_MENU_PATH := "res://options_menu.tscn"
+const PAUSE_MENU_PATH := "res://pause_menu.tscn"
 const FRAMES_TO_RUN := 120
 const SETTINGS_TEST_PATH := "user://latchpoint_settings_smoke_test.cfg"
 const SETTINGS_TEST_FILE_NAME := "latchpoint_settings_smoke_test.cfg"
@@ -19,7 +22,7 @@ func _run() -> void:
 		quit(1)
 		return
 
-	var main_menu := packed_scene.instantiate()
+	var main_menu := packed_scene.instantiate() as Control
 	if main_menu == null:
 		push_error("Could not instantiate the configured LatchPoint main menu.")
 		await _shutdown_audio()
@@ -28,6 +31,15 @@ func _run() -> void:
 
 	root.add_child(main_menu)
 	await process_frame
+	await process_frame
+
+	var keyboard_focus_passed: bool = await _check_keyboard_focus(main_menu)
+	if not keyboard_focus_passed:
+		main_menu.queue_free()
+		await process_frame
+		await _shutdown_audio()
+		quit(1)
+		return
 
 	for button_name in ["StartButton", "OptionsButton", "QuitButton"]:
 		if main_menu.get_node_or_null(button_name) == null:
@@ -76,6 +88,178 @@ func _run() -> void:
 		"windowed decorations restored and frame loop completed."
 	)
 	quit(0)
+
+
+func _check_keyboard_focus(main_menu: Control) -> bool:
+	var start_button := main_menu.get_node_or_null("StartButton") as Button
+	var options_button := main_menu.get_node_or_null("OptionsButton") as Button
+	var quit_button := main_menu.get_node_or_null("QuitButton") as Button
+	if start_button == null or options_button == null or quit_button == null:
+		push_error("Main menu focus test could not resolve its three buttons.")
+		return false
+
+	var passed := true
+	if not _expect_focus(start_button, "main menu initial focus"):
+		passed = false
+	await _send_key(KEY_DOWN)
+	if not _expect_focus(options_button, "main menu down navigation"):
+		passed = false
+	await _send_key(KEY_DOWN)
+	if not _expect_focus(quit_button, "main menu second down navigation"):
+		passed = false
+	await _send_key(KEY_UP)
+	if not _expect_focus(options_button, "main menu up navigation"):
+		passed = false
+
+	var new_load_scene := load(NEW_LOAD_MENU_PATH) as PackedScene
+	if new_load_scene == null:
+		push_error("New/load menu could not be loaded for focus testing.")
+		return false
+	var new_load_menu := new_load_scene.instantiate() as Control
+	if new_load_menu == null:
+		push_error("New/load menu could not be instantiated for focus testing.")
+		return false
+	root.add_child(new_load_menu)
+	await process_frame
+	await process_frame
+
+	var new_button := new_load_menu.get_node_or_null("New") as Button
+	var load_button := new_load_menu.get_node_or_null("Load") as Button
+	if new_button == null or load_button == null:
+		push_error("New/load menu focus test could not resolve both buttons.")
+		passed = false
+	elif not _expect_focus(new_button, "new/load initial focus"):
+		passed = false
+	if load_button == null or not load_button.disabled or load_button.focus_mode != Control.FOCUS_NONE:
+		push_error("Unavailable Load Game control must remain disabled and outside keyboard focus.")
+		passed = false
+	await _send_key(KEY_DOWN)
+	if load_button != null and root.gui_get_focus_owner() == load_button:
+		push_error("Keyboard navigation focused the disabled Load Game control.")
+		passed = false
+
+	new_load_menu.queue_free()
+	await process_frame
+	start_button.grab_focus.call_deferred()
+	await process_frame
+	await process_frame
+
+	var options_scene := load(OPTIONS_MENU_PATH) as PackedScene
+	if options_scene == null:
+		push_error("Options menu could not be loaded for focus testing.")
+		return false
+	var options_menu := options_scene.instantiate() as Control
+	if options_menu == null:
+		push_error("Options menu could not be instantiated for focus testing.")
+		return false
+	root.add_child(options_menu)
+	await process_frame
+	await process_frame
+
+	var volume_slider := options_menu.get_node_or_null("HSlider") as HSlider
+	var fullscreen_toggle := options_menu.get_node_or_null("Resolution") as CheckButton
+	var return_button := options_menu.get_node_or_null("Button") as Button
+	if volume_slider == null or fullscreen_toggle == null or return_button == null:
+		push_error("Options menu focus test could not resolve all interactive controls.")
+		passed = false
+	else:
+		if not _expect_focus(volume_slider, "options initial focus"):
+			passed = false
+		await _send_key(KEY_DOWN)
+		if not _expect_focus(fullscreen_toggle, "options down navigation"):
+			passed = false
+		await _send_key(KEY_DOWN)
+		if not _expect_focus(return_button, "options second down navigation"):
+			passed = false
+		await _send_key(KEY_UP)
+		if not _expect_focus(fullscreen_toggle, "options up navigation"):
+			passed = false
+
+	options_menu.queue_free()
+	await process_frame
+	start_button.grab_focus.call_deferred()
+	await process_frame
+	await process_frame
+
+	var pause_scene := load(PAUSE_MENU_PATH) as PackedScene
+	if pause_scene == null:
+		push_error("Pause menu could not be loaded for focus testing.")
+		return false
+	var pause_menu := pause_scene.instantiate() as Control
+	if pause_menu == null:
+		push_error("Pause menu could not be instantiated for focus testing.")
+		return false
+	root.add_child(pause_menu)
+	await process_frame
+	await _send_key(KEY_ESCAPE)
+
+	var resume_button := pause_menu.get_node_or_null("resume") as Button
+	var pause_return_button := pause_menu.get_node_or_null("return to menu") as Button
+	var exit_button := pause_menu.get_node_or_null("Exit") as Button
+	if not paused or not pause_menu.visible:
+		push_error("Escape did not open the pause menu and pause the SceneTree.")
+		passed = false
+	if resume_button == null or pause_return_button == null or exit_button == null:
+		push_error("Pause menu focus test could not resolve all three buttons.")
+		passed = false
+	else:
+		if not _expect_focus(resume_button, "pause menu initial focus"):
+			passed = false
+		await _send_key(KEY_DOWN)
+		if not _expect_focus(pause_return_button, "pause menu first down navigation"):
+			passed = false
+		await _send_key(KEY_DOWN)
+		if not _expect_focus(exit_button, "pause menu second down navigation"):
+			passed = false
+		await _send_key(KEY_UP)
+		if not _expect_focus(pause_return_button, "pause menu up navigation"):
+			passed = false
+		await _send_key(KEY_UP)
+		if not _expect_focus(resume_button, "pause menu return navigation"):
+			passed = false
+		await _send_key(KEY_SPACE)
+
+	if paused or pause_menu.visible:
+		push_error("Activating the focused Resume button did not close and unpause the game.")
+		passed = false
+		paused = false
+		pause_menu.hide()
+
+	pause_menu.queue_free()
+	await process_frame
+	start_button.grab_focus.call_deferred()
+	await process_frame
+	await process_frame
+	return passed
+
+
+func _expect_focus(expected: Control, context: String) -> bool:
+	var actual := root.gui_get_focus_owner()
+	if actual == expected:
+		return true
+
+	var actual_path := "<none>"
+	if actual != null:
+		actual_path = str(actual.get_path())
+	push_error(
+		"Keyboard focus regression (%s): expected %s, got %s." %
+		[context, str(expected.get_path()), actual_path]
+	)
+	return false
+
+
+func _send_key(keycode: int) -> void:
+	var press_event := InputEventKey.new()
+	press_event.keycode = keycode
+	press_event.pressed = true
+	Input.parse_input_event(press_event)
+	await process_frame
+
+	var release_event := InputEventKey.new()
+	release_event.keycode = keycode
+	release_event.pressed = false
+	Input.parse_input_event(release_event)
+	await process_frame
 
 
 func _check_settings_persistence() -> bool:

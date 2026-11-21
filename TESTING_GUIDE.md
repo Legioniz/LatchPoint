@@ -123,3 +123,27 @@ The integration branch combines the settings lifecycle regression with the share
 - The settings test continues to use and remove only its isolated `user://latchpoint_settings_smoke_test.cfg` file.
 
 Godot 4.7.2 run [44689407205](https://github.com/Legioniz/LatchPoint/actions/runs/44689407205) verified the combined branch: physics observed a Dummy-driver mix reset after 7 process frames and boot after 9 frames, both at 44,100 Hz. The full verbose log contained no retained ObjectDB/MP3/StringName diagnostics after either process. Issue [#3](https://github.com/Legioniz/LatchPoint/issues/3) remains open until the dependent stack reaches the default branch. Do not suppress retention diagnostics.
+
+
+## Menu keyboard/controller focus regression
+
+The boot smoke test now dispatches keyboard events through the viewport and checks the existing menu flow:
+
+- Main menu starts on Play and follows Play → Settings → Quit with Up/Down.
+- New/load menu starts on New Game; disabled Load Game remains disabled and cannot receive focus.
+- Options starts on the Music slider and follows Music → Fullscreen → Return.
+- Escape opens the pause menu and focuses Resume.
+- Pause navigation follows Resume → Return To Menu → Quit.
+- Space activates the focused Resume control, hides the pause menu and unpauses the SceneTree.
+
+The test uses the built-in Godot UI actions mapped from arrow keys, Escape and Space. The corresponding built-in actions also support controller navigation when a gamepad is connected, but this CI test simulates keyboard events only.
+
+Run with the existing boot smoke command:
+
+```sh
+godot --headless --path . --verbose --script res://tests/boot_smoke_test.gd
+```
+
+Godot 4.7.2 run [44880365084](https://github.com/Legioniz/LatchPoint/actions/runs/44880365084) passed the resource import, tracked-GDScript parse, physics and boot smoke-test workflow with these focus assertions enabled.
+
+Headless CI verifies focus ownership and navigation logic, not the visible focus style, mouse usability, native desktop window behavior, or physical gamepad hardware. Perform those checks manually on supported targets before marking the full menu UX backlog item complete.
