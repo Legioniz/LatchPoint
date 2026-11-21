@@ -118,3 +118,131 @@ These are alternative patterns, not a feature checklist. The current LatchPoint 
 - Do not implement collectibles, dash/corner correction, Wonder-style transformations, open-world systems or other reference mechanics until the owner approves a direction and the prototype demonstrates their value.
 
 **Decision status:** research comparison prepared on 2026-11-13; no game direction, mechanic, design pillar or first-playable scope has been approved. No gameplay code or assets changed.
+
+
+## 2026-11-16 — Classifying copied Git metadata on a historical branch
+
+### Official Git references
+- Repository layout: https://git-scm.com/docs/gitrepository-layout
+  - Git documents `HEAD`, `config` and `index` as repository metadata under `$GIT_DIR`; in a standard working tree this is the `.git/` directory.
+- Fetch behavior: https://git-scm.com/docs/git-fetch
+  - Git writes fetched ref/object information to `.git/FETCH_HEAD`.
+- Commit behavior: https://git-scm.com/docs/git-commit
+  - Git documents `$GIT_DIR/COMMIT_EDITMSG` as the message file for a commit in progress.
+- General repository model: https://git-scm.com/docs/git
+  - A normal working tree's `.git` directory contains the object database, index and refs; root-level files with similar names are not automatically the active metadata directory.
+
+### Repository observations
+- `automation/playability-baseline` is at `f7bb59d9ef9385a9f62c12c68b32d4ca11328f74`; comparison with `main` reports zero commits ahead and nine behind. It is the merge base of PR #1 and has no unique commits relative to main.
+- No current PR uses the automation branch as its base or head.
+- Six similarly named files are tracked at the project root on that branch. Text inspection found an old commit message, a former remote URL, a local branch pointer and a generic description. The root `config` contains no credential in the inspected text. The binary `index` was not decoded.
+- Main's previous cleanup commit [9ce61c5](https://github.com/Legioniz/LatchPoint/commit/9ce61c5e014927aa3c90a14a0ea941e98823d42b) removed three of these files from main; PR #1 already proposes removal of the remaining root-level `config`, `description` and `index` copies.
+
+### Design decision and safety
+- Treat the root-level copies as ordinary tracked project files, not active GitHub-hosted repository configuration. Do not execute or use them as a local Git repository.
+- Retain `automation/playability-baseline` unchanged as a historical baseline and PR #1 comparison point. Do not delete the branch, rewrite history, or duplicate the cleanup already proposed in PR #1 without explicit owner direction.
+- No Git commands, code, assets or dependencies were copied into the project. The official documentation was referenced for classification only; no source text or implementation was reused.
+- The binary index remains uninspected beyond confirming its presence and encoded size; no statement is made about its internal paths or entries.
+
+
+## 2026-11-17 — Audio asset provenance audit (research-lite)
+
+**Objective:** establish what can be verified about the four retained MP3 files without deleting, relabeling or redistributing material whose rights are unknown.
+
+### Technical reference
+- Godot 4.7 Import Process: https://docs.godotengine.org/en/4.7/tutorials/assets_pipeline/import_process.html
+- Godot documents that each imported source asset has a companion `.import` file containing important import configuration and that these sidecars should be committed. The generated `.godot/imported/` cache is separate and should not be committed. This supports preserving the source files and sidecars while correcting their paths; it does not establish copyright or permission.
+
+### Repository evidence (checked 2026-11-17)
+- The default-branch tree contains `Project_bullshit.mp3`, `Tung.mp3`, `maj.mp3` and `yi.mp3` at the repository root, each with a companion `.import` file.
+- Default-branch GitHub code search found `Project_bullshit.mp3` in `AUDIO.gd`. Searches for the other three names returned only their own `.import` sidecars. This search covers the default branch only and is not a complete audit of every branch, dynamic path construction or runtime-generated resource path.
+- All four MP3s were introduced together in commit https://github.com/Legioniz/LatchPoint/commit/8e586c1eb3c52f11b5c5167355e663587363d245 (2026-08-23, author account `Codfyyy`, message “Add files via upload”). The commit metadata contains no source URL, license, attribution or intended-use statement.
+- The current root `LICENSE` and `COPYRIGHT.md` distinguish owner-controlled materials from third-party audio and state that third-party materials retain their own terms. Repository presence and commit authorship do not prove the project owner owns or may redistribute these MP3s.
+- On `main`, all four sidecars use `res://MUSIC/<filename>.mp3` even though the source files are at the project root. PR #1 corrects the Project track sidecar; PR #12 corrects the other three. Those path changes are technical import repairs only and do not settle provenance.
+
+### Decision and limits
+- Keep all four binaries and their UIDs/import metadata unchanged. Do not delete the three currently unreferenced-by-default-code-search tracks, because the search is not exhaustive and ownership is unknown.
+- Do not treat the current proprietary notice as a license for third-party audio. Obtain source, rights-holder, permission/license and intended-use confirmation from the asset owner before release or redistribution.
+- This is research-lite: the task is repository provenance, not a gameplay feature. No commercial/indie game mechanic comparison was relevant; no external audio, code or assets were copied or reused. The binary audio contents were not downloaded, played or identified.
+
+
+## 2026-11-18 — High-speed CharacterBody2D regression review (research-lite)
+
+### Technical references
+- Godot 4.7 CharacterBody2D movement and collision: https://docs.godotengine.org/en/4.7/tutorials/physics/using_character_body_2d.html
+  - The official guide describes code-driven CharacterBody2D movement in the physics callback and collision resolution through move_and_slide().
+- Godot Demo Projects — Kinematic Character 2D: https://github.com/godotengine/godot-demo-projects/tree/master/2d/kinematic_character
+  - The repository README states that its demos are distributed under the MIT license and points to LICENSE.md: https://github.com/godotengine/godot-demo-projects/blob/master/LICENSE.md. The Godot Asset Library listing for Kinematic Character 2D also labels the Godot Foundation sample MIT, lists Godot 4.7 as its minimum version, and records a 2026-07-08 update: https://store.godotengine.org/asset/godot-foundation/kinematic-character-2d-demo/. It was reviewed as a technical implementation comparison only; no code, scenes or assets were copied.
+
+### Test interpretation and decision
+- PR #13 adds test-only floor, wall and ceiling probes with a 20×20 CharacterBody2D shape and 20-pixel-thick fixtures. The commanded speed is derived from the configured physics tick rate to produce 100 pixels of requested displacement per tick (6,000 pixels/second at the 60 Hz default).
+- The test asserts the expected floor/wall/ceiling classification and that the body did not pass through the fixture. The passing Godot 4.7.2 run [44035218467](https://github.com/Legioniz/LatchPoint/actions/runs/44035218467) verifies this specific headless fixture/configuration; it does not establish a universal collision guarantee or test high-speed movement of the shipping player.
+- This is an engine-level regression test, not a gameplay mechanic. A commercial/indie game comparison is not relevant to this narrow objective; the existing 2026-11-13 game-design comparison remains the decision-support reference for LP-DES-001.
+- No third-party code, art, audio, levels or other assets were reused. No new dependency or license obligation was introduced by this review.
+
+
+## 2026-11-19 — Shared audio shutdown verifier (research-lite)
+
+**Objective:** review the test-only helper introduced in PR #14 and verify that its asynchronous wait/cleanup sequence uses documented Godot 4.7 APIs.
+
+### Official Godot 4.7 references (checked 2026-11-19)
+- AudioServer class: https://docs.godotengine.org/en/4.7/classes/class_audioserver.html
+  - Documents get_time_since_last_mix() and get_time_to_next_mix() as AudioServer timing queries. The helper uses the former to observe a reset after shutdown; its returned frame count is a process-frame observation, not an audio-server frame count.
+- SceneTree class: https://docs.godotengine.org/en/4.7/classes/class_scenetree.html
+  - Documents process_frame as emitted immediately before Node _process() callbacks. Awaiting it advances the helper through a process-frame boundary.
+- GDScript reference: https://docs.godotengine.org/en/4.7/tutorials/scripting/gdscript/gdscript_basics.html
+  - Documents await for suspending on signals or coroutines. The helper returns its diagnostic dictionary to each independent SceneTree smoke-test script.
+
+### Project-specific decision and limitations
+- Keep the shared helper test-only and pass the current SceneTree and Audio autoload explicitly; do not add an autoload or change production audio ownership.
+- Retain the bounded 120-process-frame mix-reset wait and two additional process frames for deferred cleanup. Preserve the different preconditions: physics requires active playback, while boot verifies shutdown without requiring that music started.
+- A mix-age reset is a timing observation, not a direct reference-count assertion. Inspect complete process logs for ObjectDB/resource/MP3/StringName warnings as a separate acceptance check; do not infer clean shutdown from exit code alone.
+- PR #14 changes no production audio script, scene, asset, audio bus, project setting or third-party dependency. No code or assets were copied.
+- Research-lite is appropriate: this is a test-helper refactor, not a gameplay mechanic. A commercial/indie game comparison would not inform the helper API/lifecycle design. The existing 2026-11-13 game-design comparison remains the decision-support reference for LP-DES-001.
+
+## 2026-11-20 — Audio shutdown mix-cycle synchronization (research-lite)
+
+### Official Godot 4.7 API references
+- AudioServer: https://docs.godotengine.org/en/4.7/classes/class_audioserver.html
+  - Relevant APIs used by the existing test helper: `get_time_since_last_mix()`, `get_time_to_next_mix()`, `get_mix_rate()` and `get_driver_name()`.
+  - Decision: use an observable mix-age reset as a bounded synchronization condition instead of assuming that a fixed number of SceneTree process frames always covers audio-server cleanup.
+- SceneTree: https://docs.godotengine.org/en/4.7/classes/class_scenetree.html
+  - `process_frame` is a process-frame boundary; awaiting two such signals is not equivalent to observing an audio mix cycle.
+- AudioStreamPlayer: https://docs.godotengine.org/en/4.7/classes/class_audiostreamplayer.html
+  - The project shutdown method stops the player and clears its stream. The test must still allow asynchronous audio-server work to advance before process exit.
+
+### Project-specific comparison and decision
+- Compared PR #14's shared `tests/audio_shutdown_verifier.gd` with PR #15's physics-test shutdown path. The production `AUDIO.gd` blob is identical on both heads (`bbfc914556569a979a71c3a313cb4fbb97829509`).
+- PR #14 observes a mix-age reset after 12 process frames in Godot 4.7.2 CI run [44255399262](https://github.com/Legioniz/LatchPoint/actions/runs/44255399262); both smoke-process logs are free of matching retained-resource diagnostics.
+- PR #15's physics test waits only two process frames after stopping audio. CI run [44478777582](https://github.com/Legioniz/LatchPoint/actions/runs/44478777582) reproduces ObjectDB, AudioStreamPlaybackMP3, AudioStreamMP3 and StringName diagnostics after that physics process. Its boot test waits 120 frames before shutdown and has no matching diagnostics.
+- Interpretation: test-harness synchronization is the strongest current explanation for the immediate difference. This is a branch comparison, not a minimal engine reproduction; the exact engine-internal cleanup mechanism remains unproven.
+- Keep the shared verifier test-only. Do not change production audio ownership, suppress warnings, or claim an engine bug. Integrate the verifier with the settings-lifecycle test and re-run before closing issue #3.
+
+### Scope and licensing
+- Research-lite is appropriate: this is a focused lifecycle/debugging investigation, not a new gameplay feature. Commercial/indie game comparisons do not inform AudioServer synchronization.
+- Official Godot documentation is API reference only. No third-party code, assets, audio or other material was copied; no new dependency or attribution obligation was introduced.
+
+
+## 2026-11-21 — Combined settings/audio lifecycle integration review (research-lite)
+
+### Official Godot 4.7 references
+- AudioServer: https://docs.godotengine.org/en/4.7/classes/class_audioserver.html
+  - `get_time_since_last_mix()` provides an observable mix-age signal. A bounded wait for a reset is more robust than assuming a fixed number of process frames, but the timing observation alone does not prove every resource reference has been released.
+- SceneTree: https://docs.godotengine.org/en/4.7/classes/class_scenetree.html
+  - The `process_frame` signal provides a process-frame synchronization point. Each independent Godot smoke-test process owns a separate SceneTree and AudioServer lifecycle.
+- Node: https://docs.godotengine.org/en/4.7/classes/class_node.html
+  - The exit-tree lifecycle is the relevant hook for flushing pending settings when an in-tree Settings fixture is removed.
+- Timer: https://docs.godotengine.org/en/4.7/classes/class_timer.html
+  - The debounce Timer must be started by a node in the active SceneTree before the test can assert that a save is pending.
+- ConfigFile: https://docs.godotengine.org/en/4.7/classes/class_configfile.html
+  - Reloading the isolated file after fixture teardown verifies that the exit-tree flush wrote the latest value.
+
+### Findings and decisions
+- PR #16 combines PR #15's real Timer-backed Settings lifecycle assertion with PR #14's shared audio shutdown verifier while keeping physics and boot as independent processes.
+- The final Godot 4.7.2 run [44689799965](https://github.com/Legioniz/LatchPoint/actions/runs/44689799965) observed the Dummy-driver mix reset after 9 physics frames and 12 boot frames at 44,100 Hz. The complete job log contains no matching retained ObjectDB/MP3/StringName diagnostics or Godot errors/warnings after either process.
+- A clean mix-cycle observation plus clean process logs is the current acceptance evidence. It supports the test-harness synchronization approach; it does not prove every internal Godot resource-ownership detail or establish native desktop audio behavior.
+- Keep issue #3 open until the dependent stack reaches main and a main-based workflow run is clean. The current main AUDIO.gd blob differs from the integration branch.
+
+### Research scope and licensing
+- This is a small test-lifecycle integration review. A commercial/indie game comparison or gameplay postmortem would not inform the AudioServer/SceneTree/ConfigFile behavior, so no such comparison was repeated.
+- Official Godot documentation was used as API reference only. No external code, music, art, scenes, characters or levels were copied; no third-party license or attribution obligation was introduced.
