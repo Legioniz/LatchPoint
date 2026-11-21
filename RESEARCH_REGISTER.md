@@ -221,3 +221,28 @@ These are alternative patterns, not a feature checklist. The current LatchPoint 
 ### Scope and licensing
 - Research-lite is appropriate: this is a focused lifecycle/debugging investigation, not a new gameplay feature. Commercial/indie game comparisons do not inform AudioServer synchronization.
 - Official Godot documentation is API reference only. No third-party code, assets, audio or other material was copied; no new dependency or attribution obligation was introduced.
+
+
+## 2026-11-21 — Combined settings/audio lifecycle integration review (research-lite)
+
+### Official Godot 4.7 references
+- AudioServer: https://docs.godotengine.org/en/4.7/classes/class_audioserver.html
+  - `get_time_since_last_mix()` provides an observable mix-age signal. A bounded wait for a reset is more robust than assuming a fixed number of process frames, but the timing observation alone does not prove every resource reference has been released.
+- SceneTree: https://docs.godotengine.org/en/4.7/classes/class_scenetree.html
+  - The `process_frame` signal provides a process-frame synchronization point. Each independent Godot smoke-test process owns a separate SceneTree and AudioServer lifecycle.
+- Node: https://docs.godotengine.org/en/4.7/classes/class_node.html
+  - The exit-tree lifecycle is the relevant hook for flushing pending settings when an in-tree Settings fixture is removed.
+- Timer: https://docs.godotengine.org/en/4.7/classes/class_timer.html
+  - The debounce Timer must be started by a node in the active SceneTree before the test can assert that a save is pending.
+- ConfigFile: https://docs.godotengine.org/en/4.7/classes/class_configfile.html
+  - Reloading the isolated file after fixture teardown verifies that the exit-tree flush wrote the latest value.
+
+### Findings and decisions
+- PR #16 combines PR #15's real Timer-backed Settings lifecycle assertion with PR #14's shared audio shutdown verifier while keeping physics and boot as independent processes.
+- The final Godot 4.7.2 run [44689799965](https://github.com/Legioniz/LatchPoint/actions/runs/44689799965) observed the Dummy-driver mix reset after 9 physics frames and 12 boot frames at 44,100 Hz. The complete job log contains no matching retained ObjectDB/MP3/StringName diagnostics or Godot errors/warnings after either process.
+- A clean mix-cycle observation plus clean process logs is the current acceptance evidence. It supports the test-harness synchronization approach; it does not prove every internal Godot resource-ownership detail or establish native desktop audio behavior.
+- Keep issue #3 open until the dependent stack reaches main and a main-based workflow run is clean. The current main AUDIO.gd blob differs from the integration branch.
+
+### Research scope and licensing
+- This is a small test-lifecycle integration review. A commercial/indie game comparison or gameplay postmortem would not inform the AudioServer/SceneTree/ConfigFile behavior, so no such comparison was repeated.
+- Official Godot documentation was used as API reference only. No external code, music, art, scenes, characters or levels were copied; no third-party license or attribution obligation was introduced.

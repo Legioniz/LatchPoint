@@ -221,3 +221,28 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - No files were created or removed. No contributor branch was rewritten, retargeted, force-pushed or merged; main remains untouched.
 
 **Next:** coordinate PR #15's boot test with the shared verifier from PR #14 after dependency review, then run both smoke processes and inspect the complete logs on the combined head.
+
+
+## 2026-11-21 — Combined settings/audio integration review (LP-QA-001 / LP-INT-001)
+
+**Objective:** review PR #16's combined settings lifecycle and audio shutdown test head, verify its final CI run, and record the remaining integration gates. No gameplay feature was selected because LP-DES-001 remains owner-blocked.
+
+### Review
+- PR #16 is open/draft, mergeable, and based on PR #14's shared-verifier head. Its head `481f62d5d3bbc13c3324b110bc1510ab451e2136` preserves PR #15 as a second parent.
+- The five-file PR diff changes only the backlog, improvement log, research register, testing guide and boot smoke test. No production Settings or Audio script changes are in the PR diff.
+- The boot test now covers the actual in-tree debounce/exit-tree flush path and invokes the shared shutdown verifier on normal and earliest menu-load/instantiation failure paths. No blocking defect was identified in this focused test/documentation diff.
+- The branch is 96 commits ahead and 9 behind main, so it remains a stacked review head rather than a main-ready change.
+
+### Verification
+- Final-head Godot 4.7.2 run [44689799965](https://github.com/Legioniz/LatchPoint/actions/runs/44689799965) passed import, all tracked-GDScript parsing, physics/scene smoke and boot/settings smoke.
+- Full job log: Dummy driver, 44,100 Hz; mix reset after 9 physics frames and 12 boot frames; no matching retained ObjectDB/MP3/StringName diagnostics or Godot errors/warnings after either process.
+- Earlier combined commit run [44689407205](https://github.com/Legioniz/LatchPoint/actions/runs/44689407205) also passed, with 7 physics and 9 boot frames to observed mix reset.
+- The inherited `actions/checkout@v4` Node.js 20 deprecation warning remains. PR #11's pinned Node 24 action workflow is not yet present on this branch.
+- Local Godot was unavailable; no local runtime or manual desktop test was performed.
+
+### Scope and handoff
+- No GDScript/runtime changes, assets, scene changes, UID/import changes, project settings, workflow changes, new files or deletions were made in this quality cycle.
+- No ML/agent evaluation or performance profiling was justified/performed; no performance measurements are available.
+- Keep issue #3 open until the stack reaches main and a main-based run confirms clean shutdown. PR #12 sidecars and PR #13 high-speed probes are not in PR #16.
+- Do not copy the current testing guide into PR #10 yet: its commands describe Settings/audio helper files absent from PR #10's base. Synchronize it after the feature/test stack is reconciled.
+- Main remains unchanged at `097da44e4ad3fb2a3f1e762034855ef46cffdac4`; its branch listing reports `protected=false`. No settings were changed.

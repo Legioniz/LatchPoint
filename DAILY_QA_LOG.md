@@ -571,3 +571,55 @@ Reconcile PR #1's README add/add conflict and recover/review the unrepresented f
 - Documentation-only update on the existing quality branch. No GDScript, scene, asset, import metadata, UID, project setting, workflow or architecture changes; no files created or removed.
 - Local Godot import, parsing, scene loading, physics, audio and desktop tests were not run. No new physics cases were tested. No ML/agents or performance profiling was justified/performed; no measurements available.
 - Next: coordinate PR #15's settings lifecycle test with PR #14's shared verifier on one reviewed head, then inspect complete CI logs. Keep the core-loop owner decision pending; do not add unrelated gameplay systems.
+
+
+## 2026-11-21 — Combined settings/audio integration verification and dependency recheck
+
+**Role:** Project quality manager / integration reviewer  
+**Repository:** [Legioniz/LatchPoint](https://github.com/Legioniz/LatchPoint)  
+**Default branch HEAD:** `097da44e4ad3fb2a3f1e762034855ef46cffdac4`  
+**Objective:** independently review the new combined settings/audio integration PR, inspect the final Godot 4.7.2 job log, and update the dependency records without modifying the active feature branch.
+
+### Repository and project state
+- GitHub reports `main` as the default branch and the repository as public. The recursive main tree contains 72 entries with `truncated=false`; it has no `.github/workflows/`, `tests/`, `Settings.gd`, or shared project-management documents.
+- The complete branch listing returned 22 refs; the open-PR listing returned 15 open draft PRs; the only open non-PR issue returned was issue #3.
+- The GitHub branch response explicitly reports `main.protected=false`. No repository visibility, branch-protection, ruleset, collaborator or permission settings were changed.
+- Main's `project.godot` identifies Godot 4.7 / Forward Plus and only the Audio autoload. The combined integration branch additionally declares the Settings autoload and contains `Settings.gd`.
+- Re-fetched the actual main files. `Scene/player.gd` still calculates horizontal velocity twice, with the later fixed-speed movement overwriting the earlier acceleration/friction result. `new_load.gd` still calls `change_scene_to_file()` without a destination and leaves Load as `pass`. `Scene/main.tscn` still references the absent `res://bg/game_background_4/game_background_4.png`. Main's `AUDIO.gd` still loads `res://MUSIC/Project_bullshit.mp3`, while the MP3 is at the project root.
+- Main `AUDIO.gd` blob SHA is `925b955e4cd9cb4910381c941ab99504780f5bfa`; the PR #16 integration branch uses `bbfc914556569a979a71c3a313cb4fbb97829509`. The production audio change is therefore still absent from main.
+
+### PR #16 review
+- [PR #16](https://github.com/Legioniz/LatchPoint/pull/16) is open/draft and GitHub reports it mergeable. Base: `feature/shared-audio-shutdown-verifier` at `78f8097326607beaab4ad08dbc2a93ac0fb0fe14`. Head: `fix/settings-audio-shutdown-integration` at `481f62d5d3bbc13c3324b110bc1510ab451e2136`.
+- The PR contains four commits and changes five files (180 additions, 4 deletions). Its integration commit preserves PR #15's head as the second parent; no active branch was rebased or rewritten.
+- The five changed files are `IMPROVEMENT_BACKLOG.md`, `IMPROVEMENT_LOG.md`, `RESEARCH_REGISTER.md`, `TESTING_GUIDE.md`, and `tests/boot_smoke_test.gd`. The PR diff does not change production `AUDIO.gd`, `Settings.gd`, scenes, project settings, assets, UIDs or dependencies.
+- Reviewed the full diff and affected scripts. The boot test's settings fixture enters the SceneTree, asserts that the 0.5-second debounce timer is pending and no file has been written, frees the fixture to invoke the exit-tree flush, reloads the isolated ConfigFile and checks the saved value. It restores the root window flags and removes the temporary file.
+- Both smoke processes call the shared test-only audio verifier. The physics process requires active playback; boot does not. The verifier checks player state, observes an AudioServer mix-age reset within 120 process frames, and waits two further process frames. The boot test now attempts audio shutdown on its earliest menu-load and instantiation failure paths.
+- PR #16 compares to main as 96 commits ahead and 9 behind. This is a stacked integration head, not a main-ready PR. It does not yet include PR #11's Node 24-pinned workflow, PR #12's three remaining MP3 sidecar corrections, or PR #13's synthetic high-speed collision probes.
+
+### Research and licensing
+- Research-lite is appropriate: this is a focused test-lifecycle integration review, not a new gameplay mechanic.
+- Relevant official Godot 4.7 API references already recorded in `RESEARCH_REGISTER.md`: AudioServer (https://docs.godotengine.org/en/4.7/classes/class_audioserver.html), SceneTree (https://docs.godotengine.org/en/4.7/classes/class_scenetree.html), Node (https://docs.godotengine.org/en/4.7/classes/class_node.html), Timer (https://docs.godotengine.org/en/4.7/classes/class_timer.html), and ConfigFile (https://docs.godotengine.org/en/4.7/classes/class_configfile.html).
+- The implementation uses built-in Godot lifecycle, timer, ConfigFile and audio-server APIs. A commercial/indie game comparison is not relevant to this low-level integration. No external code, audio, art, scenes or assets were copied; no new dependency or license obligation was introduced.
+
+### CI and test outcomes
+- Final-head Godot 4.7.2 [run 44689799965](https://github.com/Legioniz/LatchPoint/actions/runs/44689799965), job 136132614980, completed checkout, engine/version verification, resource import, every tracked-GDScript parse, physics/scene smoke and boot/settings smoke successfully on `481f62d5d3bbc13c3324b110bc1510ab451e2136`.
+- The complete verbose job log records the Dummy driver at 44,100 Hz. Physics observed a mix reset after 9 process frames (initial next-mix estimate 0.0549 s); boot observed a reset after 12 frames (initial estimate 0.0795 s). Neither process emitted matching ObjectDB, retained MP3 playback/resource, StringName or Godot ERROR/WARNING shutdown diagnostics.
+- Earlier combined merge commit [run 44689407205](https://github.com/Legioniz/LatchPoint/actions/runs/44689407205) also passed: physics observed a reset after 7 frames and boot after 9 frames. The final-head run is the stronger verification for the current PR head.
+- The remaining workflow warning is GitHub's Node.js 20 deprecation notice for `actions/checkout@v4`. PR #11's pinned Node 24-compatible action changes are still on a separate branch.
+- No local Godot executable/editor was available. No local import, parser, scene, physics, native audio, desktop display, restart or export test was run.
+
+### Physics, agents and performance
+- **Verified by CI:** required scene loading, player landing, the existing player movement baseline, current static-platform collision-layer/player-mask checks, and normal-speed floor, wall and ceiling collision checks on the PR #16 branch.
+- **Not included in this head:** PR #13's synthetic high-speed floor/wall/ceiling probes. Corners, slopes, one-way/moving platforms, real-player high-speed movement, spawn/respawn overlap and frame-rate variation remain unverified. Hazard/pickup/projectile/power-up tests remain inapplicable until those systems exist.
+- **ML/agents:** none justified or performed; there is no approved measurable gameplay objective and state/action interface. The deterministic smoke tests are not ML.
+- **Performance:** no profiler or target-hardware measurements were available; no optimization was attempted.
+
+### Documentation, changes and limitations
+- Updated the existing quality-branch records: `IMPROVEMENT_BACKLOG.md`, `IMPROVEMENT_LOG.md`, `RESEARCH_REGISTER.md`, `ISSUE_REGISTER.md`, `BOT_TASK_BOARD.md` and this `DAILY_QA_LOG.md`.
+- No GDScript, scenes, assets, UIDs, import sidecars, project settings, workflow files or architecture files were changed in this quality cycle. No files were created or removed; no dependency was added.
+- `TESTING_GUIDE.md` exists on PR #16's integration branch but is absent from PR #10's documentation base. It references `Settings.gd` and `tests/audio_shutdown_verifier.gd`, which are not present on that documentation base. It was not copied into PR #10 to avoid documenting a different runtime/test tree. LP-DOC-002 remains blocked until the dependency stack is reconciled.
+- `ARCHITECTURE.md` on the quality branch is explicitly reviewed against the older foundation state and predates the Settings autoload. It was not rewritten to describe unmerged runtime state.
+- No other contributor branch was modified, no PR was merged or retargeted, and main was not changed.
+
+### Next recommended objective
+Coordinate PR #11's catch-all workflow and pinned actions with the PR #16 integration line, then bring in PR #12's remaining MP3 sidecar corrections and PR #13's high-speed test slice through reviewed dependency steps. Re-run the full integrated Godot 4.7.2 workflow and inspect complete logs. Keep LP-DES-001 as a P0 product-owner decision; do not add unrelated gameplay systems.

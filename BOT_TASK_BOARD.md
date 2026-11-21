@@ -30,7 +30,7 @@
 ### LP-QA-001 — Investigate MP3 playback references at shutdown
 
 - **Priority:** P1
-- **Status:** Open / in review. PR #8 and the newer PR #14 shared-verifier head have clean branch-head shutdown logs, but PR #11, PR #12 and the PR #13 movement-parent line still reproduce shutdown warnings in their own logs. PR #14 remains stacked on PR #8 and does not include the separate PR #11/#12/#13 changes. Issue #3 remains open until the fix is integrated and verified on the resulting shared head.
+- **Status:** Clean on the combined downstream integration head PR #16; issue #3 remains open until the stack reaches main and a main-based run confirms clean shutdown.
 - **Suggested role:** Audio systems + QA engineer.
 - **Evidence:** [Run 43175060644](https://github.com/Legioniz/LatchPoint/actions/runs/43175060644) on `fix/audio-mix-cycle-boot-smoke-shutdown` passed Godot 4.7.2 import/parse/physics/boot checks; the full log shows mix resets after 11 physics frames and 2 boot frames with no retained MP3/ObjectDB warnings. In contrast, Godot 4.7.2 [push run 43570349587](https://github.com/Legioniz/LatchPoint/actions/runs/43570349587) and [PR run 43570448230](https://github.com/Legioniz/LatchPoint/actions/runs/43570448230) on `ci/branch-wide-godot-validation` both complete successfully but report two leaked ObjectDB instances, one resource still in use, retained AudioStreamPlaybackMP3 / AudioStreamMP3 and `res://Project_bullshit.mp3` after each smoke-test process.
 - **Latest evidence (2026-11-15):** Godot 4.7.2 [run 43687899303](https://github.com/Legioniz/LatchPoint/actions/runs/43687899303) on PR #12's feature/audio-import-sidecar-validation branch completed import, parse, physics and boot steps successfully, but the full log reports the same ObjectDB/MP3 resource-retention warnings after both smoke-test processes. The workflow also emits the Node.js 20 deprecation warning for actions/checkout@v4. The sidecar fix does not include PR #8's shutdown diagnostic.
@@ -71,7 +71,7 @@
 ### LP-INT-001 — Review and settle the dependent foundation PR chain
 
 - **Priority:** P1
-- **Status:** In review; integration is blocked by the stale foundation PR base, an unrepresented movement-regression parent and divergent CI workflow copies.
+- **Status:** Integration advanced by PR #16, but the stack remains 96 commits ahead and 9 behind main; PR #1, the unrepresented movement-regression parent, and PR #11/#12/#13 dependencies remain unresolved.
 - **Suggested role:** GitHub integration lead / senior reviewer.
 - **Current repository evidence:** main remains at 097da44e4ad3fb2a3f1e762034855ef46cffdac4; its recursive tree has 72 entries and still contains no .github/workflows/, tests/ or shared project-management documents. The repository currently has 20 branch refs and 13 open draft PRs. Do not force-push or rewrite shared history.
 - **Foundation blocker:** PR #1 targets main from feature/gameplay-foundation; GitHub reports mergeable=false / dirty, with 52 commits ahead and 9 behind. Main and PR #1 independently add README.md; reconcile that add/add conflict through a reviewed plan.
@@ -115,7 +115,7 @@
 ### LP-DOC-002 — Synchronize the current testing guide into shared documentation
 
 - **Priority:** P3
-- **Status:** Proposed; defer until the feature/test stack settles.
+- **Status:** Blocked until the feature/test stack is reconciled; the current guide on PR #16 references runtime/test files absent from PR #10's documentation base.
 - **Problem/evidence:** `TESTING_GUIDE.md` exists on `feature/physics-layer-mask-regressions` and `fix/audio-mix-cycle-boot-smoke-shutdown`, but is absent from the docs PR #10 base `docs/core-loop-reference-research`.
 - **Goal/value:** Give every contributor one current source for import, parse, physics, settings, audio shutdown and manual desktop verification.
 - **Scope:** Bring the latest compatible guide into the shared docs line; verify its commands and descriptions against the integrated tests; link it from README and AGENTS.
@@ -237,3 +237,13 @@ Use statuses: proposed, ready, assigned, in progress, blocked, in review, comple
 - Both PR heads have identical production `AUDIO.gd` blob SHA `bbfc914556569a979a71c3a313cb4fbb97829509`. GitHub compare reports PR #15 is 2 ahead / 9 behind PR #14 from merge base `43eee75ba3d912142b1eccbdd7629a8448f180c4`.
 - **Decision:** do not retarget or rewrite either contributor branch. After dependency review, coordinate the settings test changes with the shared verifier on a single integration head and re-run the complete Godot workflow. Keep issue #3 open until that combined run is clean.
 - No runtime implementation, branch mutation or merge was performed in this audit. The project-owner core-loop decision remains P0 and unresolved.
+
+
+## 2026-11-21 — PR #16 combined verification handoff
+
+- **LP-QA-001:** The Settings exit-tree regression and shared audio shutdown verifier now pass together on [PR #16](https://github.com/Legioniz/LatchPoint/pull/16), head `481f62d5d3bbc13c3324b110bc1510ab451e2136`. Final Godot 4.7.2 run [44689799965](https://github.com/Legioniz/LatchPoint/actions/runs/44689799965) observed mix resets after 9 physics frames and 12 boot frames at 44,100 Hz, with no matching ObjectDB/MP3/StringName shutdown diagnostics. **Status:** clean on this downstream head; issue #3 remains open until the stack reaches main and a main-based run is clean.
+- **LP-INT-001:** PR #16 is open/draft and mergeable, based on PR #14's head and preserving PR #15 as its second parent. It is 96 commits ahead and 9 behind main. PR #11's Node 24-pinned workflow, PR #12's remaining MP3 sidecar corrections and PR #13's high-speed probes are not included. PR #1 remains dirty/non-mergeable; the movement-regression parent remains unrepresented. **Status:** integration advanced, still blocked from main by the dependency stack.
+- **LP-DOC-002:** The current testing guide exists on PR #16 but is not yet compatible with PR #10's documentation base because that base lacks `Settings.gd` and `tests/audio_shutdown_verifier.gd`. **Status:** blocked until the feature/test stack is reconciled; do not copy a guide whose commands do not match the target tree.
+- **LP-SEC-001:** GitHub's latest branch listing reports `main.protected=false`; repository metadata reports public visibility. No settings were changed. Owner confirmation and authorization remain required.
+- **Repository inventory:** 22 branch refs, 15 open draft PRs, one open issue (#3). Main remains at `097da44e4ad3fb2a3f1e762034855ef46cffdac4` with 72 tree entries.
+- **Coordination:** review PR #16 and issue #3 with the final-head CI evidence. No contributor branch was rewritten, retargeted or merged; main was not modified.

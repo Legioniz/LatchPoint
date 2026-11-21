@@ -1,6 +1,6 @@
 # LatchPoint — Issue Register
 
-**Reviewed:** 2026-11-19  
+**Reviewed:** 2026-11-21  
 This register separates confirmed defects from missing features, design decisions and investigations. Do not report a hypothesis as a root cause. Link to GitHub issues when they exist.
 
 ## P1 — Confirmed investigation
@@ -150,3 +150,15 @@ Verify current branch state and PR review before closing any related issue.
 - The GitHub branch-list response for `main` reports `protected: false`. This is stronger current evidence that the default branch is not protected; the earlier branch-protection/ruleset detail endpoint remained inaccessible to the connected integration.
 - No visibility, protection, ruleset, collaborator or permission settings were changed. Do not infer that public visibility is intended merely because it is the current setting.
 - **Required owner action:** confirm whether the repository should be public/private and authorize PR-only protection with the final agreed Godot validation checks. Do not configure required status checks until the workflow is integrated and its check names are stable.
+
+
+## 2026-11-21 — LP-ISSUE-001 / LP-INT-001 combined integration recheck
+
+- **Main state:** `097da44e4ad3fb2a3f1e762034855ef46cffdac4`; 72 recursive tree entries; 22 branch refs; 15 open draft PRs; issue #3 remains the only open non-PR issue returned by the repository query.
+- **Access control:** repository metadata reports public visibility and the main branch listing explicitly reports `protected=false`. No settings were changed. Confirm the intended visibility and PR-only protection policy with the owner.
+- **PR #16:** open/draft, mergeable, base `feature/shared-audio-shutdown-verifier` at `78f8097326607beaab4ad08dbc2a93ac0fb0fe14`, head `fix/settings-audio-shutdown-integration` at `481f62d5d3bbc13c3324b110bc1510ab451e2136`; four commits and five changed files. The integration commit preserves PR #15 as a second parent. Compare with main: 96 commits ahead, 9 behind.
+- **Final CI:** Godot 4.7.2 [run 44689799965](https://github.com/Legioniz/LatchPoint/actions/runs/44689799965) passed import, tracked-GDScript parsing, physics/scene smoke and boot/settings smoke. The complete job log records 9 physics and 12 boot frames to a Dummy-driver mix reset at 44,100 Hz, with no matching ObjectDB/MP3/StringName retention diagnostics or Godot errors/warnings after either process. The Node.js 20 deprecation warning from `actions/checkout@v4` remains.
+- **Interpretation:** the combined downstream branch now has clean full-log evidence for both independent processes. This is not a main-branch fix: main's `AUDIO.gd` blob differs from the integration branch and main has no validation workflow.
+- **Remaining stack:** PR #11's catch-all workflow and pinned Node 24 actions, PR #12's remaining MP3 sidecar corrections and PR #13's synthetic high-speed collision probes are not in PR #16. PR #1 remains dirty/non-mergeable. The unrepresented movement-regression parent still needs a reviewed integration plan.
+- **Issue status:** keep GitHub issue #3 open until the dependency stack reaches main and a main-based Godot 4.7.2 run has clean full logs. Do not suppress retention diagnostics or infer native desktop audio verification from the Dummy driver.
+- **Documentation status:** the current `TESTING_GUIDE.md` is on PR #16's branch but is absent from PR #10's docs base and references test/runtime files absent there. LP-DOC-002 remains blocked; do not copy the guide into the docs line until the stack is reconciled.
