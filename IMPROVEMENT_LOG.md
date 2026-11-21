@@ -238,8 +238,8 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - Existing settings, audio shutdown, physics and boot assertions remain enabled.
 
 **Verification**
-- Godot local execution: not available in this environment; validation is delegated to the existing Godot 4.7.2 GitHub Actions workflow after the branch push.
-- Automated UI focus assertions: added to the boot smoke test; result pending CI.
+- Godot local execution: not available in this environment; runtime validation used the existing Godot 4.7.2 GitHub Actions workflow.
+- Godot 4.7.2 GitHub Actions run [44880365084](https://github.com/Legioniz/LatchPoint/actions/runs/44880365084) passed the resource import, all tracked GDScript parse checks, physics/movement/collision-layer/audio-shutdown smoke tests, and boot/settings/display smoke test including the new keyboard focus assertions.
 - Manual keyboard/gamepad and mouse verification: not performed.
 - Physics/collision behavior: unchanged; no physics tests were altered.
 - Performance: no runtime profiling performed; this is a small UI-focus change and no optimization is claimed.
@@ -247,4 +247,6 @@ Each completed cycle records its purpose, affected files, sources, verification 
 
 **Research:** Godot 4.7 Keyboard/Controller Navigation and Focus tutorial and Control class reference; the official Godot demo-project UI Accessibility sample (MIT license) was inspected as an open-source UI reference. No external code or assets were copied. See `RESEARCH_REGISTER.md`.
 
-**Branch:** `feature/menu-keyboard-focus`, based on PR #16's combined settings/audio integration head. PR and final CI details will be recorded after validation.
+**CI evidence:** the complete verbose run [44880365084](https://github.com/Legioniz/LatchPoint/actions/runs/44880365084) recorded physics audio shutdown on the Dummy driver at 44,100 Hz after 10 process frames and boot shutdown after 1 process frame. No retained MP3/ObjectDB/StringName diagnostics or Godot errors followed either process. The inherited `actions/checkout@v4` Node.js 20 deprecation notice remains tracked by PR #11.
+
+**Branch:** `feature/menu-keyboard-focus`, based on PR #16's combined settings/audio integration head. **Implementation commit:** `905fe58cf88e7549e82f381b8b55b6694ea22a78`. **PR:** [#17](https://github.com/Legioniz/LatchPoint/pull/17), open draft stacked on PR #16.
