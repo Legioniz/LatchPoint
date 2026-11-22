@@ -167,3 +167,6 @@ godot --headless --path . --verbose --script res://tests/boot_smoke_test.gd
 ```
 
 Synthetic events verify the project's InputMap and Control behavior. They do not verify physical controller hardware, SDL controller mappings, analog dead-zone behavior, platform-specific button labeling, or native desktop focus visuals. Perform those checks manually before declaring controller UX complete.
+
+
+Godot 4.7.2 run [44997848266](https://github.com/Legioniz/LatchPoint/actions/runs/44997848266) passed resource import, every tracked GDScript parse check, physics/scene smoke tests and the boot smoke test with synthetic D-pad/A/B events enabled. The verbose log recorded Dummy-driver audio mix resets after 11 process frames in both test processes (44,100 Hz); no retained MP3/ObjectDB/StringName diagnostics or Godot errors followed. The only workflow warning was the existing `actions/checkout@v4` Node.js 20 deprecation notice (tracked by PR #11).

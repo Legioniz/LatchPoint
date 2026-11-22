@@ -271,8 +271,9 @@ Each completed cycle records its purpose, affected files, sources, verification 
 
 **Verification**
 - Local Godot execution: not available in this environment.
-- Godot 4.7.2 GitHub Actions: pending this branch's validation run.
+- Godot 4.7.2 GitHub Actions: passed on final code commit `fedc2a2aea08ead77bbee8ef218aa06a752be9c3` in [run 44997848266](https://github.com/Legioniz/LatchPoint/actions/runs/44997848266): project resource import, every tracked GDScript parse check, physics/scene smoke tests and boot smoke tests all completed successfully. The boot log confirms keyboard/gamepad UI navigation and settings/display checks passed.
 - Physical controller and native desktop testing: not performed; simulated joypad events verify the InputMap/Control path but do not validate SDL mappings or hardware behavior.
+- Verbose CI evidence: physics audio shutdown used the Dummy driver at 44,100 Hz (initial next-mix estimate 0.0741 s; observed mix after 11 process frames); boot shutdown used the Dummy driver at 44,100 Hz (0.0715 s; 11 frames). No retained MP3/ObjectDB/StringName diagnostics or Godot errors were emitted. The inherited `actions/checkout@v4` Node.js 20 deprecation notice remains unrelated and is tracked by PR #11.
 - Performance: no runtime profiling performed; the autoload adds two one-time InputMap lookups/conditional event additions during startup.
 - ML: not used; this is deterministic input regression testing, not machine learning.
 
