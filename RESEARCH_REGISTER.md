@@ -287,3 +287,27 @@ The references are inspiration and technical evidence, not a feature checklist. 
 - Keep the existing scene composition and visual layout. Add initial focus and explicit vertical focus neighbors only; defer responsive-layout redesign and native gamepad testing.
 - Add deterministic boot-smoke assertions by dispatching keyboard events through the viewport. Headless input simulation does not replace physical keyboard/gamepad or native desktop visual verification.
 - No new dependencies, input actions, runtime autoloads, gameplay behavior, assets or third-party code are introduced.
+
+
+## 2026-11-22 — Default gamepad confirm/cancel actions
+
+### Official Godot 4.7 — InputEventJoypadButton
+- Source: https://docs.godotengine.org/en/4.7/classes/class_inputeventjoypadbutton.html
+- Relevant behavior: `InputEventJoypadButton` represents a gamepad button press or release and exposes a standardized JoyButton index.
+- Design decision: use Godot's standardized `JOY_BUTTON_A` and `JOY_BUTTON_B` identifiers instead of platform-specific raw button numbers.
+
+### Official Godot 4.7 — Controllers, gamepads and joysticks
+- Source: https://docs.godotengine.org/en/4.7/tutorials/inputs/controllers_gamepads_joysticks.html
+- Relevant behavior: use InputMap actions for universal input and account for controller-specific mapping behavior. D-pad and analog-stick navigation can share UI actions.
+- Design decision: keep menu navigation on the existing built-in `ui_up`/`ui_down` actions and add only the missing confirm/cancel bindings.
+
+### Godot 4.7-stable engine InputMap defaults
+- Source: https://github.com/godotengine/godot/blob/4.7-stable/core/input/input_map.cpp
+- Relevant findings: the 4.7-stable built-in `ui_accept` defaults are Enter, keypad Enter and Space; `ui_cancel` defaults to Escape. Built-in `ui_up`/`ui_down` include keyboard arrows, D-pad buttons and left-stick Y-axis events. Therefore the existing focus navigation could move with a controller, but standard Joypad A/B were not configured to activate/cancel focused UI.
+- License: Godot engine source is MIT-licensed; source was inspected as an implementation reference only. No engine code was copied.
+
+### Scope, compatibility and design decision
+- Add an all-device Joypad A event to `ui_accept` and Joypad B to `ui_cancel` through a dedicated `UIInput.gd` autoload that initializes before the main scene.
+- Preserve all existing action events and avoid duplicate global-device mappings. Do not override the existing D-pad/analog navigation mappings.
+- Test with synthetic `InputEventJoypadButton` events in the boot smoke test. This verifies InputMap and focused-Control behavior but is not a substitute for a physical controller test.
+- This is a generic UI input mapping correction; commercial/indie gameplay comparisons are not applicable. No third-party code, assets, levels, characters, audio or text are reused.

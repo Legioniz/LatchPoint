@@ -17,6 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+UIInput="*res://UIInput.gd"
 Settings="*res://Settings.gd"
 Audio="*uid://e5kx2uvw6r51"
 
