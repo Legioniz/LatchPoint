@@ -147,3 +147,23 @@ godot --headless --path . --verbose --script res://tests/boot_smoke_test.gd
 Godot 4.7.2 run [44880365084](https://github.com/Legioniz/LatchPoint/actions/runs/44880365084) passed the resource import, tracked-GDScript parse, physics and boot smoke-test workflow with these focus assertions enabled.
 
 Headless CI verifies focus ownership and navigation logic, not the visible focus style, mouse usability, native desktop window behavior, or physical gamepad hardware. Perform those checks manually on supported targets before marking the full menu UX backlog item complete.
+
+
+## Gamepad menu navigation regression
+
+The boot smoke test also verifies the controller path using synthetic Joypad button events:
+
+- Joypad A is present on the built-in `ui_accept` action for all devices.
+- Joypad B is present on the built-in `ui_cancel` action for all devices.
+- D-pad Up/Down follows the configured focus paths on the main, options and pause menus.
+- D-pad navigation cannot focus the disabled Load Game button.
+- Joypad B opens and closes the pause menu through `ui_cancel`.
+- Joypad A activates the focused Resume button through `ui_accept`.
+
+The test sends both press and release events for each synthetic button. Run it through the existing boot command:
+
+```sh
+godot --headless --path . --verbose --script res://tests/boot_smoke_test.gd
+```
+
+Synthetic events verify the project's InputMap and Control behavior. They do not verify physical controller hardware, SDL controller mappings, analog dead-zone behavior, platform-specific button labeling, or native desktop focus visuals. Perform those checks manually before declaring controller UX complete.

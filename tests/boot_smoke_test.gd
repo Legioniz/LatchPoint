@@ -41,6 +41,14 @@ func _run() -> void:
 		quit(1)
 		return
 
+	var gamepad_ui_passed: bool = await _check_gamepad_ui_navigation(main_menu)
+	if not gamepad_ui_passed:
+		main_menu.queue_free()
+		await process_frame
+		await _shutdown_audio()
+		quit(1)
+		return
+
 	for button_name in ["StartButton", "OptionsButton", "QuitButton"]:
 		if main_menu.get_node_or_null(button_name) == null:
 			push_error("Main menu is missing required control: %s" % button_name)
@@ -84,7 +92,7 @@ func _run() -> void:
 		return
 
 	print(
-		"LatchPoint boot test passed: menu loaded, audio/display settings persisted, " +
+		"LatchPoint boot test passed: keyboard/gamepad UI navigation, audio/display settings persisted, " +
 		"windowed decorations restored and frame loop completed."
 	)
 	quit(0)
@@ -233,6 +241,182 @@ func _check_keyboard_focus(main_menu: Control) -> bool:
 	return passed
 
 
+func _check_gamepad_ui_navigation(main_menu: Control) -> bool:
+	if root.get_node_or_null("UIInput") == null:
+		push_error("Gamepad UI input autoload was not initialized.")
+		return false
+
+	var passed := true
+	if not _has_global_joypad_binding(&"ui_accept", JOY_BUTTON_A):
+		push_error("The built-in ui_accept action is missing its all-device Joypad A binding.")
+		passed = false
+	if not _has_global_joypad_binding(&"ui_cancel", JOY_BUTTON_B):
+		push_error("The built-in ui_cancel action is missing its all-device Joypad B binding.")
+		passed = false
+
+	var start_button := main_menu.get_node_or_null("StartButton") as Button
+	var options_button := main_menu.get_node_or_null("OptionsButton") as Button
+	if start_button == null or options_button == null:
+		push_error("Gamepad main-menu test could not resolve Play and Settings.")
+		passed = false
+	else:
+		start_button.grab_focus()
+		await _send_joypad_button(JOY_BUTTON_DPAD_DOWN)
+		if not _expect_focus(options_button, "gamepad main-menu D-pad down"):
+			passed = false
+		await _send_joypad_button(JOY_BUTTON_DPAD_UP)
+		if not _expect_focus(start_button, "gamepad main-menu D-pad up"):
+			passed = false
+
+	var new_load_scene := load(NEW_LOAD_MENU_PATH) as PackedScene
+	if new_load_scene == null:
+		push_error("New/load menu could not be loaded for gamepad focus testing.")
+		return false
+	var new_load_menu := new_load_scene.instantiate() as Control
+	if new_load_menu == null:
+		push_error("New/load menu could not be instantiated for gamepad focus testing.")
+		return false
+	root.add_child(new_load_menu)
+	await process_frame
+	await process_frame
+
+	var new_button := new_load_menu.get_node_or_null("New") as Button
+	var load_button := new_load_menu.get_node_or_null("Load") as Button
+	if new_button == null or load_button == null:
+		push_error("Gamepad new/load test could not resolve both buttons.")
+		passed = false
+	else:
+		if not _expect_focus(new_button, "gamepad new/load initial focus"):
+			passed = false
+		await _send_joypad_button(JOY_BUTTON_DPAD_DOWN)
+		if root.gui_get_focus_owner() == load_button:
+			push_error("Gamepad navigation focused the disabled Load Game control.")
+			passed = false
+		if not load_button.disabled or load_button.focus_mode != Control.FOCUS_NONE:
+			push_error("Unavailable Load Game control must remain disabled and non-focusable.")
+			passed = false
+
+	new_load_menu.queue_free()
+	await process_frame
+
+	var options_scene := load(OPTIONS_MENU_PATH) as PackedScene
+	if options_scene == null:
+		push_error("Options menu could not be loaded for gamepad focus testing.")
+		return false
+	var options_menu := options_scene.instantiate() as Control
+	if options_menu == null:
+		push_error("Options menu could not be instantiated for gamepad focus testing.")
+		return false
+	root.add_child(options_menu)
+	await process_frame
+	await process_frame
+
+	var volume_slider := options_menu.get_node_or_null("HSlider") as HSlider
+	var fullscreen_toggle := options_menu.get_node_or_null("Resolution") as CheckButton
+	var return_button := options_menu.get_node_or_null("Button") as Button
+	if volume_slider == null or fullscreen_toggle == null or return_button == null:
+		push_error("Gamepad options test could not resolve all interactive controls.")
+		passed = false
+	else:
+		if not _expect_focus(volume_slider, "gamepad options initial focus"):
+			passed = false
+		await _send_joypad_button(JOY_BUTTON_DPAD_DOWN)
+		if not _expect_focus(fullscreen_toggle, "gamepad options D-pad down"):
+			passed = false
+		await _send_joypad_button(JOY_BUTTON_DPAD_DOWN)
+		if not _expect_focus(return_button, "gamepad options second D-pad down"):
+			passed = false
+
+	options_menu.queue_free()
+	await process_frame
+
+	var pause_scene := load(PAUSE_MENU_PATH) as PackedScene
+	if pause_scene == null:
+		push_error("Pause menu could not be loaded for gamepad focus testing.")
+		return false
+	var pause_menu := pause_scene.instantiate() as Control
+	if pause_menu == null:
+		push_error("Pause menu could not be instantiated for gamepad focus testing.")
+		return false
+	root.add_child(pause_menu)
+	await process_frame
+
+	await _send_joypad_button(JOY_BUTTON_B)
+	if not paused or not pause_menu.visible:
+		push_error("Joypad B did not trigger the ui_cancel pause action.")
+		passed = false
+
+	var resume_button := pause_menu.get_node_or_null("resume") as Button
+	var pause_return_button := pause_menu.get_node_or_null("return to menu") as Button
+	if resume_button == null or pause_return_button == null:
+		push_error("Gamepad pause test could not resolve Resume and Return To Menu.")
+		passed = false
+	else:
+		if not _expect_focus(resume_button, "gamepad pause initial focus"):
+			passed = false
+		await _send_joypad_button(JOY_BUTTON_DPAD_DOWN)
+		if not _expect_focus(pause_return_button, "gamepad pause D-pad down"):
+			passed = false
+		await _send_joypad_button(JOY_BUTTON_DPAD_UP)
+		if not _expect_focus(resume_button, "gamepad pause D-pad up"):
+			passed = false
+
+		await _send_joypad_button(JOY_BUTTON_B)
+		if paused or pause_menu.visible:
+			push_error("Joypad B did not close the pause menu through ui_cancel.")
+			passed = false
+		await _send_joypad_button(JOY_BUTTON_B)
+		if not paused or not pause_menu.visible:
+			push_error("Joypad B did not reopen the pause menu.")
+			passed = false
+		if not _expect_focus(resume_button, "gamepad pause focus after reopening"):
+			passed = false
+		await _send_joypad_button(JOY_BUTTON_A)
+		if paused or pause_menu.visible:
+			push_error("Joypad A did not activate the focused Resume button through ui_accept.")
+			passed = false
+
+	if paused:
+		await _send_joypad_button(JOY_BUTTON_B)
+	if paused:
+		paused = false
+		pause_menu.hide()
+
+	pause_menu.queue_free()
+	await process_frame
+	return passed
+
+
+func _has_global_joypad_binding(action: StringName, button_index: int) -> bool:
+	if not InputMap.has_action(action):
+		return false
+
+	for event: InputEvent in InputMap.action_get_events(action):
+		if (
+			event is InputEventJoypadButton
+			and event.button_index == button_index
+			and event.device == -1
+		):
+			return true
+	return false
+
+
+func _send_joypad_button(button_index: int) -> void:
+	var press_event := InputEventJoypadButton.new()
+	press_event.device = 0
+	press_event.button_index = button_index
+	press_event.pressed = true
+	Input.parse_input_event(press_event)
+	await process_frame
+
+	var release_event := InputEventJoypadButton.new()
+	release_event.device = 0
+	release_event.button_index = button_index
+	release_event.pressed = false
+	Input.parse_input_event(release_event)
+	await process_frame
+
+
 func _expect_focus(expected: Control, context: String) -> bool:
 	var actual := root.gui_get_focus_owner()
 	if actual == expected:
@@ -242,7 +426,7 @@ func _expect_focus(expected: Control, context: String) -> bool:
 	if actual != null:
 		actual_path = str(actual.get_path())
 	push_error(
-		"Keyboard focus regression (%s): expected %s, got %s." %
+		"UI focus regression (%s): expected %s, got %s." %
 		[context, str(expected.get_path()), actual_path]
 	)
 	return false

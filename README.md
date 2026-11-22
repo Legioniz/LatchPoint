@@ -20,6 +20,7 @@ The player uses Godot's built-in input actions:
 - `ui_left` / `ui_right`: horizontal movement
 - `ui_accept`: jump
 - `ui_cancel`: pause / resume while in gameplay
+- Menus: built-in `ui_up` / `ui_down` support D-pad and left-stick navigation; `ui_accept` / `ui_cancel` also map Joypad A / B.
 
 Review **Project Settings → Input Map** for the active key bindings.
 

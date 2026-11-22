@@ -250,3 +250,32 @@ Each completed cycle records its purpose, affected files, sources, verification 
 **CI evidence:** the complete verbose run [44880365084](https://github.com/Legioniz/LatchPoint/actions/runs/44880365084) recorded physics audio shutdown on the Dummy driver at 44,100 Hz after 10 process frames and boot shutdown after 1 process frame. No retained MP3/ObjectDB/StringName diagnostics or Godot errors followed either process. The inherited `actions/checkout@v4` Node.js 20 deprecation notice remains tracked by PR #11.
 
 **Branch:** `feature/menu-keyboard-focus`, based on PR #16's combined settings/audio integration head. **Implementation commit:** `905fe58cf88e7549e82f381b8b55b6694ea22a78`. **PR:** [#17](https://github.com/Legioniz/LatchPoint/pull/17), open draft stacked on PR #16.
+
+
+## 2026-11-22 — Add gamepad confirm/cancel actions to menu navigation
+
+**Objective:** complete the controller-input portion of the existing menu UX slice without changing gameplay controls or the unconfirmed core loop.
+
+- Inspected the Godot 4.7.2 project configuration on the PR #17 branch. It had no project-level InputMap overrides; the engine's built-in `ui_up`/`ui_down` actions already include D-pad and left-stick navigation, but built-in `ui_accept` defaults to Enter/KP Enter/Space and `ui_cancel` defaults to Escape.
+- Added a small `UIInput.gd` autoload that adds all-device Joypad A to `ui_accept` and Joypad B to `ui_cancel` only when those exact global-device bindings are absent. Existing keyboard and user-defined action events are preserved.
+- Extended the boot smoke test with simulated D-pad navigation across the main, new/load, options and pause menus; it also verifies Joypad B pause/cancel behavior and Joypad A activation of the focused Resume button.
+- Kept controller input in Godot's existing built-in UI actions; no gameplay input actions, player movement behavior, scenes, assets or third-party dependencies were added.
+- Renamed the shared focus assertion diagnostic to "UI focus regression" because it now covers keyboard and gamepad events.
+
+**Acceptance criteria**
+- UIInput initializes before the main scene and leaves existing InputMap bindings intact.
+- `ui_accept` contains a global Joypad A binding and `ui_cancel` contains a global Joypad B binding.
+- D-pad navigation follows the existing explicit focus neighbors and never focuses disabled Load Game.
+- Joypad B opens/closes pause through `ui_cancel`; Joypad A activates focused Resume through `ui_accept`.
+- Existing keyboard, settings, display, physics and audio smoke checks remain enabled.
+
+**Verification**
+- Local Godot execution: not available in this environment.
+- Godot 4.7.2 GitHub Actions: pending this branch's validation run.
+- Physical controller and native desktop testing: not performed; simulated joypad events verify the InputMap/Control path but do not validate SDL mappings or hardware behavior.
+- Performance: no runtime profiling performed; the autoload adds two one-time InputMap lookups/conditional event additions during startup.
+- ML: not used; this is deterministic input regression testing, not machine learning.
+
+**Research:** Godot 4.7 InputEventJoypadButton, controller/gamepad input and GUI focus documentation, plus the 4.7-stable InputMap built-in action implementation. See `RESEARCH_REGISTER.md`.
+
+**Branch:** `feature/gamepad-ui-actions`, based on `feature/menu-keyboard-focus`. Verification and final commit details will be added after CI.
