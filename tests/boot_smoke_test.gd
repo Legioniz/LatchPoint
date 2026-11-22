@@ -253,6 +253,18 @@ func _check_gamepad_ui_navigation(main_menu: Control) -> bool:
 	if not _has_global_joypad_binding(&"ui_cancel", JOY_BUTTON_B):
 		push_error("The built-in ui_cancel action is missing its all-device Joypad B binding.")
 		passed = false
+	if not _has_key_binding(&"ui_accept", KEY_SPACE):
+		push_error("Adding gamepad input removed the built-in keyboard ui_accept binding.")
+		passed = false
+	if not _has_key_binding(&"ui_cancel", KEY_ESCAPE):
+		push_error("Adding gamepad input removed the built-in keyboard ui_cancel binding.")
+		passed = false
+	if _count_global_joypad_bindings(&"ui_accept", JOY_BUTTON_A) != 1:
+		push_error("The global Joypad A ui_accept binding is duplicated.")
+		passed = false
+	if _count_global_joypad_bindings(&"ui_cancel", JOY_BUTTON_B) != 1:
+		push_error("The global Joypad B ui_cancel binding is duplicated.")
+		passed = false
 
 	var start_button := main_menu.get_node_or_null("StartButton") as Button
 	var options_button := main_menu.get_node_or_null("OptionsButton") as Button
@@ -289,6 +301,8 @@ func _check_gamepad_ui_navigation(main_menu: Control) -> bool:
 		if not _expect_focus(new_button, "gamepad new/load initial focus"):
 			passed = false
 		await _send_joypad_button(JOY_BUTTON_DPAD_DOWN)
+		if not _expect_focus(new_button, "gamepad new/load skips disabled Load"):
+			passed = false
 		if root.gui_get_focus_owner() == load_button:
 			push_error("Gamepad navigation focused the disabled Load Game control.")
 			passed = false
@@ -399,6 +413,32 @@ func _has_global_joypad_binding(action: StringName, button_index: int) -> bool:
 		):
 			return true
 	return false
+
+
+
+func _has_key_binding(action: StringName, keycode: Key) -> bool:
+	if not InputMap.has_action(action):
+		return false
+
+	for event: InputEvent in InputMap.action_get_events(action):
+		if event is InputEventKey and event.keycode == keycode:
+			return true
+	return false
+
+
+func _count_global_joypad_bindings(action: StringName, button_index: int) -> int:
+	var count := 0
+	if not InputMap.has_action(action):
+		return count
+
+	for event: InputEvent in InputMap.action_get_events(action):
+		if (
+			event is InputEventJoypadButton
+			and event.button_index == button_index
+			and event.device == -1
+		):
+			count += 1
+	return count
 
 
 func _send_joypad_button(button_index: int) -> void:
