@@ -85,7 +85,9 @@ Each completed cycle records its purpose, affected files, sources, verification 
 **Verification**
 - Parent baseline: Godot 4.7.2 run [44035218467](https://github.com/Legioniz/LatchPoint/actions/runs/44035218467) passed resource import, tracked-script parsing, physics smoke and boot smoke on the parent branch.
 - Local Godot execution and manual visible-collision testing are unavailable/not performed in this cycle.
-- Final branch-head CI result will be recorded after the pushed branch workflow completes.
+- Initial implementation commit `58593c198dd29408ea7937842973413a92e882fa` passed Godot 4.7.2 run [45131206223](https://github.com/Legioniz/LatchPoint/actions/runs/45131206223): resource import, all tracked GDScript parsing, physics smoke (including both floor-wall corner approach orders), and boot smoke completed successfully.
+- The physics process still reports the known issue #3 shutdown diagnostics for `Project_bullshit.mp3` (`AudioStreamMP3`, `AudioStreamPlaybackMP3`, ObjectDB references and the `Music` StringName). This cycle does not change audio lifecycle behavior or suppress the warning.
+- Follow-up review made the existing floor, wall and ceiling probes use the probe's accumulated contact observations, matching the corner assertions and avoiding dependence on only the final physics tick. The follow-up branch-head workflow is the acceptance gate.
 - Performance profiling: not applicable to this test-only change; no optimization was attempted.
 - ML: not used. These are deterministic scripted physics checks, not machine learning.
 

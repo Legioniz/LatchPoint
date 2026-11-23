@@ -427,17 +427,17 @@ func _check_collision_case(
 	var did_not_pass_through := false
 	match collision_side:
 		"floor":
-			collision_detected = probe.is_on_floor()
+			collision_detected = bool(probe.get("observed_floor"))
 			var floor_top := obstacle_position.y - obstacle_size.y * 0.5
 			var player_bottom := probe.global_position.y + PROBE_SIZE.y * 0.5
 			did_not_pass_through = player_bottom <= floor_top + 1.0
 		"wall":
-			collision_detected = probe.is_on_wall()
+			collision_detected = bool(probe.get("observed_wall"))
 			var wall_left := obstacle_position.x - obstacle_size.x * 0.5
 			var player_right := probe.global_position.x + PROBE_SIZE.x * 0.5
 			did_not_pass_through = player_right <= wall_left + 1.0
 		"ceiling":
-			collision_detected = probe.is_on_ceiling()
+			collision_detected = bool(probe.get("observed_ceiling"))
 			var ceiling_bottom := obstacle_position.y + obstacle_size.y * 0.5
 			var player_top := probe.global_position.y - PROBE_SIZE.y * 0.5
 			did_not_pass_through = player_top >= ceiling_bottom - 1.0
