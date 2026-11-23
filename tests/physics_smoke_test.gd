@@ -52,12 +52,13 @@ func _run() -> void:
 	await _check_gameplay_physics()
 	await _check_player_movement()
 	await _check_solid_collision_directions()
+	await _check_corner_collision_directions()
 	await _shutdown_audio_before_exit()
 
 	if failures.is_empty():
 		print(
 			"LatchPoint tests passed: scenes loaded; player landed; acceleration, friction, " +
-			"grounded jump and airborne jump rejection held; normal-speed and high-speed floor, wall and ceiling collisions held."
+			"grounded jump and airborne jump rejection held; normal-speed and high-speed floor, wall and ceiling collisions, plus floor-wall corner approaches held."
 		)
 		quit(0)
 		return
@@ -445,6 +446,80 @@ func _check_collision_case(
 		failures.append("Physics probe did not register the expected %s collision." % display_name)
 	if not did_not_pass_through:
 		failures.append("Physics probe passed through the %s collision surface." % display_name)
+
+	fixture.free()
+	await process_frame
+
+
+
+func _check_corner_collision_directions() -> void:
+	# Exercise both approach orders so the result does not depend on which
+	# orthogonal surface the physics solver encounters first.
+	await _check_corner_collision_case("floor-first", Vector2(-20.0, 0.0))
+	await _check_corner_collision_case("wall-first", Vector2(0.0, -20.0))
+
+
+func _check_corner_collision_case(case_label: String, spawn_position: Vector2) -> void:
+	var fixture := Node2D.new()
+	fixture.name = "CornerCollisionTestFixture"
+	root.add_child(fixture)
+
+	# One StaticBody2D owns both shapes, forming a concave floor-wall corner.
+	var corner_body := StaticBody2D.new()
+
+	var floor_shape := CollisionShape2D.new()
+	floor_shape.position = Vector2(0.0, 100.0)
+	var floor_rectangle := RectangleShape2D.new()
+	floor_rectangle.size = Vector2(200.0, 20.0)
+	floor_shape.shape = floor_rectangle
+	corner_body.add_child(floor_shape)
+
+	var wall_shape := CollisionShape2D.new()
+	wall_shape.position = Vector2(100.0, 0.0)
+	var wall_rectangle := RectangleShape2D.new()
+	wall_rectangle.size = Vector2(20.0, 200.0)
+	wall_shape.shape = wall_rectangle
+	corner_body.add_child(wall_shape)
+
+	fixture.add_child(corner_body)
+
+	var probe_script := load("res://tests/physics_probe.gd") as Script
+	if probe_script == null:
+		failures.append("Physics probe script could not be loaded for %s corner case." % case_label)
+		fixture.free()
+		return
+
+	var probe := CharacterBody2D.new()
+	probe.set_script(probe_script)
+	probe.position = spawn_position
+	probe.set("commanded_velocity", Vector2(500.0, 500.0))
+
+	var probe_shape := CollisionShape2D.new()
+	var probe_rectangle := RectangleShape2D.new()
+	probe_rectangle.size = PROBE_SIZE
+	probe_shape.shape = probe_rectangle
+	probe.add_child(probe_shape)
+	fixture.add_child(probe)
+
+	await process_frame
+	for _frame_index in range(PROBE_FRAMES_TO_SIMULATE):
+		await physics_frame
+
+	var observed_floor := bool(probe.get("observed_floor"))
+	var observed_wall := bool(probe.get("observed_wall"))
+	var floor_top := 90.0
+	var wall_left := 90.0
+	var player_bottom := probe.global_position.y + PROBE_SIZE.y * 0.5
+	var player_right := probe.global_position.x + PROBE_SIZE.x * 0.5
+
+	if not observed_floor:
+		failures.append("Physics probe did not register floor contact in the %s corner approach." % case_label)
+	if not observed_wall:
+		failures.append("Physics probe did not register wall contact in the %s corner approach." % case_label)
+	if player_bottom > floor_top + 1.0:
+		failures.append("Physics probe penetrated the floor in the %s corner approach." % case_label)
+	if player_right > wall_left + 1.0:
+		failures.append("Physics probe penetrated the wall in the %s corner approach." % case_label)
 
 	fixture.free()
 	await process_frame
