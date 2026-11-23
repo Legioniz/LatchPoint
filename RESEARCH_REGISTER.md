@@ -118,6 +118,23 @@ Checked 2026-11-10. These references establish the first research baseline. Re-c
 - No runtime movement values, collision shapes, physics settings or dependencies were changed.
 - No external code, art, sound or level content was reused.
 
+## Floor-wall corner collision regression
+
+### Godot 4.7 — CharacterBody2D movement and collision
+- Source: https://docs.godotengine.org/en/4.7/tutorials/physics/using_character_body_2d.html
+- Relevant behavior: `move_and_slide()` performs collision response for CharacterBody2D and can produce multiple slide collisions during a movement call. Godot exposes collision count/details and surface classification through the CharacterBody2D API.
+- Test decision: use the existing test-only CharacterBody2D probe with a concave corner made from two orthogonal rectangle shapes on one StaticBody2D. Accumulate `is_on_floor()` and `is_on_wall()` observations after each physics movement, then assert both contacts and verify the probe bounds remain outside both surfaces.
+- Scope: this validates two deterministic approach orders for this fixture; it is not a general guarantee for arbitrary corner geometry or velocities.
+
+### Godot Foundation — Kinematic Character 2D demo
+- Source: https://github.com/godotengine/godot-demo-projects/tree/master/2d/kinematic_character
+- License: the official Godot demo-project repository declares MIT. It is a reference for CharacterBody2D platform interactions only; no source code, scenes, art or assets were copied.
+- Relevance: the demo demonstrates floor, moving-platform and one-way-platform interactions, supporting the decision to keep physics behavior in the CharacterBody2D physics loop and to add focused collision regressions rather than alter production movement.
+
+### Design decision
+- This is an engine-level test-only task. Commercial/indie gameplay comparisons and corner-correction mechanics are not adopted because the core gameplay loop is unconfirmed.
+- No shipping movement values, collision geometry, physics settings, assets or dependencies changed.
+
 ## Decision rule
 
 The references are inspiration and technical evidence, not a feature checklist. Each adopted pattern must be tied to the LatchPoint design pillars, implemented originally, tested and recorded in the improvement log. No external code, art, sound, level or character is copied by this register.
