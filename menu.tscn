@@ -26,57 +26,53 @@ func _on_quit_button_pressed() -> void:
 	get_tree().quit()
 "
 
-[node name="Menu" type="Control" unique_id=113734186]
+[node name="Menu" type="VBoxContainer" unique_id=113734186]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 2
+alignment = 1
+theme_override_constants/separation = 16
 theme = SubResource("Theme_0gbd5")
 script = SubResource("GDScript_vsb4k")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1703368117]
-
 [node name="Label" type="Label" parent="." unique_id=939327407]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 31.0
-offset_right = 622.0
-offset_bottom = 239.0
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(280, 72)
 text = "LATCHPOINT"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StartButton" type="Button" parent="." unique_id=413149182]
-layout_mode = 0
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(280, 64)
 focus_mode = 2
 focus_neighbor_bottom = NodePath("../OptionsButton")
-offset_left = 72.0
-offset_top = 354.0
-offset_right = 322.0
-offset_bottom = 438.0
 text = "Play"
 
 [node name="OptionsButton" type="Button" parent="." unique_id=1950728367]
-layout_mode = 0
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(280, 64)
 focus_mode = 2
 focus_neighbor_top = NodePath("../StartButton")
 focus_neighbor_bottom = NodePath("../QuitButton")
-offset_left = 74.0
-offset_top = 449.0
-offset_right = 348.0
-offset_bottom = 533.0
 text = "Settings"
 
 [node name="QuitButton" type="Button" parent="." unique_id=1824642754]
-layout_mode = 0
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(280, 64)
 focus_mode = 2
 focus_neighbor_top = NodePath("../OptionsButton")
-offset_left = 72.0
-offset_top = 545.0
-offset_right = 374.0
-offset_bottom = 626.0
 text = "Quit"
 
 [connection signal="pressed" from="StartButton" to="." method="_on_start_button_pressed"]

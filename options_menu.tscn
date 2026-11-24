@@ -15,59 +15,43 @@ thickness = 8
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_3fq0w"]
 color = Color(0.8173105, 0.16274187, 0.32896376, 1)
 
-[node name="Options Menu" type="Control" unique_id=485954888]
+[node name="Options Menu" type="VBoxContainer" unique_id=485954888]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 21.0
-offset_right = 21.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 2
+alignment = 1
+theme_override_constants/separation = 12
 script = ExtResource("1_lbr8e")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1132536826]
-
-[node name="Label" type="Label" parent="CanvasLayer" unique_id=1797223968]
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -273.0
-offset_right = 339.0
-offset_bottom = 233.0
-grow_horizontal = 2
+[node name="Label" type="Label" parent="." unique_id=1797223968]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(280, 36)
 text = "Options"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Label2" type="Label" parent="CanvasLayer" unique_id=723135145]
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -197.0
-offset_top = 209.0
-offset_right = 4.0
-offset_bottom = 273.0
-grow_horizontal = 2
+[node name="Label2" type="Label" parent="." unique_id=723135145]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(280, 24)
 text = "Volume"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="HSlider" type="HSlider" parent="." unique_id=1826981797]
-layout_mode = 1
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(280, 32)
 focus_mode = 2
 focus_neighbor_bottom = NodePath("../Resolution")
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -25.0
-offset_top = -90.0
-offset_right = 224.0
-offset_bottom = -74.0
-grow_horizontal = 2
-grow_vertical = 2
 theme_override_styles/slider = SubResource("StyleBoxLine_l8fa8")
 theme_override_styles/grabber_area = SubResource("StyleBoxLine_yk5ca")
 theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_3fq0w")
@@ -76,27 +60,23 @@ step = 0.02
 value = 1.0
 script = ExtResource("2_t1lix")
 
-[node name="Button" type="Button" parent="." unique_id=1987841845]
-layout_mode = 0
-focus_mode = 2
-focus_neighbor_top = NodePath("../Resolution")
-offset_left = 391.0
-offset_top = 437.0
-offset_right = 781.0
-offset_bottom = 572.0
-text = "Return"
-
 [node name="Resolution" type="CheckButton" parent="." unique_id=1921789388]
-layout_mode = 0
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(280, 48)
 focus_mode = 2
 focus_neighbor_top = NodePath("../HSlider")
 focus_neighbor_bottom = NodePath("../Button")
-offset_left = 391.0
-offset_top = 322.0
-offset_right = 735.0
-offset_bottom = 402.0
 text = "Fullscreen"
 script = ExtResource("4_6bffs")
+
+[node name="Button" type="Button" parent="." unique_id=1987841845]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(280, 56)
+focus_mode = 2
+focus_neighbor_top = NodePath("../Resolution")
+text = "Return"
 
 [connection signal="value_changed" from="HSlider" to="HSlider" method="_on_value_changed"]
 [connection signal="pressed" from="Button" to="." method="_on_button_pressed"]

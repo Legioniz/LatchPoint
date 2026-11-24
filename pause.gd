@@ -1,6 +1,6 @@
 extends Control
 
-@onready var resume_button: Button = $resume
+@onready var resume_button: Button = $MenuItems/resume
 
 
 func _ready() -> void:

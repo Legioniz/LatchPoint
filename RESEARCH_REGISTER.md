@@ -311,3 +311,22 @@ The references are inspiration and technical evidence, not a feature checklist. 
 - Preserve all existing action events and avoid duplicate global-device mappings. Do not override the existing D-pad/analog navigation mappings.
 - Test with synthetic `InputEventJoypadButton` events in the boot smoke test. This verifies InputMap and focused-Control behavior but is not a substitute for a physical controller test.
 - This is a generic UI input mapping correction; commercial/indie gameplay comparisons are not applicable. No third-party code, assets, levels, characters, audio or text are reused.
+
+
+## 2026-11-24 — Responsive layout for the existing menu flow
+
+### Official Godot 4.7 — Using Containers
+- Source: https://docs.godotengine.org/en/4.7/tutorials/ui/gui_containers.html
+- Findings: Container nodes take ownership of child Control positioning; VBoxContainer stacks controls vertically, size flags determine horizontal sizing, and containers can be nested for layouts that adapt when their parent resizes.
+- Design decision: use VBoxContainer for the main, new/load and options roots, and a full-rect VBoxContainer inside the pause overlay. Center the vertical groups, use a 16-pixel outer inset, a 280-pixel minimum content width and explicit control minimum heights. Keep the pause ColorRect full-rect and outside the button container so it continues to cover the viewport.
+
+### Official Godot 4.7 — Size and Anchors
+- Source: https://docs.godotengine.org/en/4.7/tutorials/ui/size_and_anchors.html
+- Findings: anchors are proportional to the parent rect while offsets act as pixel margins; this supports a full-rect menu container with consistent safe insets across viewport sizes.
+- Design decision: keep the menu container anchored to all four viewport edges and apply 16-pixel offsets. Child controls use container sizing rather than absolute positions.
+
+### Scope, compatibility and licensing
+- This is a generic menu-layout correction, not a gameplay mechanic. Commercial/indie game comparisons are not applicable; no game-specific interaction pattern is being adopted.
+- Preserve existing scene names, signal targets, focus order, initial-focus behavior, input actions, disabled Load state, settings/audio scripts and scene transitions. The pause buttons move under MenuItems, so the pause controller and its regression test paths are updated together.
+- Add a deterministic SubViewport layout test for 320x480, 640x360 and 1280x720. It checks every interactive/menu content control stays within the viewport and that the selected controls do not overlap. This is automated geometry validation, not a substitute for native desktop, touch or physical-controller visual testing.
+- Official Godot documentation is used as an API/design reference. No third-party code, assets, fonts, audio, levels or text are copied; no new dependencies are introduced.
