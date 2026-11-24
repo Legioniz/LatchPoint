@@ -280,3 +280,24 @@ Each completed cycle records its purpose, affected files, sources, verification 
 **Research:** Godot 4.7 InputEventJoypadButton, controller/gamepad input and GUI focus documentation, plus the 4.7-stable InputMap built-in action implementation. See `RESEARCH_REGISTER.md`.
 
 **Branch:** `feature/gamepad-ui-actions`, based on `feature/menu-keyboard-focus`. Verification and final commit details will be added after CI.
+
+
+## 2026-11-24 — Responsive menu layout
+
+**Objective:** complete the responsive-layout slice of the existing pause/menu UX backlog without changing the unconfirmed gameplay loop.
+
+- Replaced fixed pixel placement in the main, new/load and options screens with centered VBoxContainer layouts using consistent 16-pixel viewport insets.
+- Kept the pause background full-rect and moved its three controls into a centered MenuItems VBoxContainer.
+- Preserved existing menu actions, control names where possible, initial focus, keyboard/gamepad focus order, Joypad A/B mappings, disabled Load Game state, and options/settings scripts. Updated the pause controller and boot-smoke node paths for the new button parent.
+- Added tests/menu_layout_test.gd, which checks menu content bounds and pairwise overlap at 320x480, 640x360 and 1280x720 using isolated SubViewports.
+- Added the new layout test to the Godot validation workflow.
+
+**Acceptance criteria**
+- All existing menu controls remain present and connected to their existing actions.
+- Main, new/load, options and pause content remains within all three tested viewport sizes without overlap.
+- Existing keyboard/gamepad focus and pause/resume assertions continue to pass.
+- No gameplay, physics, audio, settings, save-data or core-loop behavior changes.
+
+**Verification status:** code and scene changes are being prepared on feature/responsive-menu-layout; Godot 4.7.2 GitHub Actions validation is pending. Local Godot execution is unavailable in this runtime. Native desktop resize, touch and physical-controller visual checks remain manual follow-ups. No performance profile or ML test was performed.
+
+**Research:** Godot 4.7 Using Containers and Size and Anchors documentation. See RESEARCH_REGISTER.md. Commercial/indie gameplay comparisons are not applicable to this generic UI layout change; no third-party code or assets were reused.

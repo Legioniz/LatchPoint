@@ -201,9 +201,9 @@ func _check_keyboard_focus(main_menu: Control) -> bool:
 	await process_frame
 	await _send_key(KEY_ESCAPE)
 
-	var resume_button := pause_menu.get_node_or_null("resume") as Button
-	var pause_return_button := pause_menu.get_node_or_null("return to menu") as Button
-	var exit_button := pause_menu.get_node_or_null("Exit") as Button
+	var resume_button := pause_menu.get_node_or_null("MenuItems/resume") as Button
+	var pause_return_button := pause_menu.get_node_or_null("MenuItems/return to menu") as Button
+	var exit_button := pause_menu.get_node_or_null("MenuItems/Exit") as Button
 	if not paused or not pause_menu.visible:
 		push_error("Escape did not open the pause menu and pause the SceneTree.")
 		passed = false
@@ -360,8 +360,8 @@ func _check_gamepad_ui_navigation(main_menu: Control) -> bool:
 		push_error("Joypad B did not trigger the ui_cancel pause action.")
 		passed = false
 
-	var resume_button := pause_menu.get_node_or_null("resume") as Button
-	var pause_return_button := pause_menu.get_node_or_null("return to menu") as Button
+	var resume_button := pause_menu.get_node_or_null("MenuItems/resume") as Button
+	var pause_return_button := pause_menu.get_node_or_null("MenuItems/return to menu") as Button
 	if resume_button == null or pause_return_button == null:
 		push_error("Gamepad pause test could not resolve Resume and Return To Menu.")
 		passed = false

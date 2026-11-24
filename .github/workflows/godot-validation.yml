@@ -51,3 +51,6 @@ jobs:
 
       - name: Boot the configured main scene
         run: godot --headless --path . --verbose --script res://tests/boot_smoke_test.gd
+
+      - name: Verify responsive menu layouts
+        run: godot --headless --path . --verbose --script res://tests/menu_layout_test.gd

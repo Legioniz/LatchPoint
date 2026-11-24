@@ -170,3 +170,22 @@ Synthetic events verify the project's InputMap and Control behavior. They do not
 
 
 Godot 4.7.2 run [44997848266](https://github.com/Legioniz/LatchPoint/actions/runs/44997848266) passed resource import, every tracked GDScript parse check, physics/scene smoke tests and the boot smoke test with synthetic D-pad/A/B events enabled. The verbose log recorded Dummy-driver audio mix resets after 11 process frames in both test processes (44,100 Hz); no retained MP3/ObjectDB/StringName diagnostics or Godot errors followed. The only workflow warning was the existing `actions/checkout@v4` Node.js 20 deprecation notice (tracked by PR #11).
+
+
+## Responsive menu layout regression
+
+The dedicated layout test loads the main, new/load, options and pause menus in isolated SubViewports at three representative sizes:
+
+- 320x480 — compact portrait.
+- 640x360 — compact landscape.
+- 1280x720 — desktop.
+
+For each menu, it verifies that every primary content/interactive control has a non-zero rect, remains within the viewport bounds and does not overlap the other listed controls. The pause menu is explicitly shown after its normal _ready() hide behavior so its overlay content is checked too.
+
+Run from the project root:
+
+```sh
+godot --headless --path . --verbose --script res://tests/menu_layout_test.gd
+```
+
+The test is also part of .github/workflows/godot-validation.yml. It verifies Control geometry and container reflow; it does not verify fonts at every DPI, native desktop window resizing, safe areas on physical mobile devices, touch usability, or physical controller visuals. Those remain manual checks.
