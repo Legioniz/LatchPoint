@@ -1,5 +1,7 @@
 extends SceneTree
 
+const AUDIO_SHUTDOWN_VERIFIER := preload("res://tests/audio_shutdown_verifier.gd")
+
 const VIEWPORT_SIZES := [
 	Vector2i(320, 480),
 	Vector2i(640, 360),
@@ -114,6 +116,20 @@ func _run() -> void:
 
 			test_viewport.queue_free()
 			await process_frame
+
+	var audio_verifier = AUDIO_SHUTDOWN_VERIFIER.new()
+	var audio_result: Dictionary = await audio_verifier.shutdown_and_wait(
+		self,
+		root.get_node_or_null("Audio"),
+		false,
+		"Menu layout"
+	)
+	for failure in audio_result["errors"]:
+		push_error(String(failure))
+	if not audio_result["errors"].is_empty():
+		passed = false
+	else:
+		print("Menu-layout audio shutdown passed: %s" % String(audio_result["diagnostic"]))
 
 	if passed:
 		print(

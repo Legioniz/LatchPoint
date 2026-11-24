@@ -188,4 +188,4 @@ Run from the project root:
 godot --headless --path . --verbose --script res://tests/menu_layout_test.gd
 ```
 
-The test is also part of .github/workflows/godot-validation.yml. It verifies Control geometry and container reflow; it does not verify fonts at every DPI, native desktop window resizing, safe areas on physical mobile devices, touch usability, or physical controller visuals. Those remain manual checks.
+The test is also part of .github/workflows/godot-validation.yml. After freeing its temporary SubViewports, it invokes the shared tests/audio_shutdown_verifier.gd helper for the Audio autoload; inspect the full verbose process log for retained resources as well as the test result. It verifies Control geometry and container reflow; it does not verify fonts at every DPI, native desktop window resizing, safe areas on physical mobile devices, touch usability, or physical controller visuals. Those remain manual checks.

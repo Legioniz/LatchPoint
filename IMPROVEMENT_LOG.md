@@ -298,6 +298,6 @@ Each completed cycle records its purpose, affected files, sources, verification 
 - Existing keyboard/gamepad focus and pause/resume assertions continue to pass.
 - No gameplay, physics, audio, settings, save-data or core-loop behavior changes.
 
-**Verification status:** code and scene changes are being prepared on feature/responsive-menu-layout; Godot 4.7.2 GitHub Actions validation is pending. Local Godot execution is unavailable in this runtime. Native desktop resize, touch and physical-controller visual checks remain manual follow-ups. No performance profile or ML test was performed.
+**Verification status:** first Godot 4.7.2 run 45344159805 passed import, GDScript parsing, physics, boot and all 12 viewport/layout combinations, but its new standalone test process exposed retained AudioStreamMP3/ObjectDB diagnostics because it had not invoked the project's shared audio-shutdown verifier. The test now uses that existing helper after freeing its SubViewports; a clean follow-up run is pending. Local Godot execution is unavailable in this runtime. Native desktop resize, touch and physical-controller visual checks remain manual follow-ups. No performance profile or ML test was performed.
 
 **Research:** Godot 4.7 Using Containers and Size and Anchors documentation. See RESEARCH_REGISTER.md. Commercial/indie gameplay comparisons are not applicable to this generic UI layout change; no third-party code or assets were reused.
