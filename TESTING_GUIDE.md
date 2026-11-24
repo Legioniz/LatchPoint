@@ -189,3 +189,6 @@ godot --headless --path . --verbose --script res://tests/menu_layout_test.gd
 ```
 
 The test is also part of .github/workflows/godot-validation.yml. After freeing its temporary SubViewports, it invokes the shared tests/audio_shutdown_verifier.gd helper for the Audio autoload; inspect the full verbose process log for retained resources as well as the test result. It verifies Control geometry and container reflow; it does not verify fonts at every DPI, native desktop window resizing, safe areas on physical mobile devices, touch usability, or physical controller visuals. Those remain manual checks.
+
+
+Godot 4.7.2 run [45344414253](https://github.com/Legioniz/LatchPoint/actions/runs/45344414253) passed the responsive layout test and all existing validation steps. The verbose log records the layout test's shared audio shutdown on the Dummy driver at 44,100 Hz (initial next-mix estimate 0.0127 s; observed reset after 2 process frames), with no retained MP3/ObjectDB/StringName diagnostics or Godot errors/warnings. The inherited actions/checkout@v4 Node.js 20 deprecation warning remains tracked by PR #11.
